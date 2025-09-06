@@ -1,12 +1,13 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Completion } from '../entities/Completion';
 import { Round } from '../entities/Round';
 import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
 import { MarkCompletionDto } from '../dto/completion.dto';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
-export const markCompletion = async (req: Request, res: Response) => {
+export const markCompletion = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { roundId } = req.params;
     const { memberId, isCompleted } = req.body as MarkCompletionDto;
@@ -30,6 +31,14 @@ export const markCompletion = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         message: 'isCompleted must be a boolean value'
+      });
+    }
+
+    // Validate user authentication
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
       });
     }
 
@@ -72,6 +81,26 @@ export const markCompletion = async (req: Request, res: Response) => {
       });
     }
 
+    // Check completion permissions
+    const isMarkingForSelf = member.email === req.user.email;
+    const isAdmin = req.user.role === 'admin';
+    
+    // Check if user is a club manager
+    const userMember = await AppDataSource.getRepository(Member).findOne({
+      where: { 
+        email: req.user.email,
+        clubId: round.clubId
+      }
+    });
+    const isClubManager = userMember?.isClubManager || false;
+    
+    if (!isMarkingForSelf && !isAdmin && !isClubManager) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only mark completion for yourself. Club managers and admins can mark completion for others.'
+      });
+    }
+
     // Check if completion already exists
     let completion = await AppDataSource.getRepository(Completion).findOne({
       where: {
@@ -107,7 +136,7 @@ export const markCompletion = async (req: Request, res: Response) => {
   }
 };
 
-export const getCompletionsByRound = async (req: Request, res: Response) => {
+export const getCompletionsByRound = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { roundId } = req.params;
 
@@ -153,7 +182,7 @@ export const getCompletionsByRound = async (req: Request, res: Response) => {
   }
 };
 
-export const getCompletionStatus = async (req: Request, res: Response) => {
+export const getCompletionStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { roundId } = req.params;
 

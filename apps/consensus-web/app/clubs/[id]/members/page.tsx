@@ -11,6 +11,7 @@ import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Alert } from '../../../components/ui/Alert';
 import { useClub, useClubMembers, useAddMember, useRemoveMember } from '../../../hooks/useApi';
+import { useAuth } from '../../../contexts/AuthContext';
 import { Member } from '../../../context/AppContext';
 import { 
   ArrowLeft, 
@@ -18,7 +19,9 @@ import {
   Trash2, 
   Mail, 
   User,
-  Users
+  Users,
+  Shield,
+  ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -33,10 +36,12 @@ export default function ClubMembers() {
   const params = useParams();
   const router = useRouter();
   const clubId = params.id as string;
+  const { user, hasRole } = useAuth();
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removingMember, setRemovingMember] = useState<string | null>(null);
+  const [updatingManager, setUpdatingManager] = useState<string | null>(null);
 
   const { club, isLoading: clubLoading } = useClub(clubId);
   const { members, isLoading: membersLoading, mutate } = useClubMembers(clubId);
@@ -79,6 +84,37 @@ export default function ClubMembers() {
       setError(err instanceof Error ? err.message : 'Failed to remove member');
     } finally {
       setRemovingMember(null);
+    }
+  };
+
+  const handleUpdateManagerStatus = async (memberId: string, isClubManager: boolean) => {
+    setUpdatingManager(memberId);
+    setError(null);
+
+    try {
+      const response = await fetch(`http://localhost:3001/api/members/${memberId}/manager-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Email': user?.email || '',
+          'X-User-Name': user?.name || '',
+          'X-User-Role': user?.role || '',
+          'X-User-Sub': user?.sub || '',
+          'X-User-Type': user?.isTestAccount ? 'test' : 'auth0'
+        },
+        body: JSON.stringify({ isClubManager })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update manager status');
+      }
+
+      await mutate(); // Refresh the members list
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update manager status');
+    } finally {
+      setUpdatingManager(null);
     }
   };
 
@@ -203,35 +239,82 @@ export default function ClubMembers() {
               </div>
             ) : members && members.length > 0 ? (
               <div className="space-y-3">
-                {members.map((member: Member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-blue-100 rounded-full">
-                        <User className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{member.name}</p>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <Mail className="h-4 w-4 mr-1" />
-                          {member.email}
+                {members.map((member: Member) => {
+                  const currentUserMember = members.find((m: Member) => m.email === user?.email);
+                  const canManageMembers = hasRole('admin') || currentUserMember?.isClubManager;
+                  const isCurrentUser = member.email === user?.email;
+                  
+                  return (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className={`p-2 rounded-full ${member.isClubManager ? 'bg-purple-100' : 'bg-blue-100'}`}>
+                          {member.isClubManager ? (
+                            <ShieldCheck className="h-5 w-5 text-purple-600" />
+                          ) : (
+                            <User className="h-5 w-5 text-blue-600" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <p className="font-medium text-gray-900">{member.name}</p>
+                            {member.isClubManager && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                <Shield className="h-3 w-3 mr-1" />
+                                Manager
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Mail className="h-4 w-4 mr-1" />
+                            {member.email}
+                          </div>
                         </div>
                       </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        {canManageMembers && !isCurrentUser && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleUpdateManagerStatus(member.id, !member.isClubManager)}
+                            loading={updatingManager === member.id}
+                            className={member.isClubManager 
+                              ? "text-orange-600 hover:text-orange-700 hover:bg-orange-50" 
+                              : "text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                            }
+                          >
+                            {member.isClubManager ? (
+                              <>
+                                <Shield className="h-4 w-4 mr-1" />
+                                Demote
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheck className="h-4 w-4 mr-1" />
+                                Promote
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        
+                        {canManageMembers && !isCurrentUser && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveMember(member.id)}
+                            loading={removingMember === member.id}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                    
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveMember(member.id)}
-                      loading={removingMember === member.id}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-8">

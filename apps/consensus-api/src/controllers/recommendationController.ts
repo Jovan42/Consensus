@@ -1,12 +1,13 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Recommendation } from '../entities/Recommendation';
 import { Round } from '../entities/Round';
 import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
 import { AddRecommendationDto, UpdateRecommendationDto } from '../dto/recommendation.dto';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
-export const addRecommendation = async (req: Request, res: Response) => {
+export const addRecommendation = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { title, description, recommendations } = req.body as AddRecommendationDto;
     const urlRoundId = req.params.roundId;
@@ -39,6 +40,38 @@ export const addRecommendation = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         message: 'Round is not in recommending status'
+      });
+    }
+
+    // Validate user authentication
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Check if user is the current recommender, admin, or club manager
+    const currentRecommender = await AppDataSource.getRepository(Member).findOne({
+      where: { id: round.currentRecommenderId }
+    });
+
+    const isCurrentRecommender = currentRecommender?.email === req.user.email;
+    const isAdmin = req.user.role === 'admin';
+    
+    // Check if user is a club manager
+    const userMember = await AppDataSource.getRepository(Member).findOne({
+      where: { 
+        email: req.user.email,
+        clubId: round.clubId
+      }
+    });
+    const isClubManager = userMember?.isClubManager || false;
+
+    if (!isCurrentRecommender && !isAdmin && !isClubManager) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only the current recommender, club managers, or admins can add recommendations'
       });
     }
 
@@ -131,7 +164,7 @@ export const addRecommendation = async (req: Request, res: Response) => {
   }
 };
 
-export const getRecommendationsByRound = async (req: Request, res: Response) => {
+export const getRecommendationsByRound = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { roundId } = req.params;
 
@@ -154,7 +187,7 @@ export const getRecommendationsByRound = async (req: Request, res: Response) => 
   }
 };
 
-export const getRecommendationById = async (req: Request, res: Response) => {
+export const getRecommendationById = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -183,7 +216,7 @@ export const getRecommendationById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateRecommendation = async (req: Request, res: Response) => {
+export const updateRecommendation = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { title, description } = req.body as UpdateRecommendationDto;
@@ -228,7 +261,7 @@ export const updateRecommendation = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteRecommendation = async (req: Request, res: Response) => {
+export const deleteRecommendation = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -267,7 +300,7 @@ export const deleteRecommendation = async (req: Request, res: Response) => {
   }
 };
 
-export const startVoting = async (req: Request, res: Response) => {
+export const startVoting = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { roundId } = req.params;
 

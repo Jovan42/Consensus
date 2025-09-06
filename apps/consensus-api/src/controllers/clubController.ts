@@ -36,7 +36,9 @@ export const createClub = asyncHandler(async (req: AuthenticatedRequest, res: Re
   };
 
   const clubRepository = AppDataSource.getRepository(Club);
+  const memberRepository = AppDataSource.getRepository(Member);
   const finalConfig: ClubConfig = config ? convertConfigToEnum({ ...defaultConfig, ...config }) : defaultConfig;
+  
   const club = clubRepository.create({
     name,
     description,
@@ -45,6 +47,17 @@ export const createClub = asyncHandler(async (req: AuthenticatedRequest, res: Re
   });
 
   const savedClub = await clubRepository.save(club);
+
+  // Create the creator as a club manager and member
+  if (req.user) {
+    const creatorMember = memberRepository.create({
+      name: req.user.name,
+      email: req.user.email,
+      clubId: savedClub.id,
+      isClubManager: true
+    });
+    await memberRepository.save(creatorMember);
+  }
 
   res.status(201).json({
     success: true,

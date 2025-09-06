@@ -59,6 +59,9 @@ export default function Voting() {
   const { votes, isLoading: votesLoading, mutate: mutateVotes } = useRoundVotes(roundId);
   const submitVote = useSubmitVote();
 
+  // Get current user's member info
+  const currentUserMember = members?.find((member: Member) => member.email === user?.email);
+
   const {
     register,
     handleSubmit,
@@ -120,8 +123,8 @@ export default function Voting() {
     // User can always vote for themselves
     if (user.email === member.email) return true;
     
-    // Admins can vote for anyone
-    if (hasRole('admin')) return true;
+    // Admins and club managers can vote for anyone
+    if (hasRole('admin') || currentUserMember?.isClubManager) return true;
     
     return false;
   };
@@ -140,10 +143,12 @@ export default function Voting() {
     return true;
   };
 
-  // Check if current user is voting for someone else (admin action)
+  // Check if current user is voting for someone else (admin/club manager action)
   const isVotingForSomeoneElse = (member: Member) => {
     if (!user) return false;
-    return user.email !== member.email && hasRole('admin');
+    const isAdmin = hasRole('admin');
+    const isClubManager = currentUserMember?.isClubManager || false;
+    return user.email !== member.email && (isAdmin || isClubManager);
   };
 
   // Generate voting options based on the number of recommendations
@@ -305,7 +310,9 @@ export default function Voting() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-yellow-800">Admin Action</h3>
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    {hasRole('admin') ? 'Admin Action' : 'Club Manager Action'}
+                  </h3>
                   <p className="text-sm text-yellow-700 mt-1">
                     You are casting a vote on behalf of <strong>{member.name}</strong>. This is an administrative action that will be recorded in the system.
                   </p>

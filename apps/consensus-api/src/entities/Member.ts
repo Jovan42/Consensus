@@ -17,6 +17,9 @@ export class Member {
   @Column('uuid')
   clubId: string;
 
+  @Column('boolean', { default: false })
+  isClubManager: boolean;
+
   @ManyToOne(() => Club, club => club.members, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'clubId' })
   club: Club;

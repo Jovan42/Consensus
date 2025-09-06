@@ -4,7 +4,8 @@ import {
   getClubMembers,
   updateMember,
   removeMember,
-  getMemberById
+  getMemberById,
+  updateMemberManagerStatus
 } from '../controllers/memberController';
 import { validateDto } from '../middleware/validation.middleware';
 import { CreateMemberRequestDto, UpdateMemberDto } from '../dto/member.dto';
@@ -16,6 +17,7 @@ router.post('/clubs/:clubId/members', validateDto(CreateMemberRequestDto), addMe
 router.get('/clubs/:clubId/members', getClubMembers);
 router.get('/members/:memberId', getMemberById);
 router.put('/members/:memberId', validateDto(UpdateMemberDto), updateMember);
+router.put('/members/:memberId/manager-status', updateMemberManagerStatus);
 router.delete('/members/:memberId', removeMember);
 
 export default router;

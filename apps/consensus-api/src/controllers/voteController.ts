@@ -79,10 +79,19 @@ export const submitVotes = async (req: AuthenticatedRequest, res: Response) => {
     const isVotingForSelf = member.email === req.user.email;
     const isAdmin = req.user.role === 'admin';
     
-    if (!isVotingForSelf && !isAdmin) {
+    // Check if user is a club manager
+    const userMember = await AppDataSource.getRepository(Member).findOne({
+      where: { 
+        email: req.user.email,
+        clubId: round.clubId
+      }
+    });
+    const isClubManager = userMember?.isClubManager || false;
+    
+    if (!isVotingForSelf && !isAdmin && !isClubManager) {
       return res.status(403).json({
         success: false,
-        message: 'You can only vote for yourself. Admins can vote for others.'
+        message: 'You can only vote for yourself. Club managers and admins can vote for others.'
       });
     }
 

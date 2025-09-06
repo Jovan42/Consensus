@@ -11,8 +11,9 @@ import { Button } from '../../../../../components/ui/Button';
 import { Input } from '../../../../../components/ui/Input';
 import { Textarea } from '../../../../../components/ui/Textarea';
 import { Alert } from '../../../../../components/ui/Alert';
-import { useRound, useAddRecommendations } from '../../../../../hooks/useApi';
+import { useRound, useAddRecommendations, useClubMembers } from '../../../../../hooks/useApi';
 import { useAuth } from '../../../../../contexts/AuthContext';
+import { Member } from '../../../../../context/AppContext';
 import { 
   ArrowLeft, 
   Plus, 
@@ -43,17 +44,21 @@ export default function AddRecommendations() {
   const [error, setError] = useState<string | null>(null);
 
   const { round, isLoading: roundLoading } = useRound(roundId);
+  const { members } = useClubMembers(clubId);
   const addRecommendations = useAddRecommendations();
+
+  // Get current user's member info
+  const currentUserMember = members?.find((member: Member) => member.email === user?.email);
 
   // Check if current user is the recommender
   const isCurrentRecommender = user && round?.currentRecommender && 
     user.email === round.currentRecommender.email;
 
-  // Check if current user can add recommendations (recommender or admin)
-  const canAddRecommendations = isCurrentRecommender || hasRole('admin');
+  // Check if current user can add recommendations (recommender, admin, or club manager)
+  const canAddRecommendations = isCurrentRecommender || hasRole('admin') || currentUserMember?.isClubManager;
 
-  // Check if this is an admin action (admin adding for someone else)
-  const isAdminAction = hasRole('admin') && !isCurrentRecommender;
+  // Check if this is an admin/club manager action (adding for someone else)
+  const isAdminAction = (hasRole('admin') || currentUserMember?.isClubManager) && !isCurrentRecommender;
 
   const {
     control,
@@ -203,12 +208,14 @@ export default function AddRecommendations() {
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
-              <div>
-                <h3 className="text-sm font-medium text-yellow-800">Admin Action</h3>
-                <p className="text-sm text-yellow-700 mt-1">
-                  You are adding recommendations on behalf of <strong>{round.currentRecommender?.name || 'the current recommender'}</strong>. This is an administrative action that will be recorded in the system.
-                </p>
-              </div>
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    {hasRole('admin') ? 'Admin Action' : 'Club Manager Action'}
+                  </h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    You are adding recommendations on behalf of <strong>{round.currentRecommender?.name || 'the current recommender'}</strong>. This is an administrative action that will be recorded in the system.
+                  </p>
+                </div>
             </div>
           </Alert>
         )}

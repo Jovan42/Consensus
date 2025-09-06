@@ -35,6 +35,9 @@ export default function CompletionTracking() {
   const updateCompletion = useUpdateCompletion();
   const finishRound = useFinishRound();
 
+  // Get current user's member info
+  const currentUserMember = members?.find((member: Member) => member.email === user?.email);
+
   // Get the winning recommendation
   const getWinner = () => {
     if (!recommendations || !round?.winningRecommendationId) return null;
@@ -256,8 +259,8 @@ export default function CompletionTracking() {
           </Alert>
         )}
 
-        {/* Admin Warning */}
-        {hasRole('admin') && (
+        {/* Admin/Club Manager Warning */}
+        {(hasRole('admin') || currentUserMember?.isClubManager) && (
           <Alert variant="warning">
             <div className="flex items-start space-x-2">
               <div className="flex-shrink-0">
@@ -266,7 +269,9 @@ export default function CompletionTracking() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-yellow-800">Admin Mode</h3>
+                <h3 className="text-sm font-medium text-yellow-800">
+                  {hasRole('admin') ? 'Admin Mode' : 'Club Manager Mode'}
+                </h3>
                 <p className="text-sm text-yellow-700 mt-1">
                   You can mark completion for any member. This is an administrative action that will be recorded in the system.
                 </p>

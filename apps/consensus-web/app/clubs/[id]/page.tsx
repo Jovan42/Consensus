@@ -8,6 +8,8 @@ import { Button } from '../../components/ui/Button';
 import { Alert } from '../../components/ui/Alert';
 import { useClub, useClubMembers, useClubRounds, useStartRound } from '../../hooks/useApi';
 import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { Member } from '../../context/AppContext';
 import { 
   ArrowLeft, 
   Users, 
@@ -26,6 +28,7 @@ export default function ClubDetail() {
   const router = useRouter();
   const clubId = params.id as string;
   const { setCurrentClub } = useApp();
+  const { user, hasRole } = useAuth();
   const [isStartingRound, setIsStartingRound] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +36,9 @@ export default function ClubDetail() {
   const { members, isLoading: membersLoading } = useClubMembers(clubId);
   const { rounds, isLoading: roundsLoading } = useClubRounds(clubId);
   const startRound = useStartRound();
+
+  // Get current user's member info
+  const currentUserMember = members?.find((member: Member) => member.email === user?.email);
 
   React.useEffect(() => {
     if (club) {
@@ -215,11 +221,15 @@ export default function ClubDetail() {
                   </Link>
                   
                   {currentRound.status === 'recommending' && (
-                    <Link href={`/clubs/${clubId}/rounds/${currentRound.id}/recommendations`}>
-                      <Button variant="outline">
-                        Add Recommendations
-                      </Button>
-                    </Link>
+                    (user?.email === currentRound.currentRecommender?.email || 
+                     hasRole('admin') || 
+                     currentUserMember?.isClubManager) && (
+                      <Link href={`/clubs/${clubId}/rounds/${currentRound.id}/recommendations`}>
+                        <Button variant="outline">
+                          Add Recommendations
+                        </Button>
+                      </Link>
+                    )
                   )}
                   
                   {currentRound.status === 'voting' && (

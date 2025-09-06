@@ -12,13 +12,23 @@ export interface AuthenticatedRequest extends Request {
 
 // Hardcoded test accounts for development
 const TEST_ACCOUNTS = {
+  // Admin users
+  'admin@consensus.dev': {
+    email: 'admin@consensus.dev',
+    name: 'Admin User',
+    role: 'admin',
+    sub: 'admin-user',
+    type: 'test' as const
+  },
   'test1@consensus.dev': {
     email: 'test1@consensus.dev',
     name: 'Test User 1',
-    role: 'member',
+    role: 'admin',
     sub: 'test-user-1',
     type: 'test' as const
   },
+  
+  // Regular members
   'test2@consensus.dev': {
     email: 'test2@consensus.dev',
     name: 'Test User 2',
@@ -33,13 +43,93 @@ const TEST_ACCOUNTS = {
     sub: 'test-user-3',
     type: 'test' as const
   },
-  'admin@consensus.dev': {
-    email: 'admin@consensus.dev',
-    name: 'Admin User',
-    role: 'admin',
-    sub: 'admin-user',
+  
+  // Book club enthusiasts
+  'alice@consensus.dev': {
+    email: 'alice@consensus.dev',
+    name: 'Alice Johnson',
+    role: 'member',
+    sub: 'alice-bookworm',
     type: 'test' as const
   },
+  'bob@consensus.dev': {
+    email: 'bob@consensus.dev',
+    name: 'Bob Smith',
+    role: 'member',
+    sub: 'bob-reader',
+    type: 'test' as const
+  },
+  'carol@consensus.dev': {
+    email: 'carol@consensus.dev',
+    name: 'Carol Davis',
+    role: 'member',
+    sub: 'carol-librarian',
+    type: 'test' as const
+  },
+  
+  // Movie club members
+  'david@consensus.dev': {
+    email: 'david@consensus.dev',
+    name: 'David Wilson',
+    role: 'member',
+    sub: 'david-cinephile',
+    type: 'test' as const
+  },
+  'eve@consensus.dev': {
+    email: 'eve@consensus.dev',
+    name: 'Eve Brown',
+    role: 'member',
+    sub: 'eve-filmcritic',
+    type: 'test' as const
+  },
+  'frank@consensus.dev': {
+    email: 'frank@consensus.dev',
+    name: 'Frank Miller',
+    role: 'member',
+    sub: 'frank-director',
+    type: 'test' as const
+  },
+  
+  // Gaming club members
+  'grace@consensus.dev': {
+    email: 'grace@consensus.dev',
+    name: 'Grace Lee',
+    role: 'member',
+    sub: 'grace-gamer',
+    type: 'test' as const
+  },
+  'henry@consensus.dev': {
+    email: 'henry@consensus.dev',
+    name: 'Henry Taylor',
+    role: 'member',
+    sub: 'henry-strategist',
+    type: 'test' as const
+  },
+  'iris@consensus.dev': {
+    email: 'iris@consensus.dev',
+    name: 'Iris Chen',
+    role: 'member',
+    sub: 'iris-questmaster',
+    type: 'test' as const
+  },
+  
+  // Club managers (non-admin)
+  'manager@consensus.dev': {
+    email: 'manager@consensus.dev',
+    name: 'Manager User',
+    role: 'member',
+    sub: 'club-manager',
+    type: 'test' as const
+  },
+  'sarah@consensus.dev': {
+    email: 'sarah@consensus.dev',
+    name: 'Sarah Martinez',
+    role: 'member',
+    sub: 'sarah-organizer',
+    type: 'test' as const
+  },
+  
+  // Auth0 test account
   'user@gmail.com': {
     email: 'user@gmail.com',
     name: 'Google User',

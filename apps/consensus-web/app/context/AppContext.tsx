@@ -27,6 +27,7 @@ export interface Member {
   name: string;
   email: string;
   clubId: string;
+  isClubManager: boolean;
   createdAt: string;
   updatedAt: string;
   club?: Club;

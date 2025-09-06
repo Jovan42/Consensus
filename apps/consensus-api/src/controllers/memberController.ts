@@ -4,6 +4,7 @@ import { Member } from '../entities/Member';
 import { CreateMemberRequestDto, UpdateMemberDto } from '../dto/member.dto';
 import { Club } from '../entities/Club';
 import { NotFoundError, asyncHandler } from '../middleware/error.middleware';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 export const addMemberToClub = async (req: Request, res: Response) => {
   try {
@@ -171,3 +172,64 @@ export const getMemberById = asyncHandler(async (req: Request, res: Response) =>
     data: member
   });
 });
+
+export const updateMemberManagerStatus = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { memberId } = req.params;
+    const { isClubManager: newManagerStatus } = req.body;
+
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    const memberRepository = AppDataSource.getRepository(Member);
+    const member = await memberRepository.findOne({
+      where: { id: memberId },
+      relations: ['club']
+    });
+
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: 'Member not found'
+      });
+    }
+
+    // Check if the requesting user is a club manager or site admin
+    const requestingUserMember = await memberRepository.findOne({
+      where: { 
+        email: req.user.email,
+        clubId: member.clubId
+      }
+    });
+
+    const isSiteAdmin = req.user.role === 'admin';
+    const isClubManager = requestingUserMember?.isClubManager || false;
+
+    if (!isSiteAdmin && !isClubManager) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only club managers or site admins can update member manager status'
+      });
+    }
+
+    // Update the member's manager status
+    member.isClubManager = newManagerStatus;
+    const updatedMember = await memberRepository.save(member);
+
+    res.json({
+      success: true,
+      data: updatedMember,
+      message: `Member ${newManagerStatus ? 'promoted to' : 'removed from'} club manager successfully`
+    });
+  } catch (error) {
+    console.error('Error updating member manager status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};

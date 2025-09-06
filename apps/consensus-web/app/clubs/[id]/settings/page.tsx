@@ -6,8 +6,9 @@ import { Layout } from '../../../components/layout/Layout';
 import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Alert } from '../../../components/ui/Alert';
-import { useClub, useUpdateClub } from '../../../hooks/useApi';
+import { useClub, useUpdateClub, useClubMembers } from '../../../hooks/useApi';
 import { useAuth } from '../../../contexts/AuthContext';
+import { Member } from '../../../context/AppContext';
 import { 
   ArrowLeft, 
   Save,
@@ -28,6 +29,7 @@ export default function ClubSettings() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { club, isLoading: clubLoading, error: clubError, mutate: mutateClub } = useClub(clubId);
+  const { members } = useClubMembers(clubId);
   const updateClub = useUpdateClub();
 
   // Form state
@@ -99,7 +101,8 @@ export default function ClubSettings() {
   };
 
   // Check if user has permission to edit settings
-  const canEdit = hasRole('admin') || (club && user?.email === club.createdBy);
+  const currentUserMember = members?.find((member: Member) => member.email === user?.email);
+  const canEdit = hasRole('admin') || currentUserMember?.isClubManager;
 
   if (clubLoading) {
     return (
