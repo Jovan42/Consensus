@@ -315,7 +315,12 @@ lsof -ti:3001 | xargs kill -9
 - Verify connection string in `.env`
 - Ensure database exists and user has permissions
 
-**3. Module Resolution Issues**:
+**3. SSL/TLS Required Error (Render PostgreSQL)**:
+- Render PostgreSQL requires SSL connections
+- Add `?sslmode=require` to your DATABASE_URL
+- Example: `postgresql://user:pass@host:port/db?sslmode=require`
+
+**4. Module Resolution Issues**:
 ```bash
 # Clear node_modules and reinstall
 rm -rf node_modules package-lock.json
