@@ -24,6 +24,15 @@ const api = {
       body: JSON.stringify(data),
     });
     if (!response.ok) {
+      // Try to parse error response for better error messages
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          throw new Error(errorData.message);
+        }
+      } catch (parseError) {
+        // If parsing fails, use generic error
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     return response.json();
@@ -248,8 +257,16 @@ export function useRoundVotes(roundId: string) {
 
 export function useSubmitVote() {
   return async (roundId: string, memberId: string, votes: { recommendationId: string; points: number }[]) => {
-    const response = await api.post(`/rounds/${roundId}/votes`, { memberId, votes });
-    return response.data;
+    try {
+      const response = await api.post(`/rounds/${roundId}/votes`, { memberId, votes });
+      return response.data;
+    } catch (error: any) {
+      // Parse API error response for better error messages
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
   };
 }
 

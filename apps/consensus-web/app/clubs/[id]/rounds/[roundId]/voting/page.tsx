@@ -27,7 +27,15 @@ const votingSchema = z.object({
   votes: z.array(z.object({
     recommendationId: z.string(),
     points: z.number().min(1).max(10),
-  })).min(1, 'You must vote on at least one recommendation'),
+  })).min(1, 'You must vote on at least one recommendation')
+  .refine((votes) => {
+    // Check for duplicate points
+    const points = votes.map(v => v.points);
+    const uniquePoints = [...new Set(points)];
+    return points.length === uniquePoints.length;
+  }, {
+    message: 'Each recommendation must have different points (no duplicates allowed)',
+  }),
 });
 
 type VotingForm = z.infer<typeof votingSchema>;
@@ -52,6 +60,7 @@ export default function Voting() {
     handleSubmit,
     formState: { errors },
     watch,
+    trigger,
   } = useForm<VotingForm>({
     resolver: zodResolver(votingSchema),
     defaultValues: {
@@ -59,7 +68,23 @@ export default function Voting() {
     },
   });
 
+  // Watch form values for real-time validation
   const watchedVotes = watch('votes');
+  
+  // Real-time validation for duplicate points
+  React.useEffect(() => {
+    if (watchedVotes && watchedVotes.length > 0) {
+      trigger('votes');
+    }
+  }, [watchedVotes, trigger]);
+
+  // Helper function to check for duplicate points
+  const hasDuplicatePoints = () => {
+    if (!watchedVotes || watchedVotes.length === 0) return false;
+    const points = watchedVotes.map(v => v.points).filter(p => p !== undefined && p !== null);
+    const uniquePoints = [...new Set(points)];
+    return points.length > 0 && points.length !== uniquePoints.length;
+  };
 
   // Calculate current rankings
   const getCurrentRankings = () => {
@@ -284,13 +309,24 @@ export default function Voting() {
                   </Alert>
                 )}
 
+                {/* Duplicate points warning */}
+                {hasDuplicatePoints() && (
+                  <Alert variant="error">
+                    ⚠️ You have assigned the same points to multiple recommendations. Each recommendation must have different points.
+                  </Alert>
+                )}
+
                 {/* Submit Button */}
                 <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
                   <Button variant="outline" type="button" onClick={() => setSelectedMember(null)}>
                     {hasVoted ? 'Back to Members' : 'Cancel'}
                   </Button>
                   {!hasVoted && (
-                    <Button type="submit" loading={isSubmitting}>
+                    <Button 
+                      type="submit" 
+                      loading={isSubmitting}
+                      disabled={hasDuplicatePoints() || Object.keys(errors).length > 0}
+                    >
                       <Vote className="h-4 w-4 mr-2" />
                       Submit Vote
                     </Button>
