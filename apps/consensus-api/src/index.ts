@@ -7,6 +7,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './config/database';
+import routes from './routes';
 
 // Load environment variables
 dotenv.config();
@@ -40,10 +41,8 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
+// API routes
+app.use('/api', routes);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
