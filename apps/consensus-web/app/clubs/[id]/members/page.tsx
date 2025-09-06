@@ -162,10 +162,12 @@ export default function ClubMembers() {
               <p className="text-gray-600">{club.name}</p>
             </div>
           </div>
-          <Button onClick={() => setShowAddForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Member
-          </Button>
+          {(hasRole('admin') || members?.find((m: Member) => m.email === user?.email)?.isClubManager) && (
+            <Button onClick={() => setShowAddForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Member
+            </Button>
+          )}
         </div>
 
         {/* Error Alert */}
@@ -176,7 +178,7 @@ export default function ClubMembers() {
         )}
 
         {/* Add Member Form */}
-        {showAddForm && (
+        {showAddForm && (hasRole('admin') || members?.find((m: Member) => m.email === user?.email)?.isClubManager) && (
           <Card>
             <CardHeader>
               <h2 className="text-xl font-semibold">Add New Member</h2>

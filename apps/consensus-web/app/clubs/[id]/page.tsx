@@ -124,18 +124,22 @@ export default function ClubDetail() {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <Link href={`/clubs/${clubId}/members`}>
-              <Button variant="outline">
-                <Users className="h-4 w-4 mr-2" />
-                Manage Members
-              </Button>
-            </Link>
-            <Link href={`/clubs/${clubId}/settings`}>
-              <Button variant="outline">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-            </Link>
+            {(hasRole('admin') || currentUserMember?.isClubManager) && (
+              <>
+                <Link href={`/clubs/${clubId}/members`}>
+                  <Button variant="outline">
+                    <Users className="h-4 w-4 mr-2" />
+                    Manage Members
+                  </Button>
+                </Link>
+                <Link href={`/clubs/${clubId}/settings`}>
+                  <Button variant="outline">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
 

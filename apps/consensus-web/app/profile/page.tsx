@@ -144,7 +144,7 @@ export default function ProfilePage() {
                       />
                     ) : (
                       <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
-                        <User className="h-8 w-8 text-gray-500" />
+                        <span className="text-3xl">👤</span>
                       </div>
                     )}
                     {isTestAccount && (

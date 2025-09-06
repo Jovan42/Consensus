@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { User, LogOut, Settings, Shield, TestTube } from 'lucide-react';
 
 const UserProfile: React.FC = () => {
   const { user, logout, isTestAccount } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   if (!user) return null;
 
@@ -72,7 +74,7 @@ const UserProfile: React.FC = () => {
                 />
               ) : (
                 <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-gray-600" />
+                  <span className="text-xl">👤</span>
                 </div>
               )}
               <div>
@@ -98,7 +100,7 @@ const UserProfile: React.FC = () => {
             <button
               onClick={() => {
                 setIsOpen(false);
-                // TODO: Navigate to profile settings
+                router.push('/profile');
               }}
               className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
             >
