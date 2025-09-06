@@ -1,0 +1,657 @@
+{
+	"info": {
+		"_postman_id": "consensus-phase1-api",
+		"name": "Consensus Phase 1 API",
+		"description": "Complete API collection for Consensus Phase 1 (MVP) endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Clubs",
+			"item": [
+				{
+					"name": "Get All Clubs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clubs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Club",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"My Book Club\",\n  \"type\": \"book\",\n  \"config\": {\n    \"minRecommendations\": 3,\n    \"maxRecommendations\": 5,\n    \"votingPoints\": [3, 2, 1],\n    \"turnOrder\": \"sequential\",\n    \"tieBreakingMethod\": \"random\",\n    \"minimumParticipation\": 80\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clubs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Club by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Club",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Book Club\",\n  \"type\": \"book\",\n  \"config\": {\n    \"minRecommendations\": 2,\n    \"maxRecommendations\": 4,\n    \"votingPoints\": [3, 2, 1],\n    \"turnOrder\": \"random\",\n    \"tieBreakingMethod\": \"recommender_decides\",\n    \"minimumParticipation\": 90\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Club",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Members",
+			"item": [
+				{
+					"name": "Get Club Members",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}/members",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Member to Club",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}/members",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Member",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Smith\",\n  \"email\": \"johnsmith@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/members/{{member_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"{{member_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Member",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/members/{{member_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"members",
+								"{{member_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Rounds",
+			"item": [
+				{
+					"name": "Get Club Rounds",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}/rounds",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}",
+								"rounds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start New Round",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentRecommenderId\": \"{{member_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}/rounds",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}",
+								"rounds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Round by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Round Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"voting\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Recommendations",
+			"item": [
+				{
+					"name": "Get Round Recommendations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/recommendations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"recommendations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Recommendations",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recommendations\": [\n    {\n      \"title\": \"The Great Gatsby\",\n      \"description\": \"A classic American novel by F. Scott Fitzgerald\"\n    },\n    {\n      \"title\": \"1984\",\n      \"description\": \"Dystopian fiction by George Orwell\"\n    },\n    {\n      \"title\": \"To Kill a Mockingbird\",\n      \"description\": \"A novel by Harper Lee about racial injustice\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/recommendations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"recommendations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Recommendation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"The Great Gatsby (Updated)\",\n  \"description\": \"A classic American novel by F. Scott Fitzgerald - Updated description\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/recommendations/{{recommendation_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"recommendations",
+								"{{recommendation_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Recommendation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/recommendations/{{recommendation_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"recommendations",
+								"{{recommendation_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Voting",
+			"item": [
+				{
+					"name": "Get Round Votes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"votes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Votes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{recommendation_1_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{recommendation_2_id}}\",\n      \"points\": 2\n    },\n    {\n      \"recommendationId\": \"{{recommendation_3_id}}\",\n      \"points\": 1\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"votes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Close Voting",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/close-voting",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"close-voting"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Completions",
+			"item": [
+				{
+					"name": "Get Round Completions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/completions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"completions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Completion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberId\": \"{{member_id}}\",\n  \"isCompleted\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/completions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"completions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Finish Round",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/finish",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"finish"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "club_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "member_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "round_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "recommendation_1_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "recommendation_2_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "recommendation_3_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

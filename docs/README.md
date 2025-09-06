@@ -16,6 +16,9 @@ Comprehensive overview of the project, supported use cases, core workflow, and c
 ### [Development Guide](./DEVELOPMENT-GUIDE.md)
 Step-by-step guide for setting up the development environment, running the application locally, and contributing to the project.
 
+### [Postman Collections](./postman-collections/)
+API testing collections including complete Phase 1 endpoints and happy path test scenarios.
+
 ## 🚀 Quick Links
 
 - **Main README**: [../README.md](../README.md) - Project overview and setup

@@ -1,0 +1,952 @@
+{
+	"info": {
+		"_postman_id": "consensus-happy-path-test",
+		"name": "Consensus Happy Path Test",
+		"description": "Complete happy path test scenario for Consensus MVP with 3 people and 3 recommendations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup",
+			"item": [
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Health check returns 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has status OK\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"OK\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "1. Create Club",
+			"item": [
+				{
+					"name": "Create Book Club",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Club creation returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Club has required fields\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('type');",
+									"    pm.expect(jsonData).to.have.property('config');",
+									"    pm.expect(jsonData.name).to.eql(\"Test Book Club\");",
+									"    pm.expect(jsonData.type).to.eql(\"book\");",
+									"});",
+									"",
+									"// Store club ID for later use",
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"club_id\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Book Club\",\n  \"type\": \"book\",\n  \"config\": {\n    \"minRecommendations\": 3,\n    \"maxRecommendations\": 3,\n    \"votingPoints\": [3, 2, 1],\n    \"turnOrder\": \"sequential\",\n    \"tieBreakingMethod\": \"random\",\n    \"minimumParticipation\": 100\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clubs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Add Members",
+			"item": [
+				{
+					"name": "Add Member A (Alice)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Member A creation returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Member A has correct name\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql(\"Alice\");",
+									"});",
+									"",
+									"// Store member A ID",
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"member_a_id\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}/members",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Member B (Bob)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Member B creation returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Member B has correct name\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql(\"Bob\");",
+									"});",
+									"",
+									"// Store member B ID",
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"member_b_id\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Bob\",\n  \"email\": \"bob@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}/members",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Member C (Charlie)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Member C creation returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Member C has correct name\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql(\"Charlie\");",
+									"});",
+									"",
+									"// Store member C ID",
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"member_c_id\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Charlie\",\n  \"email\": \"charlie@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}/members",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Start Round (Alice's Turn)",
+			"item": [
+				{
+					"name": "Start New Round",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Round creation returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Round has correct status and recommender\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"recommending\");",
+									"    pm.expect(jsonData.currentRecommenderId).to.eql(pm.collectionVariables.get(\"member_a_id\"));",
+									"});",
+									"",
+									"// Store round ID",
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"round_id\", jsonData.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentRecommenderId\": \"{{member_a_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}/rounds",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}",
+								"rounds"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Alice Recommends 3 Books",
+			"item": [
+				{
+					"name": "Add Recommendations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Recommendations creation returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Three recommendations created\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData).to.have.lengthOf(3);",
+									"});",
+									"",
+									"pm.test(\"Recommendations have correct titles\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const titles = jsonData.map(r => r.title);",
+									"    pm.expect(titles).to.include(\"The Great Gatsby\");",
+									"    pm.expect(titles).to.include(\"1984\");",
+									"    pm.expect(titles).to.include(\"To Kill a Mockingbird\");",
+									"});",
+									"",
+									"// Store recommendation IDs",
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"rec_1_id\", jsonData[0].id);",
+									"pm.collectionVariables.set(\"rec_2_id\", jsonData[1].id);",
+									"pm.collectionVariables.set(\"rec_3_id\", jsonData[2].id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recommendations\": [\n    {\n      \"title\": \"The Great Gatsby\",\n      \"description\": \"A classic American novel by F. Scott Fitzgerald\"\n    },\n    {\n      \"title\": \"1984\",\n      \"description\": \"Dystopian fiction by George Orwell\"\n    },\n    {\n      \"title\": \"To Kill a Mockingbird\",\n      \"description\": \"A novel by Harper Lee about racial injustice\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/recommendations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"recommendations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Start Voting",
+			"item": [
+				{
+					"name": "Update Round Status to Voting",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Round status update returns 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Round status is now voting\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"voting\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"voting\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Everyone Votes",
+			"item": [
+				{
+					"name": "Alice Votes (3,2,1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Alice's vote submission returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Alice's votes are recorded\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData).to.have.lengthOf(3);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 2\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 1\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"votes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bob Votes (1,3,2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Bob's vote submission returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Bob's votes are recorded\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData).to.have.lengthOf(3);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 1\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 2\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"votes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Charlie Votes (2,1,3)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Charlie's vote submission returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Charlie's votes are recorded\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    pm.expect(jsonData).to.have.lengthOf(3);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 2\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 1\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 3\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"votes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Close Voting & Determine Winner",
+			"item": [
+				{
+					"name": "Close Voting",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Voting closure returns 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Winner is determined\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('winner');",
+									"    pm.expect(jsonData).to.have.property('totalPoints');",
+									"});",
+									"",
+									"pm.test(\"Winner has highest points\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    // Alice: 3+1+2=6, Bob: 2+3+1=6, Charlie: 1+2+3=6",
+									"    // All tied, so winner should be determined by tie-breaking method",
+									"    pm.expect(jsonData.winner).to.be.oneOf([pm.collectionVariables.get(\"rec_1_id\"), pm.collectionVariables.get(\"rec_2_id\"), pm.collectionVariables.get(\"rec_3_id\")]);",
+									"});",
+									"",
+									"// Store winner ID",
+									"const jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"winner_id\", jsonData.winner.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/close-voting",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"close-voting"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "8. Mark Completions",
+			"item": [
+				{
+					"name": "Alice Marks Complete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Alice's completion returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Alice's completion is recorded\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isCompleted).to.be.true;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberId\": \"{{member_a_id}}\",\n  \"isCompleted\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/completions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"completions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bob Marks Complete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Bob's completion returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Bob's completion is recorded\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isCompleted).to.be.true;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberId\": \"{{member_b_id}}\",\n  \"isCompleted\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/completions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"completions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Charlie Marks Complete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Charlie's completion returns 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Charlie's completion is recorded\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.isCompleted).to.be.true;",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberId\": \"{{member_c_id}}\",\n  \"isCompleted\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/completions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"completions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "9. Finish Round & Start Next",
+			"item": [
+				{
+					"name": "Finish Round",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Round finish returns 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Round is marked as finished\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"finished\");",
+									"});",
+									"",
+									"pm.test(\"Next round is started with Bob as recommender\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('nextRound');",
+									"    pm.expect(jsonData.nextRound.currentRecommenderId).to.eql(pm.collectionVariables.get(\"member_b_id\"));",
+									"    pm.expect(jsonData.nextRound.status).to.eql(\"recommending\");",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rounds/{{round_id}}/finish",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rounds",
+								"{{round_id}}",
+								"finish"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cleanup",
+			"item": [
+				{
+					"name": "Delete Test Club",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test(\"Club deletion returns 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/clubs/{{club_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"clubs",
+								"{{club_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "club_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "member_a_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "member_b_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "member_c_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "round_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "rec_1_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "rec_2_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "rec_3_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "winner_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
