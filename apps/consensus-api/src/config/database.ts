@@ -8,9 +8,15 @@ export const AppDataSource = new DataSource({
   url: process.env.DATABASE_URL,
   synchronize: process.env.NODE_ENV === 'development', // Only in development
   logging: process.env.NODE_ENV === 'development',
-  entities: ['src/entities/*.ts'],
-  migrations: ['src/migrations/*.ts'],
-  subscribers: ['src/subscribers/*.ts'],
+  entities: process.env.NODE_ENV === 'production' 
+    ? ['dist/entities/*.js'] 
+    : ['src/entities/*.ts'],
+  migrations: process.env.NODE_ENV === 'production' 
+    ? ['dist/migrations/*.js'] 
+    : ['src/migrations/*.ts'],
+  subscribers: process.env.NODE_ENV === 'production' 
+    ? ['dist/subscribers/*.js'] 
+    : ['src/subscribers/*.ts'],
 });
 
 export const initializeDatabase = async () => {
