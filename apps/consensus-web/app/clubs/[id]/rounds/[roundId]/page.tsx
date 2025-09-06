@@ -305,6 +305,8 @@ export default function RoundDetail() {
                   onClick={async () => {
                     try {
                       await updateRoundStatus(roundId, 'voting');
+                      // Refresh round data to show updated status
+                      await mutateRound();
                     } catch (error) {
                       console.error('Failed to update round status:', error);
                     }
