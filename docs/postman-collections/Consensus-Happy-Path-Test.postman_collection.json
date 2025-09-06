@@ -63,17 +63,20 @@
 									"",
 									"pm.test(\"Club has required fields\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.property('id');",
-									"    pm.expect(jsonData).to.have.property('name');",
-									"    pm.expect(jsonData).to.have.property('type');",
-									"    pm.expect(jsonData).to.have.property('config');",
-									"    pm.expect(jsonData.name).to.eql(\"Test Book Club\");",
-									"    pm.expect(jsonData.type).to.eql(\"book\");",
+									"    pm.expect(jsonData.data).to.have.property('id');",
+									"    pm.expect(jsonData.data).to.have.property('name');",
+									"    pm.expect(jsonData.data).to.have.property('type');",
+									"    pm.expect(jsonData.data).to.have.property('config');",
+									"    pm.expect(jsonData.data.name).to.eql(\"Test Book Club\");",
+									"    pm.expect(jsonData.data.type).to.eql(\"book\");",
 									"});",
 									"",
 									"// Store club ID for later use",
-									"const jsonData = pm.response.json();",
-									"pm.collectionVariables.set(\"club_id\", jsonData.id);"
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"club_id\", jsonData.data.id);",
+									"    console.log('Club ID saved:', jsonData.data.id);",
+									"}"
 								]
 							}
 						}
@@ -122,12 +125,15 @@
 									"",
 									"pm.test(\"Member A has correct name\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.name).to.eql(\"Alice\");",
+									"    pm.expect(jsonData.data.name).to.eql(\"Alice\");",
 									"});",
 									"",
 									"// Store member A ID",
-									"const jsonData = pm.response.json();",
-									"pm.collectionVariables.set(\"member_a_id\", jsonData.id);"
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"member_a_id\", jsonData.data.id);",
+									"    console.log('Member A ID saved:', jsonData.data.id);",
+									"}"
 								]
 							}
 						}
@@ -173,12 +179,15 @@
 									"",
 									"pm.test(\"Member B has correct name\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.name).to.eql(\"Bob\");",
+									"    pm.expect(jsonData.data.name).to.eql(\"Bob\");",
 									"});",
 									"",
 									"// Store member B ID",
-									"const jsonData = pm.response.json();",
-									"pm.collectionVariables.set(\"member_b_id\", jsonData.id);"
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"member_b_id\", jsonData.data.id);",
+									"    console.log('Member B ID saved:', jsonData.data.id);",
+									"}"
 								]
 							}
 						}
@@ -224,12 +233,15 @@
 									"",
 									"pm.test(\"Member C has correct name\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.name).to.eql(\"Charlie\");",
+									"    pm.expect(jsonData.data.name).to.eql(\"Charlie\");",
 									"});",
 									"",
 									"// Store member C ID",
-									"const jsonData = pm.response.json();",
-									"pm.collectionVariables.set(\"member_c_id\", jsonData.id);"
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"member_c_id\", jsonData.data.id);",
+									"    console.log('Member C ID saved:', jsonData.data.id);",
+									"}"
 								]
 							}
 						}
@@ -280,13 +292,16 @@
 									"",
 									"pm.test(\"Round has correct status and recommender\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.status).to.eql(\"recommending\");",
-									"    pm.expect(jsonData.currentRecommenderId).to.eql(pm.collectionVariables.get(\"member_a_id\"));",
+									"    pm.expect(jsonData.data.status).to.eql(\"recommending\");",
+									"    pm.expect(jsonData.data.currentRecommenderId).to.eql(pm.collectionVariables.get(\"member_a_id\"));",
 									"});",
 									"",
 									"// Store round ID",
-									"const jsonData = pm.response.json();",
-									"pm.collectionVariables.set(\"round_id\", jsonData.id);"
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"round_id\", jsonData.data.id);",
+									"    console.log('Round ID saved:', jsonData.data.id);",
+									"}"
 								]
 							}
 						}
