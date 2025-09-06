@@ -11,6 +11,7 @@ import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Alert } from '../../../components/ui/Alert';
 import { useClub, useClubMembers, useAddMember, useRemoveMember } from '../../../hooks/useApi';
+import { Member } from '../../../context/AppContext';
 import { 
   ArrowLeft, 
   Plus, 
@@ -202,7 +203,7 @@ export default function ClubMembers() {
               </div>
             ) : members && members.length > 0 ? (
               <div className="space-y-3">
-                {members.map((member) => (
+                {members.map((member: Member) => (
                   <div
                     key={member.id}
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
