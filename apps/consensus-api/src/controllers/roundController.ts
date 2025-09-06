@@ -45,6 +45,18 @@ export const startNewRound = async (req: Request, res: Response) => {
       });
     }
 
+    // Check if club has any members
+    const memberCount = await AppDataSource.getRepository(Member).count({
+      where: { clubId: finalClubId }
+    });
+
+    if (memberCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Club must have at least one member to start a round'
+      });
+    }
+
     // Check if member exists and belongs to the club
     const member = await AppDataSource.getRepository(Member).findOne({
       where: { id: currentRecommenderId, clubId: finalClubId }

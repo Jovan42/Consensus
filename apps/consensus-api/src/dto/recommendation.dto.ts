@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsOptional, MinLength, MaxLength, IsArray, ValidateNested, IsObject } from 'class-validator';
+import { IsString, IsUUID, IsOptional, MinLength, MaxLength, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class RecommendationItemDto {
@@ -27,9 +27,7 @@ export class AddRecommendationDto {
 
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => RecommendationItemDto)
-  recommendations?: RecommendationItemDto[];
+  recommendations?: any[];
 
   @IsOptional()
   @IsUUID('4', { message: 'Invalid recommender ID format' })

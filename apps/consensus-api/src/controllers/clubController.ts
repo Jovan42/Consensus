@@ -1,45 +1,38 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { AppDataSource } from '../config/database';
 import { Club } from '../entities/Club';
 import { ClubType, ClubConfig } from '../types/enums';
 import { CreateClubDto, UpdateClubDto } from '../dto/club.dto';
+import { NotFoundError, ConflictError, asyncHandler } from '../middleware/error.middleware';
 
-export const createClub = async (req: Request, res: Response) => {
-  try {
-    const { name, type, config } = req.body as CreateClubDto;
+export const createClub = asyncHandler(async (req: Request, res: Response) => {
+  const { name, type, config } = req.body as CreateClubDto;
 
-    // Set default config if not provided
-    const defaultConfig: ClubConfig = {
-      minRecommendations: 3,
-      maxRecommendations: 5,
-      votingPoints: [3, 2, 1],
-      turnOrder: 'sequential',
-      tieBreakingMethod: 'random',
-      minimumParticipation: 80
-    };
+  // Set default config if not provided
+  const defaultConfig: ClubConfig = {
+    minRecommendations: 3,
+    maxRecommendations: 5,
+    votingPoints: [3, 2, 1],
+    turnOrder: 'sequential',
+    tieBreakingMethod: 'random',
+    minimumParticipation: 80
+  };
 
-    const clubRepository = AppDataSource.getRepository(Club);
-    const club = clubRepository.create({
-      name,
-      type,
-      config: config || defaultConfig
-    });
+  const clubRepository = AppDataSource.getRepository(Club);
+  const club = clubRepository.create({
+    name,
+    type,
+    config: config || defaultConfig
+  });
 
-    const savedClub = await clubRepository.save(club);
+  const savedClub = await clubRepository.save(club);
 
-    res.status(201).json({
-      success: true,
-      data: savedClub,
-      message: 'Club created successfully'
-    });
-  } catch (error) {
-    console.error('Error creating club:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-};
+  res.status(201).json({
+    success: true,
+    data: savedClub,
+    message: 'Club created successfully'
+  });
+});
 
 export const getAllClubs = async (req: Request, res: Response) => {
   try {
@@ -63,35 +56,24 @@ export const getAllClubs = async (req: Request, res: Response) => {
   }
 };
 
-export const getClubById = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const clubRepository = AppDataSource.getRepository(Club);
-    
-    const club = await clubRepository.findOne({
-      where: { id },
-      relations: ['members', 'rounds']
-    });
+export const getClubById = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const clubRepository = AppDataSource.getRepository(Club);
+  
+  const club = await clubRepository.findOne({
+    where: { id },
+    relations: ['members', 'rounds']
+  });
 
-    if (!club) {
-      return res.status(404).json({
-        success: false,
-        message: 'Club not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      data: club
-    });
-  } catch (error) {
-    console.error('Error fetching club:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+  if (!club) {
+    throw new NotFoundError('Club', id);
   }
-};
+
+  res.json({
+    success: true,
+    data: club
+  });
+});
 
 export const updateClub = async (req: Request, res: Response) => {
   try {

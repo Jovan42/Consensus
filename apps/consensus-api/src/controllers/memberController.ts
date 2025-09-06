@@ -3,6 +3,7 @@ import { AppDataSource } from '../config/database';
 import { Member } from '../entities/Member';
 import { CreateMemberRequestDto, UpdateMemberDto } from '../dto/member.dto';
 import { Club } from '../entities/Club';
+import { NotFoundError, asyncHandler } from '../middleware/error.middleware';
 
 export const addMemberToClub = async (req: Request, res: Response) => {
   try {
@@ -152,32 +153,21 @@ export const removeMember = async (req: Request, res: Response) => {
   }
 };
 
-export const getMemberById = async (req: Request, res: Response) => {
-  try {
-    const { memberId } = req.params;
+export const getMemberById = asyncHandler(async (req: Request, res: Response) => {
+  const { memberId } = req.params;
 
-    const memberRepository = AppDataSource.getRepository(Member);
-    const member = await memberRepository.findOne({
-      where: { id: memberId },
-      relations: ['club']
-    });
+  const memberRepository = AppDataSource.getRepository(Member);
+  const member = await memberRepository.findOne({
+    where: { id: memberId },
+    relations: ['club']
+  });
 
-    if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: 'Member not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      data: member
-    });
-  } catch (error) {
-    console.error('Error fetching member:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+  if (!member) {
+    throw new NotFoundError('Member', memberId);
   }
-};
+
+  res.json({
+    success: true,
+    data: member
+  });
+});
