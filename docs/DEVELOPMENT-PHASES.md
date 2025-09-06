@@ -62,7 +62,7 @@ This document outlines the development phases for the Consensus application with
 - [x] **Testing & Quality Assurance**
   - [x] Unit tests for API endpoints (Postman collection)
   - [x] Integration tests for complete workflows (Happy path testing)
-  - [ ] Frontend component tests
+  - [x] Frontend component tests (Jest + React Testing Library)
   - [ ] End-to-end testing
   - [ ] Performance testing
   - [ ] Security testing
