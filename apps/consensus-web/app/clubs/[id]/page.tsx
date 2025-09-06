@@ -11,7 +11,6 @@ import { useApp } from '../../context/AppContext';
 import { 
   ArrowLeft, 
   Users, 
-  Plus, 
   Play, 
   Settings, 
   Calendar,
@@ -118,10 +117,18 @@ export default function ClubDetail() {
               <p className="text-gray-600 capitalize">{club.type} club</p>
             </div>
           </div>
-          <Button variant="outline">
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Link href={`/clubs/${clubId}/members`}>
+              <Button variant="outline">
+                <Users className="h-4 w-4 mr-2" />
+                Manage Members
+              </Button>
+            </Link>
+            <Button variant="outline">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </Button>
+          </div>
         </div>
 
         {/* Error Alert */}
@@ -247,13 +254,6 @@ export default function ClubDetail() {
                     <Play className="h-4 w-4 mr-2" />
                     Start New Round
                   </Button>
-                  
-                  <Link href={`/clubs/${clubId}/members`}>
-                    <Button variant="outline">
-                      <Users className="h-4 w-4 mr-2" />
-                      Manage Members
-                    </Button>
-                  </Link>
                 </div>
               </div>
             </CardContent>
