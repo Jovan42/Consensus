@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '../../../../../components/ui/Card
 import { Button } from '../../../../../components/ui/Button';
 import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useRoundCompletions, useUpdateCompletion, useClubMembers, useFinishRound } from '../../../../../hooks/useApi';
+import { Recommendation } from '../../../../../context/AppContext';
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -37,7 +38,7 @@ export default function CompletionTracking() {
     if (!recommendations || !round?.winningRecommendationId) return null;
     
     // Find the winning recommendation by ID
-    return recommendations.find(rec => rec.id === round.winningRecommendationId);
+    return recommendations.find((rec: Recommendation) => rec.id === round.winningRecommendationId);
   };
 
   const winner = getWinner();

@@ -126,11 +126,6 @@ export default function Home() {
                         <Users className="h-4 w-4 mr-2" />
                         {club.members?.length || 0} members
                       </div>
-                      
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        {club.rounds?.length || 0} rounds
-                      </div>
 
                       <div className="pt-3">
                         <Link href={`/clubs/${club.id}`}>
