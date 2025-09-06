@@ -140,6 +140,15 @@ This is a Turborepo monorepo containing:
 4. Run tests and linting
 5. Submit a pull request
 
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](./docs/) folder:
+
+- **[API Endpoints](./docs/API-ENDPOINTS.md)** - Complete API documentation
+- **[Development Phases](./docs/DEVELOPMENT-PHASES.md)** - Project roadmap with progress tracking
+- **[Project Description](./docs/PROJECT-DESCRIPTION.md)** - Use cases and workflow details
+- **[Development Guide](./docs/DEVELOPMENT-GUIDE.md)** - Local setup and development guide
+
 ## 📄 License
 
 This project is licensed under the MIT License.
