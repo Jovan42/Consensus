@@ -11,9 +11,10 @@ import { Button } from '../../../../../components/ui/Button';
 import { Select } from '../../../../../components/ui/Select';
 import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useSubmitVote, useClubMembers, useRoundVotes } from '../../../../../hooks/useApi';
+import { Recommendation, Vote, Member } from '../../../../../context/AppContext';
 import { 
   ArrowLeft, 
-  Vote, 
+  Vote as VoteIcon, 
   Star,
   User,
   Trophy,
@@ -90,9 +91,9 @@ export default function Voting() {
   const getCurrentRankings = () => {
     if (!recommendations || !votes) return [];
     
-    const voteCounts = recommendations.map(rec => {
-      const recVotes = votes.filter(vote => vote.recommendationId === rec.id);
-      const totalPoints = recVotes.reduce((sum, vote) => sum + vote.points, 0);
+    const voteCounts = recommendations.map((rec: Recommendation) => {
+      const recVotes = votes.filter((vote: Vote) => vote.recommendationId === rec.id);
+      const totalPoints = recVotes.reduce((sum: number, vote: Vote) => sum + vote.points, 0);
       return { 
         recommendation: rec, 
         totalPoints,
@@ -100,13 +101,13 @@ export default function Voting() {
       };
     });
 
-    return voteCounts.sort((a, b) => b.totalPoints - a.totalPoints);
+    return voteCounts.sort((a: any, b: any) => b.totalPoints - a.totalPoints);
   };
 
   // Check if member has voted
   const hasMemberVoted = (memberId: string) => {
     if (!votes) return false;
-    return votes.some(vote => vote.memberId === memberId);
+    return votes.some((vote: Vote) => vote.memberId === memberId);
   };
 
   // Generate voting options based on the number of recommendations
@@ -215,8 +216,8 @@ export default function Voting() {
 
   // If a member is selected, show their voting interface
   if (selectedMember) {
-    const member = members?.find(m => m.id === selectedMember);
-    const memberVotes = votes?.filter(v => v.memberId === selectedMember) || [];
+    const member = members?.find((m: Member) => m.id === selectedMember);
+    const memberVotes = votes?.filter((v: Vote) => v.memberId === selectedMember) || [];
     const hasVoted = memberVotes.length > 0;
     
     return (
@@ -260,8 +261,8 @@ export default function Voting() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                {recommendations.map((rec, index) => {
-                  const existingVote = memberVotes.find(v => v.recommendationId === rec.id);
+                {recommendations.map((rec: Recommendation, index: number) => {
+                  const existingVote = memberVotes.find((v: Vote) => v.recommendationId === rec.id);
                   
                   return (
                     <div key={rec.id} className="p-4 border border-gray-200 rounded-lg">
@@ -327,7 +328,7 @@ export default function Voting() {
                       loading={isSubmitting}
                       disabled={hasDuplicatePoints() || Object.keys(errors).length > 0}
                     >
-                      <Vote className="h-4 w-4 mr-2" />
+                      <VoteIcon className="h-4 w-4 mr-2" />
                       Submit Vote
                     </Button>
                   )}
@@ -369,7 +370,7 @@ export default function Voting() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {rankings.map((item, index) => {
+              {rankings.map((item: any, index: number) => {
                 const getRankIcon = (rank: number) => {
                   if (rank === 0) return <Trophy className="h-5 w-5 text-yellow-500" />;
                   if (rank === 1) return <Medal className="h-5 w-5 text-gray-400" />;
@@ -418,7 +419,7 @@ export default function Voting() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {members?.map((member) => {
+              {members?.map((member: Member) => {
                 const hasVoted = hasMemberVoted(member.id);
                 
                 return (
@@ -450,7 +451,7 @@ export default function Voting() {
                             <span className="text-sm text-green-600 font-medium">Voted</span>
                           </>
                         ) : (
-                          <Vote className="h-5 w-5 text-gray-400" />
+                          <VoteIcon className="h-5 w-5 text-gray-400" />
                         )}
                       </div>
                     </div>

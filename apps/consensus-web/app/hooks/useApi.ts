@@ -199,14 +199,14 @@ export function useUpdateRoundStatus() {
 
 export function useCloseVoting() {
   return async (roundId: string) => {
-    const response = await api.post(`/rounds/${roundId}/close-voting`);
+    const response = await api.post(`/rounds/${roundId}/close-voting`, {});
     return response.data;
   };
 }
 
 export function useFinishRound() {
   return async (id: string) => {
-    const response = await api.post(`/rounds/${id}/finish`);
+    const response = await api.post(`/rounds/${id}/finish`, {});
     return response;
   };
 }

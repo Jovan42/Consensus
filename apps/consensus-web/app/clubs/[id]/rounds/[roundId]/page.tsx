@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '../../../../components/ui/Card';
 import { Button } from '../../../../components/ui/Button';
 import { Alert } from '../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useRoundVotes, useUpdateRoundStatus, useCloseVoting, useRoundCompletions, useClubMembers } from '../../../../hooks/useApi';
+import { Recommendation, Vote, Completion, Member } from '../../../../context/AppContext';
 import { 
   ArrowLeft, 
   User, 
@@ -35,15 +36,15 @@ export default function RoundDetail() {
   const getWinner = () => {
     if (!recommendations || !votes || recommendations.length === 0) return null;
     
-    const voteCounts = recommendations.map(rec => {
-      const recVotes = votes.filter(vote => vote.recommendationId === rec.id);
-      const totalPoints = recVotes.reduce((sum, vote) => sum + vote.points, 0);
+    const voteCounts = recommendations.map((rec: Recommendation) => {
+      const recVotes = votes.filter((vote: Vote) => vote.recommendationId === rec.id);
+      const totalPoints = recVotes.reduce((sum: number, vote: Vote) => sum + vote.points, 0);
       return { recommendation: rec, totalPoints };
     });
 
     if (voteCounts.length === 0) return null;
 
-    return voteCounts.reduce((winner, current) =>
+    return voteCounts.reduce((winner: any, current: any) =>
       current.totalPoints > winner.totalPoints ? current : winner
     );
   };
@@ -53,7 +54,7 @@ export default function RoundDetail() {
       return { completed: 0, total: 0, percentage: 0, missingMembers: [] };
     }
 
-    const completedCount = completions.filter(c => 
+    const completedCount = completions.filter((c: Completion) => 
       c.isCompleted && c.recommendationId === winner.recommendation.id
     ).length;
     
@@ -62,10 +63,10 @@ export default function RoundDetail() {
 
     // Find members who haven't completed
     const completedMemberIds = completions
-      .filter(c => c.isCompleted && c.recommendationId === winner.recommendation.id)
-      .map(c => c.memberId);
+      .filter((c: Completion) => c.isCompleted && c.recommendationId === winner.recommendation.id)
+      .map((c: Completion) => c.memberId);
     
-    const missingMembers = members.filter(member => 
+    const missingMembers = members.filter((member: Member) => 
       !completedMemberIds.includes(member.id)
     );
 
@@ -213,9 +214,9 @@ export default function RoundDetail() {
               </div>
             ) : recommendations && recommendations.length > 0 ? (
               <div className="space-y-4">
-                {recommendations.map((rec, index) => {
-                  const recVotes = votes?.filter(vote => vote.recommendationId === rec.id) || [];
-                  const totalPoints = recVotes.reduce((sum, vote) => sum + vote.points, 0);
+                {recommendations.map((rec: Recommendation, index: number) => {
+                  const recVotes = votes?.filter((vote: Vote) => vote.recommendationId === rec.id) || [];
+                  const totalPoints = recVotes.reduce((sum: number, vote: Vote) => sum + vote.points, 0);
                   const isWinner = winner && winner.recommendation.id === rec.id;
 
                   return (
@@ -394,7 +395,7 @@ export default function RoundDetail() {
                         <div className="mt-3 pt-3 border-t border-gray-200">
                           <p className="text-sm font-medium text-gray-700 mb-2">Still waiting for:</p>
                           <div className="space-y-1">
-                            {progress.missingMembers.map((member) => (
+                            {progress.missingMembers.map((member: Member) => (
                               <div key={member.id} className="flex items-center space-x-2">
                                 <User className="h-4 w-4 text-gray-400" />
                                 <span className="text-sm text-gray-600">{member.name}</span>

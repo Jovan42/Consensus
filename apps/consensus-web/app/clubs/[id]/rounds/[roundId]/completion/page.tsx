@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from '../../../../../components/ui/Card
 import { Button } from '../../../../../components/ui/Button';
 import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useRoundCompletions, useUpdateCompletion, useClubMembers, useFinishRound } from '../../../../../hooks/useApi';
-import { Recommendation, Completion } from '../../../../../context/AppContext';
+import { Recommendation, Completion, Member } from '../../../../../context/AppContext';
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -136,7 +136,7 @@ export default function CompletionTracking() {
   };
 
   // Use summary data if available, otherwise calculate from completions
-  const completedCount = summary ? summary.completed : (completions ? completions.filter(c => c.isCompleted).length : 0);
+  const completedCount = summary ? summary.completed : (completions ? completions.filter((c: Completion) => c.isCompleted).length : 0);
   const totalCount = summary ? summary.total : (members ? members.length : 0);
   const completionPercentage = summary ? Math.round(summary.percentage) : (totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0);
 
@@ -242,7 +242,7 @@ export default function CompletionTracking() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {members.map((member) => {
+              {members.map((member: Member) => {
                 const isCompleted = getCompletionStatus(member.id);
                 const isUpdating = updatingCompletion === `${member.id}-${winner.id}`;
 
