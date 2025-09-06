@@ -22,7 +22,7 @@ export class Round {
   })
   status: RoundStatus;
 
-  @Column({ nullable: true })
+  @Column('uuid', { nullable: true })
   winningRecommendationId: string;
 
   @CreateDateColumn()

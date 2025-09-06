@@ -13,7 +13,7 @@ export class Completion {
   @Column('uuid')
   recommendationId: string;
 
-  @Column({ default: false })
+  @Column('boolean', { default: false })
   isCompleted: boolean;
 
   @CreateDateColumn()

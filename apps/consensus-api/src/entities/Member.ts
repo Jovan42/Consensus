@@ -8,10 +8,10 @@ export class Member {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('varchar')
   name: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { nullable: true })
   email: string; // For future OAuth integration
 
   @Column('uuid')

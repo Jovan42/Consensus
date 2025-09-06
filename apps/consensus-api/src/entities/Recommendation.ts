@@ -8,10 +8,10 @@ export class Recommendation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('varchar')
   title: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { nullable: true })
   description: string;
 
   @Column('uuid')
