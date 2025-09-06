@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from '../../../../../components/ui/Card
 import { Button } from '../../../../../components/ui/Button';
 import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useRoundCompletions, useUpdateCompletion, useClubMembers, useFinishRound } from '../../../../../hooks/useApi';
-import { Recommendation } from '../../../../../context/AppContext';
+import { Recommendation, Completion } from '../../../../../context/AppContext';
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -131,7 +131,7 @@ export default function CompletionTracking() {
 
   const getCompletionStatus = (memberId: string) => {
     if (!completions || !winner) return false;
-    const completion = completions.find(c => c.memberId === memberId);
+    const completion = completions.find((c: Completion) => c.memberId === memberId);
     return completion ? completion.isCompleted : false;
   };
 
