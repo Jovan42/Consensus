@@ -194,10 +194,20 @@ export const updateRoundStatus = async (req: Request, res: Response) => {
 
 export const finishRound = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { roundId } = req.params;
 
+    // Validate required fields
+    if (!roundId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Round ID is required'
+      });
+    }
+
+    // Get the current round with club and members
     const round = await AppDataSource.getRepository(Round).findOne({
-      where: { id }
+      where: { id: roundId },
+      relations: ['club']
     });
 
     if (!round) {
@@ -207,14 +217,71 @@ export const finishRound = async (req: Request, res: Response) => {
       });
     }
 
-    // Update round status to finished
+    if (round.status !== RoundStatus.COMPLETING) {
+      return res.status(400).json({
+        success: false,
+        message: 'Round is not in completing status'
+      });
+    }
+
+    // Get all members in the club
+    const members = await AppDataSource.getRepository(Member).find({
+      where: { clubId: round.clubId },
+      order: { createdAt: 'ASC' } // Ensure consistent order
+    });
+
+    if (members.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No members found in the club'
+      });
+    }
+
+    // Mark current round as finished
     round.status = RoundStatus.FINISHED;
+    await AppDataSource.getRepository(Round).save(round);
 
-    const updatedRound = await AppDataSource.getRepository(Round).save(round);
+    // Determine next recommender based on turn order
+    const clubConfig = round.club.config as any;
+    const turnOrder = clubConfig?.turnOrder || 'sequential';
+    
+    let nextRecommenderId;
+    
+    if (turnOrder === 'sequential') {
+      // Find current recommender index and get next one
+      const currentIndex = members.findIndex(m => m.id === round.currentRecommenderId);
+      const nextIndex = (currentIndex + 1) % members.length;
+      nextRecommenderId = members[nextIndex].id;
+    } else {
+      // Random selection
+      const randomIndex = Math.floor(Math.random() * members.length);
+      nextRecommenderId = members[randomIndex].id;
+    }
 
-    res.json({
+    // Check if there's already an active round for this club
+    const existingActiveRound = await AppDataSource.getRepository(Round).findOne({
+      where: { 
+        clubId: round.clubId,
+        status: RoundStatus.RECOMMENDING
+      }
+    });
+
+    let nextRound = null;
+    
+    if (!existingActiveRound) {
+      // Create new round with next recommender
+      const newRound = new Round();
+      newRound.clubId = round.clubId;
+      newRound.currentRecommenderId = nextRecommenderId;
+      newRound.status = RoundStatus.RECOMMENDING;
+      
+      nextRound = await AppDataSource.getRepository(Round).save(newRound);
+    }
+
+    res.status(200).json({
       success: true,
-      data: updatedRound,
+      status: round.status,
+      nextRound: nextRound,
       message: 'Round finished successfully'
     });
   } catch (error) {

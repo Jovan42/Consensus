@@ -501,7 +501,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 2\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 1\n    }\n  ]\n}"
+							"raw": "{\n  \"memberId\": \"{{member_a_id}}\",\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 2\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 1\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
@@ -549,7 +549,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 1\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 2\n    }\n  ]\n}"
+							"raw": "{\n  \"memberId\": \"{{member_b_id}}\",\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 1\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 2\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
@@ -597,7 +597,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 2\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 1\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 3\n    }\n  ]\n}"
+							"raw": "{\n  \"memberId\": \"{{member_c_id}}\",\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 2\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 1\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 3\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
@@ -842,7 +842,22 @@
 									"    pm.expect(jsonData).to.have.property('nextRound');",
 									"    pm.expect(jsonData.nextRound.currentRecommenderId).to.eql(pm.collectionVariables.get(\"member_b_id\"));",
 									"    pm.expect(jsonData.nextRound.status).to.eql(\"recommending\");",
-									"});"
+									"});",
+									"",
+									"// Store previous round ID and update round_id with new round",
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.nextRound) {",
+									"        // Store previous round ID",
+									"        pm.collectionVariables.set(\"previous_round_id\", pm.collectionVariables.get(\"round_id\"));",
+									"        // Update round_id with new round ID",
+									"        pm.collectionVariables.set(\"round_id\", jsonData.nextRound.id);",
+									"        console.log('Previous round ID saved:', pm.collectionVariables.get(\"previous_round_id\"));",
+									"        console.log('New round ID saved:', jsonData.nextRound.id);",
+									"    } else {",
+									"        console.log('Failed to save round IDs - invalid response structure');",
+									"    }",
+									"}"
 								]
 							}
 						}

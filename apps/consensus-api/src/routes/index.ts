@@ -3,6 +3,8 @@ import clubsRouter from './clubs';
 import membersRouter from './members';
 import roundsRouter from './rounds';
 import recommendationsRouter from './recommendations';
+import votesRouter from './votes';
+import completionsRouter from './completions';
 import { startNewRound } from '../controllers/roundController';
 import { addRecommendation, getRecommendationsByRound } from '../controllers/recommendationController';
 
@@ -15,6 +17,8 @@ router.get('/rounds/:roundId/recommendations', getRecommendationsByRound); // Ne
 router.use('/clubs', clubsRouter);
 router.use('/', membersRouter);
 router.use('/rounds', roundsRouter);
+router.use('/rounds', votesRouter); // Voting routes
+router.use('/rounds', completionsRouter); // Completion routes
 router.use('/recommendations', recommendationsRouter);
 
 // Health check route
