@@ -41,4 +41,8 @@ export class Round {
 
   @OneToMany(() => Recommendation, recommendation => recommendation.round)
   recommendations: Recommendation[];
+
+  @ManyToOne(() => Recommendation, { nullable: true })
+  @JoinColumn({ name: 'winningRecommendationId' })
+  winningRecommendation: Recommendation;
 }
