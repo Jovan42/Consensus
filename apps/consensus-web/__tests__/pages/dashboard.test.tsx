@@ -74,7 +74,7 @@ describe('Dashboard Page', () => {
     fireEvent.click(createButton)
     
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/clubs/create')
+      expect(mockPush).toHaveBeenCalledWith('/clubs/create-club')
     })
   })
 

@@ -12,6 +12,7 @@ import { Input } from '../../../../../components/ui/Input';
 import { Textarea } from '../../../../../components/ui/Textarea';
 import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useAddRecommendations } from '../../../../../hooks/useApi';
+import { useAuth } from '../../../../../contexts/AuthContext';
 import { 
   ArrowLeft, 
   Plus, 
@@ -37,11 +38,22 @@ export default function AddRecommendations() {
   const router = useRouter();
   const clubId = params.id as string;
   const roundId = params.roundId as string;
+  const { user, hasRole } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { round, isLoading: roundLoading } = useRound(roundId);
   const addRecommendations = useAddRecommendations();
+
+  // Check if current user is the recommender
+  const isCurrentRecommender = user && round?.currentRecommender && 
+    user.email === round.currentRecommender.email;
+
+  // Check if current user can add recommendations (recommender or admin)
+  const canAddRecommendations = isCurrentRecommender || hasRole('admin');
+
+  // Check if this is an admin action (admin adding for someone else)
+  const isAdminAction = hasRole('admin') && !isCurrentRecommender;
 
   const {
     control,
@@ -120,6 +132,25 @@ export default function AddRecommendations() {
     );
   }
 
+  if (!canAddRecommendations) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Restricted</h2>
+          <p className="text-gray-600 mb-6">
+            Only {round.currentRecommender?.name || 'the current recommender'} can add recommendations to this round.
+          </p>
+          <Link href={`/clubs/${clubId}/rounds/${roundId}`}>
+            <Button>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Round
+            </Button>
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="max-w-2xl mx-auto space-y-6">
@@ -160,6 +191,25 @@ export default function AddRecommendations() {
         {error && (
           <Alert variant="error" onClose={() => setError(null)}>
             {error}
+          </Alert>
+        )}
+
+        {/* Admin Warning */}
+        {isAdminAction && (
+          <Alert variant="warning">
+            <div className="flex items-start space-x-2">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-yellow-800">Admin Action</h3>
+                <p className="text-sm text-yellow-700 mt-1">
+                  You are adding recommendations on behalf of <strong>{round.currentRecommender?.name || 'the current recommender'}</strong>. This is an administrative action that will be recorded in the system.
+                </p>
+              </div>
+            </div>
           </Alert>
         )}
 

@@ -8,6 +8,7 @@ import { Button } from '../../../../components/ui/Button';
 import { Alert } from '../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useRoundVotes, useUpdateRoundStatus, useCloseVoting, useRoundCompletions, useClubMembers } from '../../../../hooks/useApi';
 import { Recommendation, Vote, Completion, Member } from '../../../../context/AppContext';
+import { useAuth } from '../../../../contexts/AuthContext';
 import { 
   ArrowLeft, 
   User, 
@@ -24,6 +25,7 @@ export default function RoundDetail() {
   const params = useParams();
   const clubId = params.id as string;
   const roundId = params.roundId as string;
+  const { user, hasRole } = useAuth();
 
   const { round, isLoading: roundLoading, error: roundError, mutate: mutateRound } = useRound(roundId);
   const { recommendations, isLoading: recommendationsLoading } = useRoundRecommendations(roundId);
@@ -32,6 +34,13 @@ export default function RoundDetail() {
   const { members } = useClubMembers(clubId);
   const updateRoundStatus = useUpdateRoundStatus();
   const closeVoting = useCloseVoting();
+
+  // Check if current user is the recommender
+  const isCurrentRecommender = user && round?.currentRecommender && 
+    user.email === round.currentRecommender.email;
+
+  // Check if current user can add recommendations (recommender or admin)
+  const canAddRecommendations = isCurrentRecommender || hasRole('admin');
 
   const getWinner = () => {
     if (!recommendations || !votes || recommendations.length === 0) return null;
@@ -198,7 +207,7 @@ export default function RoundDetail() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Recommendations</h2>
-              {round.status === 'recommending' && (
+              {round.status === 'recommending' && canAddRecommendations && (
                 <Link href={`/clubs/${clubId}/rounds/${roundId}/recommendations`}>
                   <Button variant="outline">
                     Add Recommendations
@@ -279,12 +288,17 @@ export default function RoundDetail() {
                 <p className="text-gray-600 mb-4">
                   {round.currentRecommender?.name || 'The recommender'} hasn't added any recommendations yet.
                 </p>
-                {round.status === 'recommending' && (
+                {round.status === 'recommending' && canAddRecommendations && (
                   <Link href={`/clubs/${clubId}/rounds/${roundId}/recommendations`}>
                     <Button>
                       Add Recommendations
                     </Button>
                   </Link>
+                )}
+                {round.status === 'recommending' && !canAddRecommendations && (
+                  <div className="text-sm text-gray-500">
+                    Only {round.currentRecommender?.name || 'the current recommender'} can add recommendations.
+                  </div>
                 )}
               </div>
             )}
@@ -302,25 +316,31 @@ export default function RoundDetail() {
                 <p className="text-gray-600 mb-4">
                   All recommendations have been added. You can now start the voting phase.
                 </p>
-                <Button
-                  onClick={async () => {
-                    try {
-                      await updateRoundStatus(roundId, 'voting');
-                      // Refresh round data to show updated status
-                      await mutateRound();
-                    } catch (error) {
-                      console.error('Failed to update round status:', error);
-                    }
-                  }}
-                >
-                  Start Voting
-                </Button>
+                {(hasRole('admin') || isCurrentRecommender) ? (
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await updateRoundStatus(roundId, 'voting');
+                        // Refresh round data to show updated status
+                        await mutateRound();
+                      } catch (error) {
+                        console.error('Failed to update round status:', error);
+                      }
+                    }}
+                  >
+                    Start Voting
+                  </Button>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Only {round.currentRecommender?.name || 'the current recommender'} or admins can start voting.
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
         )}
 
-        {round.status === 'voting' && votes && votes.length > 0 && (
+        {round.status === 'voting' && (
           <Card>
             <CardContent className="p-6">
               <div className="text-center">
@@ -328,27 +348,32 @@ export default function RoundDetail() {
                   Voting in progress
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  {votes.length} vote(s) have been cast. Continue voting or close the round when ready.
+                  {votes && votes.length > 0 
+                    ? `${votes.length} vote(s) have been cast. Continue voting or close the round when ready.`
+                    : 'Voting is now open. Members can cast their votes.'
+                  }
                 </p>
                 <div className="flex justify-center space-x-4">
                   <Link href={`/clubs/${clubId}/rounds/${roundId}/voting`}>
                     <Button variant="outline">
-                      Continue Voting
+                      {votes && votes.length > 0 ? 'Continue Voting' : 'Start Voting'}
                     </Button>
                   </Link>
-                  <Button
-                    onClick={async () => {
-                      try {
-                        await closeVoting(roundId);
-                        // Refresh round data to show the new status
-                        await mutateRound();
-                      } catch (error) {
-                        console.error('Failed to close voting:', error);
-                      }
-                    }}
-                  >
-                    Close Voting
-                  </Button>
+                  {(hasRole('admin') || isCurrentRecommender) && (
+                    <Button
+                      onClick={async () => {
+                        try {
+                          await closeVoting(roundId);
+                          // Refresh round data to show the new status
+                          await mutateRound();
+                        } catch (error) {
+                          console.error('Failed to close voting:', error);
+                        }
+                      }}
+                    >
+                      Close Voting
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>

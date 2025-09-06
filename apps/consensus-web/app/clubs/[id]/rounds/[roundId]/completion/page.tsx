@@ -8,6 +8,7 @@ import { Button } from '../../../../../components/ui/Button';
 import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useRoundCompletions, useUpdateCompletion, useClubMembers, useFinishRound } from '../../../../../hooks/useApi';
 import { Recommendation, Completion, Member } from '../../../../../context/AppContext';
+import { useAuth } from '../../../../../contexts/AuthContext';
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -23,6 +24,7 @@ export default function CompletionTracking() {
   const router = useRouter();
   const clubId = params.id as string;
   const roundId = params.roundId as string;
+  const { user, hasRole } = useAuth();
   const [updatingCompletion, setUpdatingCompletion] = useState<string | null>(null);
   const [isFinishingRound, setIsFinishingRound] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +47,25 @@ export default function CompletionTracking() {
   
   // Get completion data for the round (only if there's a winning recommendation)
   const { completions, summary, isLoading: completionsLoading, mutate: mutateCompletions } = useRoundCompletions(roundId, !!round?.winningRecommendationId);
+
+  // Check if current user can mark completion for a specific member
+  const canMarkCompletionForMember = (member: Member) => {
+    if (!user) return false;
+    
+    // User can always mark completion for themselves
+    if (user.email === member.email) return true;
+    
+    // Admins can mark completion for anyone
+    if (hasRole('admin')) return true;
+    
+    return false;
+  };
+
+  // Check if current user is marking completion for someone else (admin action)
+  const isMarkingCompletionForSomeoneElse = (member: Member) => {
+    if (!user) return false;
+    return user.email !== member.email && hasRole('admin');
+  };
 
   const handleToggleCompletion = async (memberId: string, recommendationId: string, isCompleted: boolean) => {
     setUpdatingCompletion(`${memberId}-${recommendationId}`);
@@ -235,6 +256,25 @@ export default function CompletionTracking() {
           </Alert>
         )}
 
+        {/* Admin Warning */}
+        {hasRole('admin') && (
+          <Alert variant="warning">
+            <div className="flex items-start space-x-2">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-yellow-800">Admin Mode</h3>
+                <p className="text-sm text-yellow-700 mt-1">
+                  You can mark completion for any member. This is an administrative action that will be recorded in the system.
+                </p>
+              </div>
+            </div>
+          </Alert>
+        )}
+
         {/* Members List */}
         <Card>
           <CardHeader>
@@ -245,19 +285,35 @@ export default function CompletionTracking() {
               {members.map((member: Member) => {
                 const isCompleted = getCompletionStatus(member.id);
                 const isUpdating = updatingCompletion === `${member.id}-${winner.id}`;
+                const canMarkCompletion = canMarkCompletionForMember(member);
+                const isAdminAction = isMarkingCompletionForSomeoneElse(member);
 
                 return (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                    className={`flex items-center justify-between p-4 rounded-lg ${
+                      canMarkCompletion ? 'bg-gray-50' : 'bg-gray-100 opacity-60'
+                    }`}
                   >
                     <div className="flex items-center space-x-3">
                       <div className="p-2 bg-blue-100 rounded-full">
                         <User className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{member.name}</p>
+                        <div className="flex items-center space-x-2">
+                          <p className="font-medium text-gray-900">{member.name}</p>
+                          {isAdminAction && (
+                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                              Admin Action
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-600">{member.email}</p>
+                        {!canMarkCompletion && (
+                          <p className="text-xs text-red-600 mt-1">
+                            You can only mark completion for yourself
+                          </p>
+                        )}
                       </div>
                     </div>
                     
@@ -275,14 +331,24 @@ export default function CompletionTracking() {
                         </span>
                       </div>
                       
-                      <Button
-                        variant={isCompleted ? 'outline' : 'primary'}
-                        size="sm"
-                        onClick={() => handleToggleCompletion(member.id, winner.id, isCompleted)}
-                        loading={isUpdating}
-                      >
-                        {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
-                      </Button>
+                      {canMarkCompletion ? (
+                        <Button
+                          variant={isCompleted ? 'outline' : 'primary'}
+                          size="sm"
+                          onClick={() => handleToggleCompletion(member.id, winner.id, isCompleted)}
+                          loading={isUpdating}
+                        >
+                          {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled
+                        >
+                          {isCompleted ? 'Mark Incomplete' : 'Mark Complete'}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );
@@ -311,12 +377,18 @@ export default function CompletionTracking() {
                       Back to Round
                     </Button>
                   </Link>
-                  <Button 
-                    onClick={handleFinishAndStartNew}
-                    loading={isFinishingRound}
-                  >
-                    Start New Round
-                  </Button>
+                  {(hasRole('admin') || (user && round?.currentRecommender && user.email === round.currentRecommender.email)) ? (
+                    <Button 
+                      onClick={handleFinishAndStartNew}
+                      loading={isFinishingRound}
+                    >
+                      Start New Round
+                    </Button>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      Only {round?.currentRecommender?.name || 'the current recommender'} or admins can start a new round.
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>

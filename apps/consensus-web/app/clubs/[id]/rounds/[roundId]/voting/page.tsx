@@ -12,6 +12,7 @@ import { Select } from '../../../../../components/ui/Select';
 import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useSubmitVote, useClubMembers, useRoundVotes } from '../../../../../hooks/useApi';
 import { Recommendation, Vote, Member } from '../../../../../context/AppContext';
+import { useAuth } from '../../../../../contexts/AuthContext';
 import { 
   ArrowLeft, 
   Vote as VoteIcon, 
@@ -46,9 +47,11 @@ export default function Voting() {
   const router = useRouter();
   const clubId = params.id as string;
   const roundId = params.roundId as string;
+  const { user, hasRole } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [showAdminWarning, setShowAdminWarning] = useState(false);
 
   const { round, isLoading: roundLoading } = useRound(roundId);
   const { recommendations, isLoading: recommendationsLoading } = useRoundRecommendations(roundId);
@@ -108,6 +111,39 @@ export default function Voting() {
   const hasMemberVoted = (memberId: string) => {
     if (!votes) return false;
     return votes.some((vote: Vote) => vote.memberId === memberId);
+  };
+
+  // Check if current user can vote for a specific member
+  const canVoteForMember = (member: Member) => {
+    if (!user) return false;
+    
+    // User can always vote for themselves
+    if (user.email === member.email) return true;
+    
+    // Admins can vote for anyone
+    if (hasRole('admin')) return true;
+    
+    return false;
+  };
+
+  // Check if current user can view voting results for a specific member
+  const canViewVotingForMember = (member: Member) => {
+    if (!user) return false;
+    
+    // User can always view their own votes
+    if (user.email === member.email) return true;
+    
+    // Admins can view anyone's votes
+    if (hasRole('admin')) return true;
+    
+    // Non-admins can view voting results (but not vote) for others
+    return true;
+  };
+
+  // Check if current user is voting for someone else (admin action)
+  const isVotingForSomeoneElse = (member: Member) => {
+    if (!user) return false;
+    return user.email !== member.email && hasRole('admin');
   };
 
   // Generate voting options based on the number of recommendations
@@ -219,6 +255,8 @@ export default function Voting() {
     const member = members?.find((m: Member) => m.id === selectedMember);
     const memberVotes = votes?.filter((v: Vote) => v.memberId === selectedMember) || [];
     const hasVoted = memberVotes.length > 0;
+    const canVote = member ? canVoteForMember(member) : false;
+    const isViewOnly = member ? (canViewVotingForMember(member) && !canVote) : false;
     
     return (
       <Layout>
@@ -234,7 +272,12 @@ export default function Voting() {
                 {member?.name}'s Vote
               </h1>
               <p className="text-gray-600">
-                {hasVoted ? 'View your submitted votes' : 'Assign points to each recommendation'}
+                {isViewOnly 
+                  ? 'View voting results (read-only)' 
+                  : hasVoted 
+                    ? 'View your submitted votes' 
+                    : 'Assign points to each recommendation'
+                }
               </p>
               {hasVoted && (
                 <div className="flex items-center mt-2">
@@ -252,11 +295,35 @@ export default function Voting() {
             </Alert>
           )}
 
+          {/* Admin Warning */}
+          {member && isVotingForSomeoneElse(member) && (
+            <Alert variant="warning">
+              <div className="flex items-start space-x-2">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800">Admin Action</h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    You are casting a vote on behalf of <strong>{member.name}</strong>. This is an administrative action that will be recorded in the system.
+                  </p>
+                </div>
+              </div>
+            </Alert>
+          )}
+
           {/* Voting Form */}
           <Card>
             <CardHeader>
               <h2 className="text-xl font-semibold">
-                {hasVoted ? 'Your Submitted Votes' : 'Your Votes'}
+                {isViewOnly 
+                  ? 'Voting Results' 
+                  : hasVoted 
+                    ? 'Your Submitted Votes' 
+                    : 'Your Votes'
+                }
               </h2>
             </CardHeader>
             <CardContent>
@@ -287,7 +354,7 @@ export default function Voting() {
                             options={votingOptions}
                             error={errors.votes?.[index]?.points?.message}
                             defaultValue={existingVote?.points?.toString() || ''}
-                            disabled={hasVoted}
+                            disabled={hasVoted || isViewOnly}
                             {...register(`votes.${index}.points`, { 
                               valueAsNumber: true,
                               setValueAs: (value) => parseInt(value)
@@ -320,9 +387,9 @@ export default function Voting() {
                 {/* Submit Button */}
                 <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
                   <Button variant="outline" type="button" onClick={() => setSelectedMember(null)}>
-                    {hasVoted ? 'Back to Members' : 'Cancel'}
+                    {isViewOnly ? 'Back to Members' : hasVoted ? 'Back to Members' : 'Cancel'}
                   </Button>
-                  {!hasVoted && (
+                  {!hasVoted && !isViewOnly && (
                     <Button 
                       type="submit" 
                       loading={isSubmitting}
@@ -414,23 +481,29 @@ export default function Voting() {
               Members
             </h2>
             <p className="text-gray-600">
-              Click on a member to cast your vote or view your submitted vote
+              Click on a member to cast your vote, view your submitted vote, or view voting results
             </p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {members?.map((member: Member) => {
                 const hasVoted = hasMemberVoted(member.id);
+                const canVote = canVoteForMember(member);
+                const canView = canViewVotingForMember(member);
+                const isAdminAction = isVotingForSomeoneElse(member);
+                const isViewOnly = canView && !canVote;
                 
                 return (
                   <div
                     key={member.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                      hasVoted 
-                        ? 'border-green-200 bg-green-50 hover:bg-green-100' 
-                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                    className={`p-4 border rounded-lg transition-colors ${
+                      !canView
+                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+                        : hasVoted 
+                          ? 'border-green-200 bg-green-50 hover:bg-green-100 cursor-pointer' 
+                          : 'border-gray-200 bg-white hover:bg-gray-50 cursor-pointer'
                     }`}
-                    onClick={() => setSelectedMember(member.id)}
+                    onClick={() => canView && setSelectedMember(member.id)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -440,8 +513,30 @@ export default function Voting() {
                           <User className={`h-5 w-5 ${hasVoted ? 'text-green-600' : 'text-gray-600'}`} />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{member.name}</h3>
+                          <div className="flex items-center space-x-2">
+                            <h3 className="font-semibold text-gray-900">{member.name}</h3>
+                            {isAdminAction && (
+                              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                                Admin Action
+                              </span>
+                            )}
+                            {isViewOnly && hasVoted && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                                View Only
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-600">{member.email}</p>
+                          {!canVote && !hasVoted && (
+                            <p className="text-xs text-red-600 mt-1">
+                              You can only vote for yourself
+                            </p>
+                          )}
+                          {isViewOnly && hasVoted && (
+                            <p className="text-xs text-blue-600 mt-1">
+                              View voting results
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -450,8 +545,10 @@ export default function Voting() {
                             <CheckCircle className="h-5 w-5 text-green-500" />
                             <span className="text-sm text-green-600 font-medium">Voted</span>
                           </>
-                        ) : (
+                        ) : canVote ? (
                           <VoteIcon className="h-5 w-5 text-gray-400" />
+                        ) : (
+                          <VoteIcon className="h-5 w-5 text-gray-300" />
                         )}
                       </div>
                     </div>

@@ -21,7 +21,7 @@ jest.mock('next/navigation', () => ({
 
 // Import components
 import Dashboard from '../../app/page'
-import CreateClubForm from '../../app/clubs/create/page'
+import CreateClubForm from '../../app/clubs/create-club/page'
 
 describe('Club Creation Workflow Integration', () => {
   beforeEach(() => {
@@ -72,7 +72,7 @@ describe('Club Creation Workflow Integration', () => {
 
     // Should navigate to create form
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/clubs/create')
+      expect(mockPush).toHaveBeenCalledWith('/clubs/create-club')
     })
 
     // Now render the create form

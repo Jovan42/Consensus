@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '../utils/test-utils'
 import userEvent from '@testing-library/user-event'
-import CreateClubForm from '../../app/clubs/create/page'
+import CreateClubForm from '../../app/clubs/create-club/page'
 
 // Mock the API hooks
 const mockCreateClub = jest.fn()
