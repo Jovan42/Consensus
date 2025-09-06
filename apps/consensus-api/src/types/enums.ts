@@ -29,3 +29,12 @@ export enum RoundStatus {
   COMPLETING = 'completing',
   FINISHED = 'finished'
 }
+
+export interface ClubConfig {
+  minRecommendations: number;
+  maxRecommendations: number;
+  votingPoints: number[];
+  turnOrder: TurnOrder;
+  tieBreakingMethod: TieBreakingMethod;
+  minimumParticipation: number;
+}

@@ -235,7 +235,7 @@ export const closeVoting = async (req: Request, res: Response) => {
     }
 
     // Calculate total points for each recommendation
-    const recommendationTotals = {};
+    const recommendationTotals: { [key: string]: number } = {};
     votes.forEach(vote => {
       const recId = vote.recommendationId;
       if (!recommendationTotals[recId]) {

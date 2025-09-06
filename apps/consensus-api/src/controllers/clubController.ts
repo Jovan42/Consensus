@@ -1,9 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppDataSource } from '../config/database';
 import { Club } from '../entities/Club';
-import { ClubType, ClubConfig } from '../types/enums';
+import { ClubType, ClubConfig, TurnOrder, TieBreakingMethod } from '../types/enums';
 import { CreateClubDto, UpdateClubDto } from '../dto/club.dto';
 import { NotFoundError, ConflictError, asyncHandler } from '../middleware/error.middleware';
+
+// Helper function to convert string values to enum values
+function convertConfigToEnum(config: any): ClubConfig {
+  return {
+    minRecommendations: config.minRecommendations || 3,
+    maxRecommendations: config.maxRecommendations || 5,
+    votingPoints: config.votingPoints || [3, 2, 1],
+    turnOrder: config.turnOrder === 'sequential' ? TurnOrder.SEQUENTIAL : TurnOrder.RANDOM,
+    tieBreakingMethod: config.tieBreakingMethod === 'random' ? TieBreakingMethod.RANDOM :
+                      config.tieBreakingMethod === 'recommender_decides' ? TieBreakingMethod.RECOMMENDER_DECIDES :
+                      TieBreakingMethod.RE_VOTE,
+    minimumParticipation: config.minimumParticipation || 80
+  };
+}
 
 export const createClub = asyncHandler(async (req: Request, res: Response) => {
   const { name, type, config } = req.body as CreateClubDto;
@@ -13,16 +27,17 @@ export const createClub = asyncHandler(async (req: Request, res: Response) => {
     minRecommendations: 3,
     maxRecommendations: 5,
     votingPoints: [3, 2, 1],
-    turnOrder: 'sequential',
-    tieBreakingMethod: 'random',
+    turnOrder: TurnOrder.SEQUENTIAL,
+    tieBreakingMethod: TieBreakingMethod.RANDOM,
     minimumParticipation: 80
   };
 
   const clubRepository = AppDataSource.getRepository(Club);
+  const finalConfig: ClubConfig = config ? convertConfigToEnum({ ...defaultConfig, ...config }) : defaultConfig;
   const club = clubRepository.create({
     name,
     type,
-    config: config || defaultConfig
+    config: finalConfig
   });
 
   const savedClub = await clubRepository.save(club);
@@ -93,7 +108,10 @@ export const updateClub = async (req: Request, res: Response) => {
     // Update fields if provided
     if (name) club.name = name;
     if (type && Object.values(ClubType).includes(type)) club.type = type;
-    if (config) club.config = config;
+    if (config) {
+      const updatedConfig: ClubConfig = convertConfigToEnum({ ...club.config, ...config });
+      club.config = updatedConfig;
+    }
 
     const updatedClub = await clubRepository.save(club);
 

@@ -21,17 +21,17 @@
     "reflect-metadata": "^0.1.13",
     "class-validator": "^0.14.0",
     "class-transformer": "^0.5.1",
-    "dotenv": "^16.3.0"
-  },
-  "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
+    "dotenv": "^16.3.0",
     "@types/express": "^4.17.0",
     "@types/cors": "^2.8.0",
     "@types/pg": "^8.10.0",
     "@types/node": "^22.15.3",
+    "typescript": "5.9.2"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
     "eslint": "^9.34.0",
-    "typescript": "5.9.2",
     "tsx": "^4.6.0"
   }
 }

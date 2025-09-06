@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { ClubType, TurnOrder, TieBreakingMethod } from '../types/enums';
+import { ClubType } from '../types/enums';
+import type { ClubConfig } from '../types/enums';
 import { Member } from './Member';
 import { Round } from './Round';
 
@@ -19,14 +20,7 @@ export class Club {
   type: ClubType;
 
   @Column('jsonb')
-  config: {
-    minRecommendations: number;
-    maxRecommendations: number;
-    votingPoints: number[];
-    turnOrder: TurnOrder;
-    tieBreakingMethod: TieBreakingMethod;
-    minimumParticipation: number; // percentage (0-100)
-  };
+  config: ClubConfig;
 
   @CreateDateColumn()
   createdAt: Date;

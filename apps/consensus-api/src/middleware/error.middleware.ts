@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ValidationError } from 'class-validator';
+import { ValidationError as ClassValidatorError } from 'class-validator';
 import { QueryFailedError } from 'typeorm';
 
 // Custom error classes
@@ -16,7 +16,7 @@ export class AppError extends Error {
   }
 }
 
-export class ValidationError extends AppError {
+export class CustomValidationError extends AppError {
   public errors: string[];
 
   constructor(message: string, errors: string[] = []) {
@@ -68,7 +68,7 @@ interface ErrorResponse {
 }
 
 // Handle different types of errors
-const handleValidationError = (error: ValidationError): ErrorResponse => {
+const handleValidationError = (error: CustomValidationError): ErrorResponse => {
   return {
     success: false,
     message: error.message,
@@ -109,7 +109,7 @@ const handleTypeORMError = (error: QueryFailedError): ErrorResponse => {
   };
 };
 
-const handleClassValidatorError = (errors: ValidationError[]): ErrorResponse => {
+const handleClassValidatorError = (errors: ClassValidatorError[]): ErrorResponse => {
   const errorMessages = errors.map(error => {
     const constraints = Object.values(error.constraints || {});
     return constraints.join(', ');
@@ -180,8 +180,8 @@ export const errorHandler = (
     errorResponse = handleAppError(error);
   } else if (error instanceof QueryFailedError) {
     errorResponse = handleTypeORMError(error);
-  } else if (Array.isArray(error) && error.length > 0 && error[0] instanceof ValidationError) {
-    errorResponse = handleClassValidatorError(error as ValidationError[]);
+  } else if (Array.isArray(error) && error.length > 0 && error[0] instanceof ClassValidatorError) {
+    errorResponse = handleClassValidatorError(error as ClassValidatorError[]);
   } else if (error.name === 'SyntaxError' && error.message.includes('JSON')) {
     errorResponse = handleJSONError(error);
   } else {

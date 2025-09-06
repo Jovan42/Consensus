@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { validate, ValidationError } from 'class-validator';
+import { validate, ValidationError as ClassValidatorError } from 'class-validator';
 import { plainToClass, ClassConstructor } from 'class-transformer';
 
 export function validateDto<T extends object>(dtoClass: ClassConstructor<T>) {
@@ -12,7 +12,7 @@ export function validateDto<T extends object>(dtoClass: ClassConstructor<T>) {
       const errors = await validate(dto);
       
       if (errors.length > 0) {
-        const errorMessages = errors.map((error: ValidationError) => {
+        const errorMessages = errors.map((error: ClassValidatorError) => {
           const constraints = error.constraints;
           return constraints ? Object.values(constraints).join(', ') : 'Validation error';
         });

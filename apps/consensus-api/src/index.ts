@@ -50,7 +50,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // JSON parsing error handler
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-  if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
+  if (error instanceof SyntaxError && (error as any).status === 400 && 'body' in error) {
     return res.status(400).json({
       success: false,
       message: 'Invalid JSON format in request body',
