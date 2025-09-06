@@ -9,6 +9,14 @@ This document contains all the API endpoints for the Consensus application.
 ## Authentication
 Currently, the MVP has no authentication. All endpoints are public.
 
+## Input Validation
+All endpoints use `class-validator` for input validation. Invalid requests will return detailed validation errors.
+
+## Testing
+- **Postman Collection**: `docs/postman-collections/Consensus-API-Phase-1.postman_collection.json`
+- **Happy Path Test**: `docs/postman-collections/Consensus-Happy-Path-Test.postman_collection.json`
+- **Environment**: `docs/postman-collections/Consensus-Local-Environment.postman_environment.json`
+
 ## Health Check
 
 ### GET /health
@@ -18,6 +26,8 @@ Check if the API is running.
 ```json
 {
   "status": "OK",
+  "success": true,
+  "message": "Consensus API is running",
   "timestamp": "2025-09-06T08:57:04.639Z"
 }
 ```
