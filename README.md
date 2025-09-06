@@ -111,10 +111,15 @@ This is a Turborepo monorepo containing:
 - `npm run check-types` - Type check all apps and packages
 - `npm run format` - Format all code with Prettier
 
+## 🚀 Live Application
+
+**Frontend (UI)**: [https://consensus-ua48.onrender.com](https://consensus-ua48.onrender.com)
+**Backend (API)**: [https://consensus-nosn.onrender.com](https://consensus-nosn.onrender.com)
+
 ## 🚀 Deployment
 
-- **Frontend**: Vercel (automatic deployment from main branch)
-- **Backend**: Render (production environment)
+- **Frontend**: Render (production environment)
+- **Backend**: Render (production environment)  
 - **Database**: Render PostgreSQL (managed database)
 
 ## 📱 Future Phases
