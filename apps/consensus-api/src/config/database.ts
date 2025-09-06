@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
+import { join } from 'path';
 
 config();
 
@@ -9,14 +10,14 @@ export const AppDataSource = new DataSource({
   synchronize: process.env.NODE_ENV === 'development', // Only in development
   logging: process.env.NODE_ENV === 'development',
   entities: process.env.NODE_ENV === 'production' 
-    ? ['dist/entities/*.js'] 
-    : ['src/entities/*.ts'],
+    ? [join(__dirname, 'entities', '*.js')] 
+    : [join(__dirname, 'entities', '*.ts')],
   migrations: process.env.NODE_ENV === 'production' 
-    ? ['dist/migrations/*.js'] 
-    : ['src/migrations/*.ts'],
+    ? [join(__dirname, 'migrations', '*.js')] 
+    : [join(__dirname, 'migrations', '*.ts')],
   subscribers: process.env.NODE_ENV === 'production' 
-    ? ['dist/subscribers/*.js'] 
-    : ['src/subscribers/*.ts'],
+    ? [join(__dirname, 'subscribers', '*.js')] 
+    : [join(__dirname, 'subscribers', '*.ts')],
 });
 
 export const initializeDatabase = async () => {
