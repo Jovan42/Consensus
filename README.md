@@ -1,135 +1,145 @@
-# Turborepo starter
+# Consensus - Book Club & Activity Management App
 
-This Turborepo starter is maintained by the Turborepo core team.
+A full-stack application for managing book clubs and other group activities with voting and recommendation systems.
 
-## Using this example
+## 🎯 Project Overview
 
-Run the following command:
+Consensus is a generic platform for group decision-making that can be used for:
+- **Book Clubs** - Choose next book to read
+- **Movie Nights** - Select films to watch together  
+- **Restaurant Groups** - Decide where to eat
+- **Travel Planning** - Select destinations and activities
+- **Gaming Groups** - Pick board games or video games
+- **Learning Groups** - Select courses or workshops
+- **Event Planning** - Select venues and themes
+- And many more use cases!
 
-```sh
-npx create-turbo@latest
-```
+## 🏗️ Architecture
 
-## What's inside?
+This is a Turborepo monorepo containing:
 
-This Turborepo includes the following packages/apps:
+### Apps
+- **`consensus-web`** - Next.js 14 frontend with App Router, TypeScript, Tailwind CSS
+- **`consensus-api`** - Express.js backend with TypeScript, PostgreSQL, TypeORM
 
-### Apps and Packages
+### Packages
+- **`ui`** - Shared React component library
+- **`eslint-config`** - Shared ESLint configurations
+- **`typescript-config`** - Shared TypeScript configurations
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## 🚀 Technology Stack
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Frontend (consensus-web)
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: React Context + useReducer
+- **Data Fetching**: SWR (Stale-While-Revalidate)
+- **Forms**: React Hook Form + Zod validation
+- **Icons**: Lucide React
+- **Real-time**: Socket.io Client (Phase 2)
 
-### Utilities
+### Backend (consensus-api)
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Language**: TypeScript
+- **Database**: PostgreSQL
+- **ORM**: TypeORM
+- **Authentication**: Auth0 (Phase 2 - initially no auth for MVP)
+- **Real-time**: Socket.io
+- **Validation**: class-validator
+- **Security**: Helmet, CORS, Rate Limiting
 
-This Turborepo has some additional tools already setup for you:
+## 📋 MVP Workflow
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+1. **Create Club** → Set name, type, configuration
+2. **Add Members** → Add 3+ members to the club
+3. **Start Turn** → One member becomes the recommender
+4. **Recommend** → Recommender picks items (min/max based on config)
+5. **Vote** → All members vote with points (e.g., [3,2,1] or [5,4,3,2,1])
+6. **Close Vote** → Pick winning item
+7. **Mark Complete** → Members mark when they're done with the item
+8. **Finish Round** → Move to next member's turn
 
-### Build
+## ⚙️ Configuration Options
 
-To build all apps and packages, run the following command:
+- **Min/max recommendations** (e.g., books: 3-5, movies: 1-3)
+- **Voting point systems** (e.g., [3,2,1] for 3 items, [5,4,3,2,1] for 5+ items)
+- **Turn order** (sequential A→B→C→A vs random)
+- **Tie-breaking method** (random, recommender decides, re-vote)
+- **Minimum participation** (e.g., 80% of members must vote)
 
-```
-cd my-turborepo
+## 🛠️ Development
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+### Prerequisites
+- Node.js >= 18
+- PostgreSQL (local or Render)
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+### Setup
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+3. Set up environment variables:
+   ```bash
+   # Copy example environment file
+   cp apps/consensus-api/env.example apps/consensus-api/.env
+   
+   # Edit the .env file with your database URL
+   ```
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+4. Start development servers:
+   ```bash
+   # Start both frontend and backend
+   npm run dev
+   
+   # Or start individually
+   npm run dev:web    # Frontend only (port 3000)
+   npm run dev:api    # Backend only (port 3001)
+   ```
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+### Available Scripts
 
-### Develop
+- `npm run build` - Build all apps and packages
+- `npm run dev` - Develop all apps and packages
+- `npm run dev:web` - Start frontend only
+- `npm run dev:api` - Start backend only
+- `npm run start` - Start production servers
+- `npm run lint` - Lint all apps and packages
+- `npm run check-types` - Type check all apps and packages
+- `npm run format` - Format all code with Prettier
 
-To develop all apps and packages, run the following command:
+## 🚀 Deployment
 
-```
-cd my-turborepo
+- **Frontend**: Vercel (automatic deployment from main branch)
+- **Backend**: Render (production environment)
+- **Database**: Render PostgreSQL (managed database)
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+## 📱 Future Phases
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+### Phase 2
+- OAuth authentication (Auth0)
+- Real-time updates with Socket.io
+- Discussion scheduling
+- Rating and review system
+- Mobile apps (iOS/Android)
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### Phase 3+
+- Advanced analytics
+- Social features
+- Integration with external APIs
+- Advanced scheduling and notifications
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+## 🤝 Contributing
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
 
-### Remote Caching
+## 📄 License
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+This project is licensed under the MIT License.
