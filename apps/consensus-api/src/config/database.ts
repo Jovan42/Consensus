@@ -1,6 +1,11 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
-import { join } from 'path';
+import { Club } from '../entities/Club';
+import { Member } from '../entities/Member';
+import { Round } from '../entities/Round';
+import { Recommendation } from '../entities/Recommendation';
+import { Vote } from '../entities/Vote';
+import { Completion } from '../entities/Completion';
 
 config();
 
@@ -9,15 +14,9 @@ export const AppDataSource = new DataSource({
   url: process.env.DATABASE_URL,
   synchronize: process.env.NODE_ENV === 'development', // Only in development
   logging: process.env.NODE_ENV === 'development',
-  entities: process.env.NODE_ENV === 'production' 
-    ? [join(__dirname, 'entities', '*.js')] 
-    : [join(__dirname, 'entities', '*.ts')],
-  migrations: process.env.NODE_ENV === 'production' 
-    ? [join(__dirname, 'migrations', '*.js')] 
-    : [join(__dirname, 'migrations', '*.ts')],
-  subscribers: process.env.NODE_ENV === 'production' 
-    ? [join(__dirname, 'subscribers', '*.js')] 
-    : [join(__dirname, 'subscribers', '*.ts')],
+  entities: [Club, Member, Round, Recommendation, Vote, Completion],
+  migrations: [],
+  subscribers: [],
 });
 
 export const initializeDatabase = async () => {
