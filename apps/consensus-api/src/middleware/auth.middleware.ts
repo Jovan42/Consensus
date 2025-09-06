@@ -12,120 +12,70 @@ export interface AuthenticatedRequest extends Request {
 
 // Hardcoded test accounts for development
 const TEST_ACCOUNTS = {
-  // Admin users
-  'admin@consensus.dev': {
-    email: 'admin@consensus.dev',
-    name: 'Admin User',
+  // Admin users (3 admins)
+  'alexander.thompson@consensus.dev': {
+    email: 'alexander.thompson@consensus.dev',
+    name: 'Alexander Thompson',
     role: 'admin',
-    sub: 'admin-user',
+    sub: 'alex-admin',
     type: 'test' as const
   },
-  'test1@consensus.dev': {
-    email: 'test1@consensus.dev',
-    name: 'Test User 1',
+  'maya.patel@consensus.dev': {
+    email: 'maya.patel@consensus.dev',
+    name: 'Maya Patel',
     role: 'admin',
-    sub: 'test-user-1',
+    sub: 'maya-admin',
+    type: 'test' as const
+  },
+  'james.rodriguez@consensus.dev': {
+    email: 'james.rodriguez@consensus.dev',
+    name: 'James Rodriguez',
+    role: 'admin',
+    sub: 'james-admin',
     type: 'test' as const
   },
   
-  // Regular members
-  'test2@consensus.dev': {
-    email: 'test2@consensus.dev',
-    name: 'Test User 2',
+  // Regular members (6 members)
+  'sophia.chen@consensus.dev': {
+    email: 'sophia.chen@consensus.dev',
+    name: 'Sophia Chen',
     role: 'member',
-    sub: 'test-user-2',
+    sub: 'sophia-member',
     type: 'test' as const
   },
-  'test3@consensus.dev': {
-    email: 'test3@consensus.dev',
-    name: 'Test User 3',
+  'michael.johnson@consensus.dev': {
+    email: 'michael.johnson@consensus.dev',
+    name: 'Michael Johnson',
     role: 'member',
-    sub: 'test-user-3',
+    sub: 'michael-member',
     type: 'test' as const
   },
-  
-  // Book club enthusiasts
-  'alice@consensus.dev': {
-    email: 'alice@consensus.dev',
-    name: 'Alice Johnson',
+  'emma.williams@consensus.dev': {
+    email: 'emma.williams@consensus.dev',
+    name: 'Emma Williams',
     role: 'member',
-    sub: 'alice-bookworm',
+    sub: 'emma-member',
     type: 'test' as const
   },
-  'bob@consensus.dev': {
-    email: 'bob@consensus.dev',
-    name: 'Bob Smith',
+  'oliver.brown@consensus.dev': {
+    email: 'oliver.brown@consensus.dev',
+    name: 'Oliver Brown',
     role: 'member',
-    sub: 'bob-reader',
+    sub: 'oliver-member',
     type: 'test' as const
   },
-  'carol@consensus.dev': {
-    email: 'carol@consensus.dev',
-    name: 'Carol Davis',
+  'ava.davis@consensus.dev': {
+    email: 'ava.davis@consensus.dev',
+    name: 'Ava Davis',
     role: 'member',
-    sub: 'carol-librarian',
+    sub: 'ava-member',
     type: 'test' as const
   },
-  
-  // Movie club members
-  'david@consensus.dev': {
-    email: 'david@consensus.dev',
-    name: 'David Wilson',
+  'liam.miller@consensus.dev': {
+    email: 'liam.miller@consensus.dev',
+    name: 'Liam Miller',
     role: 'member',
-    sub: 'david-cinephile',
-    type: 'test' as const
-  },
-  'eve@consensus.dev': {
-    email: 'eve@consensus.dev',
-    name: 'Eve Brown',
-    role: 'member',
-    sub: 'eve-filmcritic',
-    type: 'test' as const
-  },
-  'frank@consensus.dev': {
-    email: 'frank@consensus.dev',
-    name: 'Frank Miller',
-    role: 'member',
-    sub: 'frank-director',
-    type: 'test' as const
-  },
-  
-  // Gaming club members
-  'grace@consensus.dev': {
-    email: 'grace@consensus.dev',
-    name: 'Grace Lee',
-    role: 'member',
-    sub: 'grace-gamer',
-    type: 'test' as const
-  },
-  'henry@consensus.dev': {
-    email: 'henry@consensus.dev',
-    name: 'Henry Taylor',
-    role: 'member',
-    sub: 'henry-strategist',
-    type: 'test' as const
-  },
-  'iris@consensus.dev': {
-    email: 'iris@consensus.dev',
-    name: 'Iris Chen',
-    role: 'member',
-    sub: 'iris-questmaster',
-    type: 'test' as const
-  },
-  
-  // Club managers (non-admin)
-  'manager@consensus.dev': {
-    email: 'manager@consensus.dev',
-    name: 'Manager User',
-    role: 'member',
-    sub: 'club-manager',
-    type: 'test' as const
-  },
-  'sarah@consensus.dev': {
-    email: 'sarah@consensus.dev',
-    name: 'Sarah Martinez',
-    role: 'member',
-    sub: 'sarah-organizer',
+    sub: 'liam-member',
     type: 'test' as const
   },
   
