@@ -2,13 +2,14 @@
 
 import useSWR from 'swr';
 import { Club, Member, Round, Recommendation, Vote, Completion } from '../context/AppContext';
+import { authenticatedFetch } from '../utils/authenticatedFetch';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
-// Generic API functions
+// Generic API functions using authenticated fetch
 const api = {
   get: async (url: string) => {
-    const response = await fetch(`${API_BASE_URL}${url}`);
+    const response = await authenticatedFetch(`${API_BASE_URL}${url}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -16,11 +17,8 @@ const api = {
   },
   
   post: async (url: string, data: any) => {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}${url}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
     if (!response.ok) {
@@ -39,11 +37,8 @@ const api = {
   },
   
   put: async (url: string, data: any) => {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}${url}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
     if (!response.ok) {
@@ -53,7 +48,7 @@ const api = {
   },
   
   delete: async (url: string) => {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}${url}`, {
       method: 'DELETE',
     });
     if (!response.ok) {
@@ -95,9 +90,12 @@ export function useCreateClub() {
 }
 
 export function useUpdateClub() {
-  return async (id: string, clubData: Partial<Club>) => {
-    const response = await api.put(`/clubs/${id}`, clubData);
-    return response.data;
+  return {
+    mutateAsync: async (clubData: { id: string } & Partial<Club>) => {
+      const { id, ...data } = clubData;
+      const response = await api.put(`/clubs/${id}`, data);
+      return response.data;
+    }
   };
 }
 

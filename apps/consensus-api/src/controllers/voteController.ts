@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Vote } from '../entities/Vote';
 import { Round } from '../entities/Round';
@@ -6,8 +6,9 @@ import { Member } from '../entities/Member';
 import { Recommendation } from '../entities/Recommendation';
 import { RoundStatus } from '../types/enums';
 import { SubmitVotesDto } from '../dto/vote.dto';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
-export const submitVotes = async (req: Request, res: Response) => {
+export const submitVotes = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { roundId } = req.params;
     const { votes, memberId } = req.body as SubmitVotesDto;
@@ -31,6 +32,14 @@ export const submitVotes = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         message: 'Member ID is required'
+      });
+    }
+
+    // Validate user authentication
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
       });
     }
 
@@ -63,6 +72,17 @@ export const submitVotes = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         message: 'Member not found or does not belong to this club'
+      });
+    }
+
+    // Check voting permissions
+    const isVotingForSelf = member.email === req.user.email;
+    const isAdmin = req.user.role === 'admin';
+    
+    if (!isVotingForSelf && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only vote for yourself. Admins can vote for others.'
       });
     }
 
@@ -169,7 +189,7 @@ export const submitVotes = async (req: Request, res: Response) => {
   }
 };
 
-export const closeVoting = async (req: Request, res: Response) => {
+export const closeVoting = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { roundId } = req.params;
 
@@ -300,7 +320,7 @@ export const closeVoting = async (req: Request, res: Response) => {
   }
 };
 
-export const getVotesByRound = async (req: Request, res: Response) => {
+export const getVotesByRound = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { roundId } = req.params;
 

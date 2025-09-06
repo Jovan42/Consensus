@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import { initializeDatabase } from './config/database';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
+import { authenticateUser } from './middleware/auth.middleware';
 
 // Load environment variables
 dotenv.config();
@@ -62,6 +63,9 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   }
   next(error);
 });
+
+// Authentication middleware
+app.use('/api', authenticateUser);
 
 // API routes
 app.use('/api', routes);

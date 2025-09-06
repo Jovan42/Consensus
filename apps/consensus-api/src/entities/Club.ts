@@ -12,6 +12,9 @@ export class Club {
   @Column('varchar')
   name: string;
 
+  @Column('text', { nullable: true })
+  description: string;
+
   @Column({
     type: 'enum',
     enum: ClubType,

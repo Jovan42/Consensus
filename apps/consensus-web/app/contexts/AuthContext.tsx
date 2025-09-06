@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useUser } from '@auth0/nextjs-auth0';
+// import { useUser } from '@auth0/nextjs-auth0'; // Removed to prevent automatic profile requests
 import { getTestAccount, isTestAccount as checkIsTestAccount } from '@/lib/auth0';
 
 export interface User {
@@ -40,8 +40,10 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { user: auth0User, isLoading } = useUser();
+  // Remove Auth0's useUser hook to prevent automatic profile requests
+  // const { user: auth0User, isLoading } = useUser();
   const [testUser, setTestUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check for test user or Auth0 user in localStorage on mount
   useEffect(() => {
@@ -63,9 +65,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.removeItem('auth0User');
       }
     }
+    
+    // Set loading to false after checking localStorage
+    setIsLoading(false);
   }, []);
 
-  const user = testUser || auth0User;
+  const user = testUser; // Only use test user, no Auth0 user
   const isAuthenticated = !!user;
   const isTestAccount = !!testUser;
 

@@ -124,10 +124,12 @@ export default function ClubDetail() {
                 Manage Members
               </Button>
             </Link>
-            <Button variant="outline">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
+            <Link href={`/clubs/${clubId}/settings`}>
+              <Button variant="outline">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
           </div>
         </div>
 

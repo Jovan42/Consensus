@@ -3,7 +3,6 @@
 import React from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import ProtectedRoute from '@/app/components/auth/ProtectedRoute';
-import Navigation from '@/app/components/layout/Navigation';
 import Link from 'next/link';
 import { Users, BookOpen, Calendar, TrendingUp } from 'lucide-react';
 
@@ -13,8 +12,6 @@ const DashboardPage: React.FC = () => {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
             <div className="mb-8">

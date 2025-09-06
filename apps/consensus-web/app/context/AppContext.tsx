@@ -6,6 +6,7 @@ import React, { createContext, useContext, useReducer, useCallback, ReactNode } 
 export interface Club {
   id: string;
   name: string;
+  description?: string;
   type: string;
   config: {
     minRecommendations: number;

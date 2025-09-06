@@ -1,9 +1,12 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response } from 'express';
+import { In } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Club } from '../entities/Club';
+import { Member } from '../entities/Member';
 import { ClubType, ClubConfig, TurnOrder, TieBreakingMethod } from '../types/enums';
 import { CreateClubDto, UpdateClubDto } from '../dto/club.dto';
 import { NotFoundError, ConflictError, asyncHandler } from '../middleware/error.middleware';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 // Helper function to convert string values to enum values
 function convertConfigToEnum(config: any): ClubConfig {
@@ -19,8 +22,8 @@ function convertConfigToEnum(config: any): ClubConfig {
   };
 }
 
-export const createClub = asyncHandler(async (req: Request, res: Response) => {
-  const { name, type, config } = req.body as CreateClubDto;
+export const createClub = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { name, description, type, config } = req.body as CreateClubDto;
 
   // Set default config if not provided
   const defaultConfig: ClubConfig = {
@@ -36,6 +39,7 @@ export const createClub = asyncHandler(async (req: Request, res: Response) => {
   const finalConfig: ClubConfig = config ? convertConfigToEnum({ ...defaultConfig, ...config }) : defaultConfig;
   const club = clubRepository.create({
     name,
+    description,
     type,
     config: finalConfig
   });
@@ -49,13 +53,47 @@ export const createClub = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-export const getAllClubs = async (req: Request, res: Response) => {
+export const getAllClubs = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const clubRepository = AppDataSource.getRepository(Club);
-    const clubs = await clubRepository.find({
-      relations: ['members'],
-      order: { createdAt: 'DESC' }
-    });
+    const memberRepository = AppDataSource.getRepository(Member);
+    
+    let clubs: Club[];
+    
+    // If user is authenticated
+    if (req.user) {
+      const isAdmin = req.user.role === 'admin';
+      
+      if (isAdmin) {
+        // Admins can see all clubs
+        clubs = await clubRepository.find({
+          relations: ['members'],
+          order: { createdAt: 'DESC' }
+        });
+      } else {
+        // Regular users can only see clubs they are members of
+        const userMemberships = await memberRepository.find({
+          where: { email: req.user.email },
+          relations: ['club']
+        });
+        
+        const clubIds = userMemberships.map(membership => membership.clubId);
+        
+        if (clubIds.length === 0) {
+          clubs = [];
+        } else {
+          clubs = await clubRepository.find({
+            where: { id: In(clubIds) },
+            relations: ['members'],
+            order: { createdAt: 'DESC' }
+          });
+        }
+      }
+    } else {
+      // If no user is authenticated, return empty array
+      // In a real app, you might want to return public clubs or require authentication
+      clubs = [];
+    }
 
     res.json({
       success: true,
@@ -71,7 +109,7 @@ export const getAllClubs = async (req: Request, res: Response) => {
   }
 };
 
-export const getClubById = asyncHandler(async (req: Request, res: Response) => {
+export const getClubById = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
   const clubRepository = AppDataSource.getRepository(Club);
   
@@ -90,10 +128,10 @@ export const getClubById = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-export const updateClub = async (req: Request, res: Response) => {
+export const updateClub = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, type, config } = req.body as UpdateClubDto;
+    const { name, description, type, config } = req.body as UpdateClubDto;
     
     const clubRepository = AppDataSource.getRepository(Club);
     const club = await clubRepository.findOne({ where: { id } });
@@ -106,7 +144,8 @@ export const updateClub = async (req: Request, res: Response) => {
     }
 
     // Update fields if provided
-    if (name) club.name = name;
+    if (name !== undefined) club.name = name;
+    if (description !== undefined) club.description = description;
     if (type && Object.values(ClubType).includes(type)) club.type = type;
     if (config) {
       const updatedConfig: ClubConfig = convertConfigToEnum({ ...club.config, ...config });
@@ -129,7 +168,7 @@ export const updateClub = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteClub = async (req: Request, res: Response) => {
+export const deleteClub = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
     const clubRepository = AppDataSource.getRepository(Club);

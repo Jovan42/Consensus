@@ -50,21 +50,25 @@ const getClubTypeColor = (type: string) => {
 
 export default function ClubsPage() {
   const { clubs, isLoading, error } = useClubs();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const [showOnlyMyClubs, setShowOnlyMyClubs] = useState(false);
 
-  // Filter clubs based on user's membership
+  // Check if user is admin (only admins need the filter since they can see all clubs)
+  const isAdmin = hasRole('admin');
+
+  // Filter clubs based on user's membership (only for admins)
   const filteredClubs = useMemo(() => {
     if (!clubs || !user) return clubs || [];
     
-    if (showOnlyMyClubs) {
+    // Only apply frontend filtering for admins (since regular users already get filtered data from backend)
+    if (isAdmin && showOnlyMyClubs) {
       return clubs.filter((club: any) => 
         club.members?.some((member: any) => member.email === user.email)
       );
     }
     
     return clubs;
-  }, [clubs, user, showOnlyMyClubs]);
+  }, [clubs, user, showOnlyMyClubs, isAdmin]);
 
   // Calculate stats for filtered clubs
   const stats = useMemo(() => {
@@ -109,34 +113,38 @@ export default function ClubsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {showOnlyMyClubs ? 'My Clubs' : 'Browse Clubs'}
+              {isAdmin && showOnlyMyClubs ? 'My Clubs' : 'Browse Clubs'}
             </h1>
             <p className="text-gray-600 mt-2">
-              {showOnlyMyClubs 
+              {isAdmin && showOnlyMyClubs 
                 ? 'View clubs you are a member of'
-                : 'Discover and join clubs that match your interests'
+                : isAdmin 
+                  ? 'View all clubs or filter to see only your clubs'
+                  : 'View clubs you are a member of'
               }
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            {/* Filter Toggle */}
-            <Button
-              variant="outline"
-              onClick={() => setShowOnlyMyClubs(!showOnlyMyClubs)}
-              className="flex items-center space-x-2"
-            >
-              {showOnlyMyClubs ? (
-                <>
-                  <EyeOff className="h-4 w-4" />
-                  <span>Show All</span>
-                </>
-              ) : (
-                <>
-                  <Eye className="h-4 w-4" />
-                  <span>My Clubs</span>
-                </>
-              )}
-            </Button>
+            {/* Filter Toggle - Only show for admins */}
+            {isAdmin && (
+              <Button
+                variant="outline"
+                onClick={() => setShowOnlyMyClubs(!showOnlyMyClubs)}
+                className="flex items-center space-x-2"
+              >
+                {showOnlyMyClubs ? (
+                  <>
+                    <EyeOff className="h-4 w-4" />
+                    <span>Show All</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    <span>My Clubs</span>
+                  </>
+                )}
+              </Button>
+            )}
             
             <Link href="/clubs/create-club">
               <Button>
@@ -257,16 +265,18 @@ export default function ClubsPage() {
             <CardContent className="text-center py-12">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {showOnlyMyClubs ? 'No Clubs Found' : 'No Clubs Available'}
+                {isAdmin && showOnlyMyClubs ? 'No Clubs Found' : 'No Clubs Available'}
               </h3>
               <p className="text-gray-600 mb-6">
-                {showOnlyMyClubs 
+                {isAdmin && showOnlyMyClubs 
                   ? "You're not a member of any clubs yet. Join a club or create your own!"
-                  : "There are no clubs available at the moment. Be the first to create one!"
+                  : isAdmin
+                    ? "There are no clubs available at the moment. Be the first to create one!"
+                    : "You're not a member of any clubs yet. Create your own club to get started!"
                 }
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                {showOnlyMyClubs && (
+                {isAdmin && showOnlyMyClubs && (
                   <Button
                     variant="outline"
                     onClick={() => setShowOnlyMyClubs(false)}
@@ -278,7 +288,7 @@ export default function ClubsPage() {
                 <Link href="/clubs/create-club">
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    {showOnlyMyClubs ? 'Create Club' : 'Create First Club'}
+                    {isAdmin && showOnlyMyClubs ? 'Create Club' : 'Create First Club'}
                   </Button>
                 </Link>
               </div>
