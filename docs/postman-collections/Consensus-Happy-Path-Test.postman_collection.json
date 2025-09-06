@@ -33,11 +33,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/health",
+							"raw": "{{base_url}}/api/health",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
+								"api",
 								"health"
 							]
 						}
@@ -350,25 +351,37 @@
 									"    pm.response.to.have.status(201);",
 									"});",
 									"",
+									"pm.test(\"Response has success true\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
 									"pm.test(\"Three recommendations created\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.be.an('array');",
-									"    pm.expect(jsonData).to.have.lengthOf(3);",
+									"    pm.expect(jsonData.data).to.be.an('array');",
+									"    pm.expect(jsonData.data).to.have.lengthOf(3);",
 									"});",
 									"",
 									"pm.test(\"Recommendations have correct titles\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    const titles = jsonData.map(r => r.title);",
+									"    const titles = jsonData.data.map(r => r.title);",
 									"    pm.expect(titles).to.include(\"The Great Gatsby\");",
 									"    pm.expect(titles).to.include(\"1984\");",
 									"    pm.expect(titles).to.include(\"To Kill a Mockingbird\");",
 									"});",
 									"",
 									"// Store recommendation IDs",
-									"const jsonData = pm.response.json();",
-									"pm.collectionVariables.set(\"rec_1_id\", jsonData[0].id);",
-									"pm.collectionVariables.set(\"rec_2_id\", jsonData[1].id);",
-									"pm.collectionVariables.set(\"rec_3_id\", jsonData[2].id);"
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.data && jsonData.data.length >= 3) {",
+									"        pm.collectionVariables.set(\"rec_1_id\", jsonData.data[0].id);",
+									"        pm.collectionVariables.set(\"rec_2_id\", jsonData.data[1].id);",
+									"        pm.collectionVariables.set(\"rec_3_id\", jsonData.data[2].id);",
+									"        console.log('Recommendation IDs saved:', jsonData.data.map(r => r.id));",
+									"    } else {",
+									"        console.log('Failed to save recommendation IDs - invalid response structure');",
+									"    }",
+									"}"
 								]
 							}
 						}
