@@ -4,11 +4,12 @@ import { Completion } from '../entities/Completion';
 import { Round } from '../entities/Round';
 import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
+import { MarkCompletionDto } from '../dto/completion.dto';
 
 export const markCompletion = async (req: Request, res: Response) => {
   try {
     const { roundId } = req.params;
-    const { memberId, isCompleted } = req.body;
+    const { memberId, isCompleted } = req.body as MarkCompletionDto;
 
     // Validate required fields
     if (!roundId) {

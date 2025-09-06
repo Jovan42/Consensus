@@ -519,7 +519,7 @@
 					"response": []
 				},
 				{
-					"name": "Bob Votes (1,3,2)",
+					"name": "Bob Votes (3,1,2)",
 					"event": [
 						{
 							"listen": "test",
@@ -549,7 +549,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"memberId\": \"{{member_b_id}}\",\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 1\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 2\n    }\n  ]\n}"
+							"raw": "{\n  \"memberId\": \"{{member_b_id}}\",\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 1\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 2\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
@@ -567,7 +567,7 @@
 					"response": []
 				},
 				{
-					"name": "Charlie Votes (2,1,3)",
+					"name": "Charlie Votes (3,2,1)",
 					"event": [
 						{
 							"listen": "test",
@@ -597,7 +597,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"memberId\": \"{{member_c_id}}\",\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 2\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 1\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 3\n    }\n  ]\n}"
+							"raw": "{\n  \"memberId\": \"{{member_c_id}}\",\n  \"votes\": [\n    {\n      \"recommendationId\": \"{{rec_1_id}}\",\n      \"points\": 3\n    },\n    {\n      \"recommendationId\": \"{{rec_2_id}}\",\n      \"points\": 2\n    },\n    {\n      \"recommendationId\": \"{{rec_3_id}}\",\n      \"points\": 1\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/rounds/{{round_id}}/votes",
@@ -639,9 +639,9 @@
 									"",
 									"pm.test(\"Winner has highest points\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    // Alice: 3+1+2=6, Bob: 2+3+1=6, Charlie: 1+2+3=6",
-									"    // All tied, so winner should be determined by tie-breaking method",
-									"    pm.expect(jsonData.winner).to.be.oneOf([pm.collectionVariables.get(\"rec_1_id\"), pm.collectionVariables.get(\"rec_2_id\"), pm.collectionVariables.get(\"rec_3_id\")]);",
+									"    // Alice: 3+3+3=9, Bob: 2+1+2=5, Charlie: 1+2+1=4",
+									"    // First recommendation (The Great Gatsby) should be the clear winner with 9 points",
+									"    pm.expect(jsonData.winner.id).to.eql(pm.collectionVariables.get(\"rec_1_id\"));",
 									"});",
 									"",
 									"// Store winner ID",
@@ -688,7 +688,7 @@
 									"",
 									"pm.test(\"Alice's completion is recorded\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.isCompleted).to.be.true;",
+									"    pm.expect(jsonData.data.isCompleted).to.be.true;",
 									"});"
 								]
 							}
@@ -735,7 +735,7 @@
 									"",
 									"pm.test(\"Bob's completion is recorded\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.isCompleted).to.be.true;",
+									"    pm.expect(jsonData.data.isCompleted).to.be.true;",
 									"});"
 								]
 							}
@@ -782,7 +782,7 @@
 									"",
 									"pm.test(\"Charlie's completion is recorded\", function () {",
 									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.isCompleted).to.be.true;",
+									"    pm.expect(jsonData.data.isCompleted).to.be.true;",
 									"});"
 								]
 							}

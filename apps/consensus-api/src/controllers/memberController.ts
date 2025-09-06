@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Member } from '../entities/Member';
+import { CreateMemberRequestDto, UpdateMemberDto } from '../dto/member.dto';
 import { Club } from '../entities/Club';
 
 export const addMemberToClub = async (req: Request, res: Response) => {
   try {
     const { clubId } = req.params;
-    const { name, email } = req.body;
+    const { name, email } = req.body as CreateMemberRequestDto;
 
     // Validate required fields
     if (!name) {
@@ -90,7 +91,7 @@ export const getClubMembers = async (req: Request, res: Response) => {
 export const updateMember = async (req: Request, res: Response) => {
   try {
     const { memberId } = req.params;
-    const { name, email } = req.body;
+    const { name, email } = req.body as UpdateMemberDto;
 
     const memberRepository = AppDataSource.getRepository(Member);
     const member = await memberRepository.findOne({ where: { id: memberId } });

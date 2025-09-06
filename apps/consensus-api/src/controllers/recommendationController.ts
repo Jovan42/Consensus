@@ -4,15 +4,15 @@ import { Recommendation } from '../entities/Recommendation';
 import { Round } from '../entities/Round';
 import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
+import { AddRecommendationDto, UpdateRecommendationDto } from '../dto/recommendation.dto';
 
 export const addRecommendation = async (req: Request, res: Response) => {
   try {
-    
-    const { roundId, title, description, recommenderId, recommendations } = req.body;
+    const { title, description, recommendations } = req.body as AddRecommendationDto;
     const urlRoundId = req.params.roundId;
     
-    // Use roundId from URL parameter if available, otherwise from body
-    const finalRoundId = urlRoundId || roundId;
+    // Use roundId from URL parameter
+    const finalRoundId = urlRoundId;
 
     // Validate required fields
     if (!finalRoundId) {
@@ -186,7 +186,7 @@ export const getRecommendationById = async (req: Request, res: Response) => {
 export const updateRecommendation = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, description } = req.body;
+    const { title, description } = req.body as UpdateRecommendationDto;
 
     const recommendation = await AppDataSource.getRepository(Recommendation).findOne({
       where: { id },

@@ -4,19 +4,19 @@ import { Round } from '../entities/Round';
 import { Club } from '../entities/Club';
 import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
+import { StartRoundDto, UpdateRoundStatusDto } from '../dto/round.dto';
 
 export const startNewRound = async (req: Request, res: Response) => {
   try {
-    const { clubId, currentRecommenderId } = req.body;
+    const { currentRecommenderId } = req.body as StartRoundDto;
     const urlClubId = req.params.clubId;
     
     // Debug logging
     console.log('Debug - req.params:', req.params);
     console.log('Debug - urlClubId:', urlClubId);
-    console.log('Debug - body clubId:', clubId);
     
-    // Use clubId from URL parameter if available, otherwise from body
-    const finalClubId = urlClubId || clubId;
+    // Use clubId from URL parameter
+    const finalClubId = urlClubId;
 
     // Validate required fields
     if (!finalClubId) {
@@ -149,7 +149,7 @@ export const getClubRounds = async (req: Request, res: Response) => {
 export const updateRoundStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { status, winningRecommendationId } = req.body;
+    const { status, winningRecommendationId } = req.body as UpdateRoundStatusDto;
 
     // Validate status
     if (!Object.values(RoundStatus).includes(status)) {
@@ -180,6 +180,7 @@ export const updateRoundStatus = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
+      status: updatedRound.status,
       data: updatedRound,
       message: 'Round status updated successfully'
     });

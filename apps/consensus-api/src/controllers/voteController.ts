@@ -5,11 +5,12 @@ import { Round } from '../entities/Round';
 import { Member } from '../entities/Member';
 import { Recommendation } from '../entities/Recommendation';
 import { RoundStatus } from '../types/enums';
+import { SubmitVotesDto } from '../dto/vote.dto';
 
 export const submitVotes = async (req: Request, res: Response) => {
   try {
     const { roundId } = req.params;
-    const { votes, memberId } = req.body;
+    const { votes, memberId } = req.body as SubmitVotesDto;
 
     // Validate required fields
     if (!roundId) {
@@ -158,11 +159,7 @@ export const submitVotes = async (req: Request, res: Response) => {
       savedVotes.push(savedVote);
     }
 
-    res.status(201).json({
-      success: true,
-      data: savedVotes,
-      message: `${savedVotes.length} vote(s) submitted successfully`
-    });
+    res.status(201).json(savedVotes);
   } catch (error) {
     console.error('Error submitting votes:', error);
     res.status(500).json({

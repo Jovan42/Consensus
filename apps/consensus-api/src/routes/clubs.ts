@@ -6,14 +6,16 @@ import {
   updateClub,
   deleteClub
 } from '../controllers/clubController';
+import { validateDto } from '../middleware/validation.middleware';
+import { CreateClubDto, UpdateClubDto } from '../dto/club.dto';
 
 const router = Router();
 
 // Club CRUD routes
-router.post('/', createClub);
+router.post('/', validateDto(CreateClubDto), createClub);
 router.get('/', getAllClubs);
 router.get('/:id', getClubById);
-router.put('/:id', updateClub);
+router.put('/:id', validateDto(UpdateClubDto), updateClub);
 router.delete('/:id', deleteClub);
 
 export default router;

@@ -2,26 +2,11 @@ import { Request, Response } from 'express';
 import { AppDataSource } from '../config/database';
 import { Club } from '../entities/Club';
 import { ClubType, ClubConfig } from '../types/enums';
+import { CreateClubDto, UpdateClubDto } from '../dto/club.dto';
 
 export const createClub = async (req: Request, res: Response) => {
   try {
-    const { name, type, config } = req.body;
-
-    // Validate required fields
-    if (!name || !type) {
-      return res.status(400).json({
-        success: false,
-        message: 'Name and type are required'
-      });
-    }
-
-    // Validate club type
-    if (!Object.values(ClubType).includes(type)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid club type'
-      });
-    }
+    const { name, type, config } = req.body as CreateClubDto;
 
     // Set default config if not provided
     const defaultConfig: ClubConfig = {
@@ -111,7 +96,7 @@ export const getClubById = async (req: Request, res: Response) => {
 export const updateClub = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, type, config } = req.body;
+    const { name, type, config } = req.body as UpdateClubDto;
     
     const clubRepository = AppDataSource.getRepository(Club);
     const club = await clubRepository.findOne({ where: { id } });
