@@ -20,26 +20,18 @@ export function RealtimeStatus({ className = '', showText = true, showForAdminsO
     return null;
   }
 
+  // Only show the status when disconnected
+  if (isConnected) {
+    return null;
+  }
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {isConnected ? (
-        <>
-          <Wifi className="h-4 w-4 text-success" />
-          {showText && (
-            <span className="text-sm text-success">
-              Live
-            </span>
-          )}
-        </>
-      ) : (
-        <>
-          <WifiOff className="h-4 w-4 text-muted-foreground" />
-          {showText && (
-            <span className="text-sm text-muted-foreground">
-              Offline
-            </span>
-          )}
-        </>
+      <WifiOff className="h-4 w-4 text-red-500" />
+      {showText && (
+        <span className="text-sm text-red-500">
+          Connection Lost
+        </span>
       )}
     </div>
   );
