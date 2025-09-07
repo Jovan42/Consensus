@@ -139,23 +139,37 @@ const errorColors = getStatusColors('error');
 
 ### CSS Variables
 
-The system uses CSS variables for theme support:
+The system uses CSS variables for theme support with a three-tier color hierarchy:
 
 ```css
 :root {
   --background: 0 0% 100%;
+  --page-background: 210 40% 98%;
+  --content-background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
   --primary: 221.2 83.2% 53.3%;
   /* ... */
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
+  --background: 222.2 84% 12%;        /* Main content area */
+  --page-background: 222.2 84% 8%;    /* Outer page background */
+  --content-background: 222.2 84% 12%; /* Navigation and cards */
   --foreground: 210 40% 98%;
   --primary: 217.2 91.2% 59.8%;
   /* ... */
 }
 ```
+
+### Color Hierarchy
+
+**Light Theme:**
+- All backgrounds use white/light colors for consistency
+
+**Dark Theme:**
+- **Page Background** (8% lightness): Darkest - outer page areas
+- **Main Content** (12% lightness): Medium - main content areas
+- **Cards/Navigation** (12% lightness): Same as main content - unified appearance
 
 ### Using in CSS
 

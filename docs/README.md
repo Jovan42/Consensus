@@ -16,6 +16,12 @@ Comprehensive overview of the project, supported use cases, core workflow, and c
 ### [Development Guide](./DEVELOPMENT-GUIDE.md)
 Step-by-step guide for setting up the development environment, running the application locally, and contributing to the project.
 
+### [Theme System Documentation](./THEME-SYSTEM.md)
+Complete guide to the theme system, dark mode implementation, and theme switching functionality.
+
+### [Color System Documentation](../apps/consensus-web/docs/COLOR-SYSTEM.md)
+Comprehensive guide to the centralized color system, theme support, and UI component styling.
+
 ### [Postman Collections](./postman-collections/)
 API testing collections including complete Phase 1 endpoints and happy path test scenarios.
 
@@ -28,10 +34,12 @@ API testing collections including complete Phase 1 endpoints and happy path test
 
 ## 📋 Current Status
 
-**Phase 1 (MVP)**: 15% Complete
+**Phase 1 (MVP)**: 25% Complete
 - ✅ Project structure and setup
 - ✅ Database entities and configuration
 - ✅ Basic API and frontend setup
+- ✅ Dark theme implementation with centralized color system
+- ✅ UI/UX improvements and component updates
 - ⏳ Core functionality implementation (in progress)
 
 ## 🎯 Next Steps

@@ -74,8 +74,18 @@ Consensus/
 ├── apps/
 │   ├── consensus-web/          # Next.js frontend
 │   │   ├── app/               # App Router pages
-│   │   ├── components/        # React components
+│   │   │   ├── components/    # React components
+│   │   │   │   ├── auth/      # Authentication components
+│   │   │   │   ├── layout/    # Layout components
+│   │   │   │   ├── ui/        # UI components (Button, Card, etc.)
+│   │   │   │   └── examples/  # Example/demo components
+│   │   │   ├── contexts/      # React contexts (Auth, Theme)
+│   │   │   └── theme-demo/    # Theme demonstration page
 │   │   ├── lib/              # Utility functions
+│   │   │   ├── colors.ts     # Centralized color system
+│   │   │   ├── color-utils.ts # Color utility functions
+│   │   │   └── utils.ts      # General utilities
+│   │   ├── docs/             # Frontend-specific documentation
 │   │   └── package.json      # Frontend dependencies
 │   └── consensus-api/         # Express.js backend
 │       ├── src/
@@ -265,6 +275,64 @@ export function ClubCard({ club }: ClubCardProps) {
   );
 }
 ```
+
+## 🎨 Theme System
+
+The application includes a comprehensive theme system with both light and dark modes.
+
+### Theme Features
+
+- **🌙 Dark Mode**: Complete dark theme implementation
+- **🎨 Centralized Color System**: All colors defined in one place
+- **🔄 Theme Toggle**: Easy switching between light/dark/system themes
+- **📱 Responsive**: Themes work across all devices
+- **♿ Accessible**: Colors meet WCAG contrast requirements
+
+### Theme Components
+
+- **ThemeContext**: React context for theme state management
+- **ThemeToggle**: UI component for switching themes
+- **ThemeScript**: Prevents flash of unstyled content (FOUC)
+- **Color System**: Centralized color definitions and utilities
+
+### Using Themes in Development
+
+```tsx
+// Access theme in components
+import { useTheme } from '@/app/contexts/ThemeContext';
+
+function MyComponent() {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  
+  return (
+    <div className="bg-background text-foreground">
+      <p>Current theme: {resolvedTheme}</p>
+      <button onClick={() => setTheme('dark')}>
+        Switch to Dark
+      </button>
+    </div>
+  );
+}
+```
+
+### Color System Usage
+
+```tsx
+// Use semantic colors (recommended)
+<div className="bg-background text-foreground">
+<button className="bg-primary text-primary-foreground">
+<Alert variant="success">Success message</Alert>
+
+// Use utility functions for dynamic colors
+import { getRoleColors } from '@/lib/color-utils';
+const colors = getRoleColors('admin');
+```
+
+### Theme Demo Page
+
+Visit `/theme-demo` (admin only) to see all theme features and color variations in action.
+
+For detailed information, see the [Color System Documentation](../apps/consensus-web/docs/COLOR-SYSTEM.md).
 
 ## 🧪 Testing
 
