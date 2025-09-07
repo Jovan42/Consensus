@@ -11,7 +11,7 @@ export function Card({ children, className, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        'rounded-lg border border-gray-200 bg-white shadow-sm',
+        'rounded-lg border border-border bg-card shadow-sm',
         className
       )}
       {...props}
@@ -28,7 +28,7 @@ interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 export function CardHeader({ children, className, ...props }: CardHeaderProps) {
   return (
     <div
-      className={cn('px-6 py-4 border-b border-gray-200', className)}
+      className={cn('px-6 py-4 border-b border-border', className)}
       {...props}
     >
       {children}
@@ -55,7 +55,7 @@ interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
 export function CardFooter({ children, className, ...props }: CardFooterProps) {
   return (
     <div
-      className={cn('px-6 py-4 border-t border-gray-200', className)}
+      className={cn('px-6 py-4 border-t border-border', className)}
       {...props}
     >
       {children}

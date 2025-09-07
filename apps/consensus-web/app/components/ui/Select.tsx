@@ -26,7 +26,7 @@ export function Select({
       {label && (
         <label
           htmlFor={selectId}
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-foreground"
         >
           {label}
         </label>
@@ -34,8 +34,8 @@ export function Select({
       <select
         id={selectId}
         className={cn(
-          'block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500',
-          error && 'border-red-300 focus:border-red-500 focus:ring-red-500',
+          'block w-full rounded-lg border border-input px-3 py-2 text-sm shadow-sm transition-colors focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground',
+          error && 'border-error-300 focus:border-error-500 focus:ring-error-500',
           className
         )}
         {...props}
@@ -47,10 +47,10 @@ export function Select({
         ))}
       </select>
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-error-600">{error}</p>
       )}
       {helperText && !error && (
-        <p className="text-sm text-gray-500">{helperText}</p>
+        <p className="text-sm text-muted-foreground">{helperText}</p>
       )}
     </div>
   );

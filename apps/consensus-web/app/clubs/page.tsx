@@ -38,13 +38,13 @@ const getClubTypeIcon = (type: string) => {
 const getClubTypeColor = (type: string) => {
   switch (type) {
     case 'book':
-      return 'text-blue-600 bg-blue-50';
+      return 'text-info-600 bg-info-50';
     case 'movie':
-      return 'text-red-600 bg-red-50';
+      return 'text-error-600 bg-error-50';
     case 'game':
-      return 'text-green-600 bg-green-50';
+      return 'text-success-600 bg-success-50';
     default:
-      return 'text-gray-600 bg-gray-50';
+      return 'text-muted-foreground bg-muted';
   }
 };
 
@@ -83,7 +83,7 @@ export default function ClubsPage() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </Layout>
     );
@@ -93,8 +93,8 @@ export default function ClubsPage() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Clubs</h2>
-          <p className="text-gray-600 mb-6">There was an error loading the clubs. Please try again.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Error Loading Clubs</h2>
+          <p className="text-muted-foreground mb-6">There was an error loading the clubs. Please try again.</p>
           <Link href="/dashboard">
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -112,10 +112,10 @@ export default function ClubsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-foreground">
               {isAdmin && showOnlyMyClubs ? 'My Clubs' : 'Browse Clubs'}
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-muted-foreground mt-2">
               {isAdmin && showOnlyMyClubs 
                 ? 'View clubs you are a member of'
                 : isAdmin 
@@ -164,8 +164,8 @@ export default function ClubsPage() {
                   <Users className="h-6 w-6 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Clubs</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Clubs</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.total}</p>
                 </div>
               </div>
             </CardContent>
@@ -178,8 +178,8 @@ export default function ClubsPage() {
                   <BookOpen className="h-6 w-6 text-green-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Book Clubs</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">Book Clubs</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {stats.bookClubs}
                   </p>
                 </div>
@@ -194,8 +194,8 @@ export default function ClubsPage() {
                   <Film className="h-6 w-6 text-red-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Movie Clubs</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">Movie Clubs</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {stats.movieClubs}
                   </p>
                 </div>
@@ -217,32 +217,32 @@ export default function ClubsPage() {
                       </div>
                       <div>
                         <div className="flex items-center space-x-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{club.name}</h3>
+                          <h3 className="text-lg font-semibold text-foreground">{club.name}</h3>
                           {user && club.members?.some((member: any) => member.email === user.email) && (
                             <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
                               Member
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 capitalize">{club.type} Club</p>
+                        <p className="text-sm text-muted-foreground capitalize">{club.type} Club</p>
                       </div>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-3">
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <Users className="h-4 w-4 mr-2" />
                       <span>{club.members?.length || 0} members</span>
                     </div>
                     
-                    <div className="flex items-center text-sm text-gray-600">
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-2" />
                       <span>Created {new Date(club.createdAt).toLocaleDateString()}</span>
                     </div>
 
                     {club.config && (
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-muted-foreground">
                         <p>Min: {club.config.minRecommendations} recs</p>
                         <p>Max: {club.config.maxRecommendations} recs</p>
                       </div>
@@ -264,10 +264,10 @@ export default function ClubsPage() {
           <Card>
             <CardContent className="text-center py-12">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium text-foreground mb-2">
                 {isAdmin && showOnlyMyClubs ? 'No Clubs Found' : 'No Clubs Available'}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-muted-foreground mb-6">
                 {isAdmin && showOnlyMyClubs 
                   ? "You're not a member of any clubs yet. Join a club or create your own!"
                   : isAdmin

@@ -36,30 +36,30 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
             Sign in to Consensus
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Choose your preferred sign-in method
           </p>
         </div>
 
         <div className="space-y-6">
           {/* OAuth Login */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+          <div className="bg-card p-6 rounded-lg shadow">
+            <h3 className="text-lg font-medium text-foreground mb-4">
               Sign in with OAuth
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               Sign up or sign in with your Google account
             </p>
             <button
               onClick={login}
               disabled={isLoading}
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -76,11 +76,11 @@ const LoginForm: React.FC = () => {
           </div>
 
           {/* Test Accounts */}
-          <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-            <h3 className="text-lg font-medium text-yellow-800 mb-4">
+          <div className="bg-warning-50 p-6 rounded-lg border border-warning-200">
+            <h3 className="text-lg font-medium text-warning-800 mb-4">
               Test Accounts (Development)
             </h3>
-            <p className="text-sm text-yellow-700 mb-4">
+            <p className="text-sm text-warning-700 mb-4">
               Use these pre-configured test accounts for development
             </p>
             
@@ -90,10 +90,10 @@ const LoginForm: React.FC = () => {
                   key={account.sub}
                   onClick={() => handleTestLogin(account.email)}
                   disabled={isTestLoginLoading}
-                  className="w-full flex justify-between items-center py-2 px-3 border border-yellow-300 rounded-md text-sm font-medium text-yellow-800 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-between items-center py-2 px-3 border border-warning-300 rounded-md text-sm font-medium text-warning-800 bg-warning-100 hover:bg-warning-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-warning-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span>{account.name}</span>
-                  <span className="text-xs bg-yellow-200 px-2 py-1 rounded">
+                  <span className="text-xs bg-warning-200 px-2 py-1 rounded">
                     {account.role}
                   </span>
                 </button>
@@ -101,9 +101,9 @@ const LoginForm: React.FC = () => {
             </div>
 
             {/* Custom Test Email */}
-            <div className="mt-4 pt-4 border-t border-yellow-300">
+            <div className="mt-4 pt-4 border-t border-warning-300">
               <form onSubmit={handleCustomTestLogin} className="space-y-2">
-                <label htmlFor="test-email" className="block text-sm font-medium text-yellow-800">
+                <label htmlFor="test-email" className="block text-sm font-medium text-warning-800">
                   Or enter test email:
                 </label>
                 <div className="flex space-x-2">
@@ -113,12 +113,12 @@ const LoginForm: React.FC = () => {
                     value={testEmail}
                     onChange={(e) => setTestEmail(e.target.value)}
                     placeholder="test@consensus.dev"
-                    className="flex-1 px-3 py-2 border border-yellow-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className="flex-1 px-3 py-2 border border-warning-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-warning-500 focus:border-warning-500"
                   />
                   <button
                     type="submit"
                     disabled={isTestLoginLoading || !testEmail.trim()}
-                    className="px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-warning-600 text-white text-sm font-medium rounded-md hover:bg-warning-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-warning-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isTestLoginLoading ? '...' : 'Login'}
                   </button>
@@ -126,14 +126,14 @@ const LoginForm: React.FC = () => {
               </form>
               
               {testLoginError && (
-                <p className="mt-2 text-sm text-red-600">{testLoginError}</p>
+                <p className="mt-2 text-sm text-error-600">{testLoginError}</p>
               )}
             </div>
           </div>
         </div>
 
         <div className="text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Test accounts: test1@consensus.dev, test2@consensus.dev, test3@consensus.dev, admin@consensus.dev
           </p>
         </div>

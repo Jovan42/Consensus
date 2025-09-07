@@ -9,20 +9,20 @@ export function Header() {
   const { state } = useApp();
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-background border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <Users className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">Consensus</span>
+              <Users className="h-8 w-8 text-primary" />
+              <span className="text-xl font-bold text-foreground">Consensus</span>
             </Link>
           </div>
 
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               href="/"
-              className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center space-x-1 text-muted-foreground hover:text-foreground transition-colors"
             >
               <Home className="h-4 w-4" />
               <span>Dashboard</span>
@@ -31,7 +31,7 @@ export function Header() {
             {state.currentClub && (
               <Link
                 href={`/clubs/${state.currentClub.id}`}
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 {state.currentClub.name}
               </Link>
@@ -39,7 +39,7 @@ export function Header() {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
+            <button className="p-2 text-muted-foreground hover:text-foreground transition-colors">
               <Settings className="h-5 w-5" />
             </button>
           </div>

@@ -1,3 +1,5 @@
+import { baseColors, semanticColors, componentColors } from './lib/colors';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -8,6 +10,10 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Base color palette
+        ...baseColors,
+        
+        // Semantic colors (using CSS variables for theme support)
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -41,6 +47,48 @@ export default {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
+        
+        // Status colors
+        success: {
+          DEFAULT: baseColors.green[600],
+          50: baseColors.green[50],
+          100: baseColors.green[100],
+          200: baseColors.green[200],
+          600: baseColors.green[600],
+          700: baseColors.green[700],
+          800: baseColors.green[800],
+        },
+        error: {
+          DEFAULT: baseColors.red[600],
+          50: baseColors.red[50],
+          100: baseColors.red[100],
+          200: baseColors.red[200],
+          300: baseColors.red[300],
+          500: baseColors.red[500],
+          600: baseColors.red[600],
+          700: baseColors.red[700],
+          800: baseColors.red[800],
+        },
+        warning: {
+          DEFAULT: baseColors.yellow[600],
+          50: baseColors.yellow[50],
+          100: baseColors.yellow[100],
+          200: baseColors.yellow[200],
+          600: baseColors.yellow[600],
+          700: baseColors.yellow[700],
+          800: baseColors.yellow[800],
+        },
+        info: {
+          DEFAULT: baseColors.blue[600],
+          50: baseColors.blue[50],
+          100: baseColors.blue[100],
+          200: baseColors.blue[200],
+          600: baseColors.blue[600],
+          700: baseColors.blue[700],
+          800: baseColors.blue[800],
+        },
+        
+        // Chart colors
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',

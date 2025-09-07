@@ -22,11 +22,11 @@ export function Button({
   const baseClasses = 'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
   
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800',
-    secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300',
-    outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100',
-    ghost: 'text-gray-700 hover:bg-gray-100 active:bg-gray-200',
-    destructive: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
+    primary: 'bg-primary text-primary-foreground hover:bg-blue-700 active:bg-blue-800',
+    secondary: 'bg-secondary text-secondary-foreground hover:bg-gray-200 active:bg-gray-300',
+    outline: 'border border-border bg-background text-foreground hover:bg-muted active:bg-muted/80',
+    ghost: 'text-foreground hover:bg-muted active:bg-muted/80',
+    destructive: 'bg-destructive text-destructive-foreground hover:bg-red-700 active:bg-red-800',
   };
   
   const sizes = {
