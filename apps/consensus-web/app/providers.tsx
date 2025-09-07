@@ -5,6 +5,7 @@ import { Auth0Provider } from '@auth0/nextjs-auth0';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { SocketProvider } from './contexts/SocketContext';
 import { authenticatedFetch } from './utils/authenticatedFetch';
 
 const fetcher = (url: string) => {
@@ -25,9 +26,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         <ThemeProvider>
           <AuthProvider>
-            <AppProvider>
-              {children}
-            </AppProvider>
+            <SocketProvider>
+              <AppProvider>
+                {children}
+              </AppProvider>
+            </SocketProvider>
           </AuthProvider>
         </ThemeProvider>
       </SWRConfig>

@@ -4,24 +4,21 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
-import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './config/database';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authenticateUser } from './middleware/auth.middleware';
+import SocketManager from './config/socket';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
-});
+
+// Initialize Socket.io manager
+const socketManager = new SocketManager(server);
 
 const PORT = process.env.PORT || 3001;
 
@@ -76,14 +73,8 @@ app.use(notFoundHandler);
 // Global error handling middleware
 app.use(errorHandler);
 
-// Socket.io connection handling
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-  
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
-});
+// Make socketManager available to routes
+app.set('socketManager', socketManager);
 
 // Start server
 const startServer = async () => {
@@ -97,4 +88,4 @@ const startServer = async () => {
 
 startServer().catch(console.error);
 
-export { app, io };
+export { app, socketManager };

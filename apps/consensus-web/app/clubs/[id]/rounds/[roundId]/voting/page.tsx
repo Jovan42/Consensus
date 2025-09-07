@@ -10,9 +10,10 @@ import { Card, CardContent, CardHeader } from '../../../../../components/ui/Card
 import { Button } from '../../../../../components/ui/Button';
 import { Select } from '../../../../../components/ui/Select';
 import { Alert } from '../../../../../components/ui/Alert';
-import { useRound, useRoundRecommendations, useSubmitVote, useClubMembers, useRoundVotes } from '../../../../../hooks/useApi';
+import { useRound, useRoundRecommendations, useSubmitVote, useClubMembers, useRoundVotes, useClub } from '../../../../../hooks/useApi';
 import { Recommendation, Vote, Member } from '../../../../../context/AppContext';
 import { useAuth } from '../../../../../contexts/AuthContext';
+import { useRealtimeUpdates } from '../../../../../hooks/useRealtimeUpdates';
 import { 
   ArrowLeft, 
   Vote as VoteIcon, 
@@ -28,11 +29,19 @@ import Link from 'next/link';
 const votingSchema = z.object({
   votes: z.array(z.object({
     recommendationId: z.string(),
-    points: z.number().min(1).max(10),
-  })).min(1, 'You must vote on at least one recommendation')
+    points: z.union([z.number().min(1).max(10), z.literal('')]),
+  }))
   .refine((votes) => {
-    // Check for duplicate points
-    const points = votes.map(v => v.points);
+    // Filter out empty votes and check if at least one vote is cast
+    const validVotes = votes.filter(v => v.points !== '');
+    return validVotes.length > 0;
+  }, {
+    message: 'You must vote on at least one recommendation',
+  })
+  .refine((votes) => {
+    // Check for duplicate points (only among non-empty votes)
+    const validVotes = votes.filter(v => v.points !== '');
+    const points = validVotes.map(v => v.points);
     const uniquePoints = [...new Set(points)];
     return points.length === uniquePoints.length;
   }, {
@@ -52,11 +61,15 @@ export default function Voting() {
   const [error, setError] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [showAdminWarning, setShowAdminWarning] = useState(false);
+  
+  // Enable real-time updates for this page
+  useRealtimeUpdates({ clubId, roundId });
 
   const { round, isLoading: roundLoading } = useRound(roundId);
   const { recommendations, isLoading: recommendationsLoading } = useRoundRecommendations(roundId);
   const { members, isLoading: membersLoading } = useClubMembers(clubId);
   const { votes, isLoading: votesLoading, mutate: mutateVotes } = useRoundVotes(roundId);
+  const { club } = useClub(clubId);
   const submitVote = useSubmitVote();
 
   // Get current user's member info
@@ -88,7 +101,9 @@ export default function Voting() {
   // Helper function to check for duplicate points
   const hasDuplicatePoints = () => {
     if (!watchedVotes || watchedVotes.length === 0) return false;
-    const points = watchedVotes.map(v => v.points).filter(p => p !== undefined && p !== null);
+    // Filter out empty votes (empty string or null/undefined)
+    const validVotes = watchedVotes.filter(v => v.points !== '' && v.points !== undefined && v.points !== null);
+    const points = validVotes.map(v => v.points);
     const uniquePoints = [...new Set(points)];
     return points.length > 0 && points.length !== uniquePoints.length;
   };
@@ -151,18 +166,22 @@ export default function Voting() {
     return user.email !== member.email && (isAdmin || isClubManager);
   };
 
-  // Generate voting options based on the number of recommendations
-  const getVotingOptions = (numRecommendations: number) => {
-    const options = [];
-    if (numRecommendations <= 2) {
-      options.push({ value: '2', label: '2 points' }, { value: '1', label: '1 point' });
-    } else if (numRecommendations <= 3) {
-      options.push({ value: '3', label: '3 points' }, { value: '2', label: '2 points' }, { value: '1', label: '1 point' });
-    } else if (numRecommendations <= 4) {
-      options.push({ value: '4', label: '4 points' }, { value: '3', label: '3 points' }, { value: '2', label: '2 points' }, { value: '1', label: '1 point' });
-    } else {
-      options.push({ value: '5', label: '5 points' }, { value: '4', label: '4 points' }, { value: '3', label: '3 points' }, { value: '2', label: '2 points' }, { value: '1', label: '1 point' });
-    }
+  // Generate voting options based on the club's voting points configuration
+  const getVotingOptions = () => {
+    // Use club's configured voting points, fallback to [3, 2, 1] if not configured
+    const votingPoints = club?.config?.votingPoints || [3, 2, 1];
+    
+    const options = votingPoints.map((points: number) => ({
+      value: points.toString(),
+      label: `${points} point${points !== 1 ? 's' : ''}`
+    }));
+    
+    // Add "No vote" option at the beginning
+    options.unshift({
+      value: '',
+      label: 'No vote (skip)'
+    });
+    
     return options;
   };
 
@@ -176,7 +195,20 @@ export default function Voting() {
     setError(null);
 
     try {
-      await submitVote(roundId, selectedMember, data.votes);
+      // Filter out empty votes (where points is empty string)
+      const validVotes = data.votes
+        .filter(vote => vote.points !== '')
+        .map(vote => ({
+          recommendationId: vote.recommendationId,
+          points: vote.points as number
+        }));
+      
+      if (validVotes.length === 0) {
+        setError('You must vote on at least one recommendation');
+        return;
+      }
+
+      await submitVote(roundId, selectedMember, validVotes);
       // Refresh votes data to show updated voting status
       await mutateVotes();
       setSelectedMember(null); // Go back to member list
@@ -252,7 +284,7 @@ export default function Voting() {
     );
   }
 
-  const votingOptions = getVotingOptions(recommendations.length);
+  const votingOptions = getVotingOptions();
   const rankings = getCurrentRankings();
 
   // If a member is selected, show their voting interface
@@ -363,8 +395,7 @@ export default function Voting() {
                             defaultValue={existingVote?.points?.toString() || ''}
                             disabled={hasVoted || isViewOnly}
                             {...register(`votes.${index}.points`, { 
-                              valueAsNumber: true,
-                              setValueAs: (value) => parseInt(value)
+                              setValueAs: (value) => value === '' ? '' : parseInt(value)
                             })}
                           />
                           <input

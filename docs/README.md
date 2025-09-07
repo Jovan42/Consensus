@@ -25,6 +25,9 @@ Comprehensive guide to the centralized color system, theme support, and UI compo
 ### [Member Notes Feature](./MEMBER-NOTES-FEATURE.md)
 Complete documentation for the private notes system that allows members to keep personal notes for each round.
 
+### [Real-time Features](./REALTIME-FEATURES.md)
+Comprehensive guide to the real-time notification system, Socket.io integration, and live updates functionality.
+
 ### [Postman Collections](./postman-collections/)
 API testing collections including complete Phase 1 endpoints and happy path test scenarios.
 
@@ -45,6 +48,8 @@ API testing collections including complete Phase 1 endpoints and happy path test
 - ✅ Centralized color system with semantic tokens
 - ✅ Role-based UI styling and member management
 - ✅ Member notes system for private round notes
+- ✅ Real-time features with Socket.io integration
+- ✅ Enhanced voting system with partial voting support
 - ✅ Enhanced user experience and interactions
 - ✅ Production deployment and testing
 

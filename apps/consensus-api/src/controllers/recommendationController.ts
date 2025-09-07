@@ -6,6 +6,7 @@ import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
 import { AddRecommendationDto, UpdateRecommendationDto } from '../dto/recommendation.dto';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { getSocketManager, emitRecommendationAdded, emitNotification } from '../utils/socket';
 
 export const addRecommendation = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -148,6 +149,43 @@ export const addRecommendation = async (req: AuthenticatedRequest, res: Response
 
       const savedRecommendation = await AppDataSource.getRepository(Recommendation).save(recommendation);
       savedRecommendations.push(savedRecommendation);
+    }
+
+    // Emit real-time notifications for new recommendations
+    try {
+      const socketManager = getSocketManager(req);
+      if (socketManager) {
+        const recommender = await AppDataSource.getRepository(Member).findOne({
+          where: { id: finalRecommenderId }
+        });
+
+        // Emit specific recommendation events for each recommendation
+        for (const recommendation of savedRecommendations) {
+          emitRecommendationAdded(
+            socketManager,
+            round.clubId,
+            finalRoundId,
+            recommendation.id,
+            recommendation.title,
+            recommendation.description || '',
+            finalRecommenderId,
+            recommender?.name || 'Unknown'
+          );
+        }
+
+        // Emit general notification
+        emitNotification(
+          socketManager,
+          'success',
+          'New Recommendations Added',
+          `${savedRecommendations.length} new recommendation(s) added by ${recommender?.name || 'Unknown'}`,
+          round.clubId,
+          finalRoundId
+        );
+      }
+    } catch (socketError) {
+      console.error('Error emitting recommendation notification:', socketError);
+      // Don't fail the request if socket notification fails
     }
 
     res.status(201).json({

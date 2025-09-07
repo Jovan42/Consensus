@@ -64,6 +64,17 @@ This document outlines the development phases for the Consensus application with
   - [x] Tie-breaking methods (random, recommender decides, re-vote)
   - [x] Minimum participation requirements
 
+- [x] **Real-time Features**
+  - [x] Socket.io integration for real-time communication
+  - [x] Real-time vote submission notifications
+  - [x] Real-time voting closed notifications
+  - [x] Real-time recommendation added notifications
+  - [x] Real-time completion status notifications
+  - [x] Real-time member management notifications
+  - [x] Real-time UI updates and cache invalidation
+  - [x] Admin-only real-time connection status indicator
+  - [x] Enhanced voting system with partial voting support
+
 - [x] **UI/UX Enhancements**
   - [x] Comprehensive theme system with light/dark modes
   - [x] Centralized color system with semantic tokens
@@ -73,6 +84,8 @@ This document outlines the development phases for the Consensus application with
   - [x] Click-outside-to-close dropdown functionality
   - [x] Consistent loading states and button hover effects
   - [x] Member notes system for private round documentation
+  - [x] Real-time status indicator (admin-only)
+  - [x] Enhanced voting system with skip options for partial voting
 
 - [x] **Testing & Quality Assurance**
   - [x] Unit tests for API endpoints (Postman collection)

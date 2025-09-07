@@ -10,6 +10,7 @@ import { useRound, useRoundRecommendations, useRoundVotes, useUpdateRoundStatus,
 import { NotesSection } from '../../../../components/ui/NotesSection';
 import { Recommendation, Vote, Completion, Member } from '../../../../context/AppContext';
 import { useAuth } from '../../../../contexts/AuthContext';
+import { useRealtimeUpdates } from '../../../../hooks/useRealtimeUpdates';
 import { 
   ArrowLeft, 
   User, 
@@ -27,6 +28,9 @@ export default function RoundDetail() {
   const clubId = params.id as string;
   const roundId = params.roundId as string;
   const { user, hasRole } = useAuth();
+  
+  // Enable real-time updates for this page
+  useRealtimeUpdates({ clubId, roundId });
 
   const { round, isLoading: roundLoading, error: roundError, mutate: mutateRound } = useRound(roundId);
   const { recommendations, isLoading: recommendationsLoading } = useRoundRecommendations(roundId);

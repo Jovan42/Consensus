@@ -7,6 +7,7 @@ import { Recommendation } from '../entities/Recommendation';
 import { RoundStatus } from '../types/enums';
 import { SubmitVotesDto } from '../dto/vote.dto';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { getSocketManager, emitVoteCast, emitRoundStatusChanged, emitNotification } from '../utils/socket';
 
 export const submitVotes = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -148,11 +149,11 @@ export const submitVotes = async (req: AuthenticatedRequest, res: Response) => {
       }
     }
 
-    // Check if all recommendations are voted for
-    if (votes.length !== recommendations.length) {
+    // Check if at least one recommendation is voted for
+    if (votes.length === 0) {
       return res.status(400).json({
         success: false,
-        message: `Must vote for all ${recommendations.length} recommendations`
+        message: 'Must vote for at least one recommendation'
       });
     }
 
@@ -187,6 +188,31 @@ export const submitVotes = async (req: AuthenticatedRequest, res: Response) => {
       const savedVote = await AppDataSource.getRepository(Vote).save(newVote);
       savedVotes.push(savedVote);
     }
+
+    // Emit real-time vote cast events
+    const socketManager = getSocketManager(req);
+    for (const vote of votes) {
+      emitVoteCast(
+        socketManager,
+        round.clubId,
+        roundId,
+        memberId,
+        member.name,
+        vote.recommendationId,
+        vote.points
+      );
+    }
+
+    // Emit notification to club members
+    console.log('Emitting vote cast notification for member:', member.name, 'in club:', round.clubId);
+    emitNotification(
+      socketManager,
+      'success',
+      'Vote Submitted',
+      `${member.name} has submitted their vote for this round`,
+      round.clubId,
+      roundId
+    );
 
     res.status(201).json(savedVotes);
   } catch (error) {
@@ -308,6 +334,29 @@ export const closeVoting = async (req: AuthenticatedRequest, res: Response) => {
     const winningRecommendation = await AppDataSource.getRepository(Recommendation).findOne({
       where: { id: winningRecommendationId }
     });
+
+    // Emit real-time events
+    const socketManager = getSocketManager(req);
+    
+    // Emit round status change
+    emitRoundStatusChanged(
+      socketManager,
+      round.clubId,
+      roundId,
+      'completed',
+      winningRecommendationId,
+      winningRecommendation?.title
+    );
+
+    // Emit notification about voting completion
+    emitNotification(
+      socketManager,
+      'success',
+      'Voting Complete!',
+      `Voting has been closed. Winner: ${winningRecommendation?.title}`,
+      round.clubId,
+      roundId
+    );
 
     res.status(200).json({
       success: true,

@@ -18,6 +18,6 @@ router.get('/clubs/:clubId/members', getClubMembers);
 router.get('/members/:memberId', getMemberById);
 router.put('/members/:memberId', validateDto(UpdateMemberDto), updateMember);
 router.put('/members/:memberId/manager-status', updateMemberManagerStatus);
-router.delete('/members/:memberId', removeMember);
+router.delete('/clubs/:clubId/members/:memberId', removeMember);
 
 export default router;

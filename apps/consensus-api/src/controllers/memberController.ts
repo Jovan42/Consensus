@@ -5,6 +5,7 @@ import { CreateMemberRequestDto, UpdateMemberDto } from '../dto/member.dto';
 import { Club } from '../entities/Club';
 import { NotFoundError, asyncHandler } from '../middleware/error.middleware';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { getSocketManager, emitMemberAdded, emitMemberRemoved, emitMemberRoleChanged, emitNotification } from '../utils/socket';
 
 export const addMemberToClub = async (req: Request, res: Response) => {
   try {
@@ -39,6 +40,26 @@ export const addMemberToClub = async (req: Request, res: Response) => {
     });
 
     const savedMember = await memberRepository.save(member);
+
+    // Emit real-time member added event
+    const socketManager = getSocketManager(req);
+    emitMemberAdded(
+      socketManager,
+      clubId,
+      savedMember.id,
+      savedMember.name,
+      savedMember.email,
+      savedMember.isClubManager ? 'manager' : 'member'
+    );
+
+    // Emit notification
+    emitNotification(
+      socketManager,
+      'success',
+      'New Member Added',
+      `${savedMember.name} has been added to the club`,
+      clubId
+    );
 
     res.status(201).json({
       success: true,
@@ -127,19 +148,64 @@ export const updateMember = async (req: Request, res: Response) => {
 
 export const removeMember = async (req: Request, res: Response) => {
   try {
-    const { memberId } = req.params;
+    const { memberId, clubId } = req.params;
+
+    // Validate required fields
+    if (!memberId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Member ID is required'
+      });
+    }
+
+    if (!clubId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Club ID is required'
+      });
+    }
 
     const memberRepository = AppDataSource.getRepository(Member);
-    const member = await memberRepository.findOne({ where: { id: memberId } });
+    const member = await memberRepository.findOne({ 
+      where: { 
+        id: memberId,
+        clubId: clubId 
+      } 
+    });
 
     if (!member) {
       return res.status(404).json({
         success: false,
-        message: 'Member not found'
+        message: 'Member not found in this club'
       });
     }
 
+    // Store member info before removal for real-time events
+    const memberInfo = {
+      id: member.id,
+      name: member.name,
+      clubId: member.clubId
+    };
+
     await memberRepository.remove(member);
+
+    // Emit real-time member removed event
+    const socketManager = getSocketManager(req);
+    emitMemberRemoved(
+      socketManager,
+      memberInfo.clubId,
+      memberInfo.id,
+      memberInfo.name
+    );
+
+    // Emit notification
+    emitNotification(
+      socketManager,
+      'warning',
+      'Member Removed',
+      `${memberInfo.name} has been removed from the club`,
+      memberInfo.clubId
+    );
 
     res.json({
       success: true,
@@ -216,9 +282,34 @@ export const updateMemberManagerStatus = async (req: AuthenticatedRequest, res: 
       });
     }
 
+    // Store old status for real-time events
+    const oldRole = member.isClubManager ? 'manager' : 'member';
+    const newRole = newManagerStatus ? 'manager' : 'member';
+
     // Update the member's manager status
     member.isClubManager = newManagerStatus;
     const updatedMember = await memberRepository.save(member);
+
+    // Emit real-time role change event
+    const socketManager = getSocketManager(req);
+    emitMemberRoleChanged(
+      socketManager,
+      member.clubId,
+      member.id,
+      member.name,
+      oldRole,
+      newRole
+    );
+
+    // Emit notification
+    const actionText = newManagerStatus ? 'promoted to' : 'removed from';
+    emitNotification(
+      socketManager,
+      'info',
+      'Role Changed',
+      `${member.name} has been ${actionText} club manager`,
+      member.clubId
+    );
 
     res.json({
       success: true,

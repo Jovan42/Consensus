@@ -5,6 +5,7 @@ import { Club } from '../entities/Club';
 import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
 import { StartRoundDto, UpdateRoundStatusDto } from '../dto/round.dto';
+import { getSocketManager, emitTurnChanged, emitRoundStatusChanged, emitNotification } from '../utils/socket';
 
 export const startNewRound = async (req: Request, res: Response) => {
   try {
@@ -91,6 +92,43 @@ export const startNewRound = async (req: Request, res: Response) => {
     round.status = RoundStatus.RECOMMENDING;
 
     const savedRound = await AppDataSource.getRepository(Round).save(round);
+
+    // Get recommender info for real-time events
+    const recommender = await AppDataSource.getRepository(Member).findOne({
+      where: { id: currentRecommenderId }
+    });
+
+    // Emit real-time events
+    const socketManager = getSocketManager(req);
+    
+    // Emit round status change
+    emitRoundStatusChanged(
+      socketManager,
+      finalClubId,
+      savedRound.id,
+      'active'
+    );
+
+    // Emit turn change notification
+    if (recommender) {
+      emitTurnChanged(
+        socketManager,
+        finalClubId,
+        savedRound.id,
+        currentRecommenderId,
+        recommender.name
+      );
+
+      // Emit notification
+      emitNotification(
+        socketManager,
+        'info',
+        'New Round Started',
+        `A new round has started with ${recommender.name} as the recommender`,
+        finalClubId,
+        savedRound.id
+      );
+    }
 
     res.status(201).json({
       success: true,
@@ -189,6 +227,39 @@ export const updateRoundStatus = async (req: Request, res: Response) => {
     }
 
     const updatedRound = await AppDataSource.getRepository(Round).save(round);
+
+    // Emit real-time events for status changes
+    const socketManager = getSocketManager(req);
+    
+    // Emit round status change
+    emitRoundStatusChanged(
+      socketManager,
+      round.clubId,
+      id,
+      status as 'active' | 'voting' | 'completed',
+      winningRecommendationId
+    );
+
+    // Emit notification based on status change
+    let notificationTitle = 'Round Status Updated';
+    let notificationMessage = `Round status changed to ${status}`;
+    
+    if (status === RoundStatus.COMPLETING) {
+      notificationTitle = 'Voting Closed';
+      notificationMessage = 'Voting has been closed for this round';
+    } else if (status === RoundStatus.FINISHED) {
+      notificationTitle = 'Round Finished';
+      notificationMessage = 'The round has been completed';
+    }
+
+    emitNotification(
+      socketManager,
+      'info',
+      notificationTitle,
+      notificationMessage,
+      round.clubId,
+      id
+    );
 
     res.json({
       success: true,
@@ -289,6 +360,58 @@ export const finishRound = async (req: Request, res: Response) => {
       newRound.status = RoundStatus.RECOMMENDING;
       
       nextRound = await AppDataSource.getRepository(Round).save(newRound);
+    }
+
+    // Get member info for real-time events
+    const currentRecommender = await AppDataSource.getRepository(Member).findOne({
+      where: { id: round.currentRecommenderId }
+    });
+    const nextRecommender = await AppDataSource.getRepository(Member).findOne({
+      where: { id: nextRecommenderId }
+    });
+
+    // Emit real-time events
+    const socketManager = getSocketManager(req);
+    
+    // Emit round status change for finished round
+    emitRoundStatusChanged(
+      socketManager,
+      round.clubId,
+      roundId,
+      'completed'
+    );
+
+    // Emit turn change if new round was created
+    if (nextRound && nextRecommender) {
+      emitTurnChanged(
+        socketManager,
+        round.clubId,
+        nextRound.id,
+        nextRecommenderId,
+        nextRecommender.name,
+        currentRecommender?.id,
+        currentRecommender?.name
+      );
+
+      // Emit notification about new round
+      emitNotification(
+        socketManager,
+        'success',
+        'Round Finished & New Round Started',
+        `Round finished! New round started with ${nextRecommender.name} as the recommender`,
+        round.clubId,
+        nextRound.id
+      );
+    } else {
+      // Just notify about round completion
+      emitNotification(
+        socketManager,
+        'success',
+        'Round Finished',
+        'The round has been completed successfully',
+        round.clubId,
+        roundId
+      );
     }
 
     res.status(200).json({

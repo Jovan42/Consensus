@@ -12,6 +12,7 @@ import { Input } from '../../../components/ui/Input';
 import { Alert } from '../../../components/ui/Alert';
 import { useClub, useClubMembers, useAddMember, useRemoveMember } from '../../../hooks/useApi';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useRealtimeUpdates } from '../../../hooks/useRealtimeUpdates';
 import { Member } from '../../../context/AppContext';
 import { getTestAccount } from '../../../../lib/auth0';
 import { 
@@ -43,6 +44,9 @@ export default function ClubMembers() {
   const [error, setError] = useState<string | null>(null);
   const [removingMember, setRemovingMember] = useState<string | null>(null);
   const [updatingManager, setUpdatingManager] = useState<string | null>(null);
+  
+  // Enable real-time updates for this page
+  useRealtimeUpdates({ clubId });
 
   const { club, isLoading: clubLoading } = useClub(clubId);
   const { members, isLoading: membersLoading, mutate } = useClubMembers(clubId);

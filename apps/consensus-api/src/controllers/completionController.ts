@@ -6,6 +6,7 @@ import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
 import { MarkCompletionDto } from '../dto/completion.dto';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { getSocketManager, emitCompletionUpdated, emitNotification } from '../utils/socket';
 
 export const markCompletion = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -121,6 +122,28 @@ export const markCompletion = async (req: AuthenticatedRequest, res: Response) =
       completion.isCompleted = isCompleted;
       await AppDataSource.getRepository(Completion).save(completion);
     }
+
+    // Emit real-time completion update
+    const socketManager = getSocketManager(req);
+    emitCompletionUpdated(
+      socketManager,
+      round.clubId,
+      roundId,
+      memberId,
+      member.name,
+      isCompleted
+    );
+
+    // Emit notification
+    const statusText = isCompleted ? 'completed' : 'not completed';
+    emitNotification(
+      socketManager,
+      'info',
+      'Completion Updated',
+      `${member.name} has marked the recommendation as ${statusText}`,
+      round.clubId,
+      roundId
+    );
 
     res.status(201).json({
       success: true,
