@@ -119,18 +119,20 @@ export default function CreateClub() {
     <Layout>
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4">
-          <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Create New Club</h1>
-            <p className="mt-2 text-muted-foreground">
-              Set up a new club for your group activities
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
+              </Button>
+            </Link>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Create New Club</h1>
+              <p className="mt-1 text-muted-foreground">
+                Set up a new club for your group activities
+              </p>
+            </div>
           </div>
         </div>
 
@@ -230,8 +232,8 @@ export default function CreateClub() {
                   </Button>
                 </Link>
                 <Button type="submit" loading={isSubmitting}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Create Club
+                  <Save className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Create Club</span>
                 </Button>
               </div>
             </form>

@@ -127,8 +127,8 @@ export default function RoundDetail() {
           <p className="text-muted-foreground mb-6">The round you're looking for doesn't exist.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Club
+              <ArrowLeft className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back to Club</span>
             </Button>
           </Link>
         </div>
@@ -143,22 +143,22 @@ export default function RoundDetail() {
     <Layout>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-4">
             <Link href={`/clubs/${clubId}`}>
               <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Club
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Club</span>
               </Button>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Round Details</h1>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Round Details</h1>
               <p className="text-muted-foreground">
                 Started {new Date(round.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-shrink-0">
             <StatusIcon className="h-5 w-5" />
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(round.status)}`}>
               {round.status}

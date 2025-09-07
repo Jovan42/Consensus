@@ -110,25 +110,27 @@ export default function ClubDetail() {
     <Layout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-4">
             <Link href="/">
               <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
               </Button>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">{club.name}</h1>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate">{club.name}</h1>
               <p className="text-muted-foreground capitalize">{club.type} club</p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Members button - visible to all members */}
             <Link href={`/clubs/${clubId}/members`}>
               <Button variant="outline">
-                <Users className="h-4 w-4 mr-2" />
-                {hasRole('admin') || currentUserMember?.isClubManager ? 'Manage Members' : 'View Members'}
+                <Users className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">
+                  {hasRole('admin') || currentUserMember?.isClubManager ? 'Manage Members' : 'View Members'}
+                </span>
               </Button>
             </Link>
             
@@ -136,8 +138,8 @@ export default function ClubDetail() {
             {(hasRole('admin') || currentUserMember?.isClubManager) && (
               <Link href={`/clubs/${clubId}/settings`}>
                 <Button variant="outline">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
+                  <Settings className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Settings</span>
                 </Button>
               </Link>
             )}
@@ -287,26 +289,26 @@ export default function ClubDetail() {
               <div className="space-y-4">
                 {completedRounds.slice(0, 5).map((round: any) => (
                   <div key={round.id} className="p-4 bg-muted rounded-lg border border-border">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-3 flex-1">
-                        <CheckCircle className="h-5 w-5 text-success mt-0.5" />
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                      <div className="flex items-start space-x-3 flex-1 min-w-0">
+                        <CheckCircle className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <p className="font-medium text-foreground">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1 gap-1">
+                            <p className="font-medium text-foreground truncate">
                               Round by {round.currentRecommender?.name || 'Unknown'}
                             </p>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success self-start">
                               Completed
                             </span>
                           </div>
                           
                           {round.winningRecommendation ? (
                             <div className="mb-2">
-                              <p className="text-sm font-medium text-foreground mb-1">
+                              <p className="text-sm font-medium text-foreground mb-1 truncate">
                                 🏆 Winner: {round.winningRecommendation.title}
                               </p>
                               {round.winningRecommendation.description && (
-                                <p className="text-sm text-muted-foreground truncate">
+                                <p className="text-sm text-muted-foreground line-clamp-2">
                                   {round.winningRecommendation.description}
                                 </p>
                               )}
@@ -317,23 +319,24 @@ export default function ClubDetail() {
                             </p>
                           )}
                           
-                          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-xs text-muted-foreground gap-1">
                             <span className="flex items-center">
-                              <Calendar className="h-3 w-3 mr-1" />
+                              <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
                               {new Date(round.createdAt).toLocaleDateString()}
                             </span>
                             <span className="flex items-center">
-                              <Clock className="h-3 w-3 mr-1" />
-                              Finished {new Date(round.updatedAt).toLocaleDateString()}
+                              <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
+                              <span className="hidden sm:inline">Finished </span>{new Date(round.updatedAt).toLocaleDateString()}
                             </span>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="ml-4 flex-shrink-0">
+                      <div className="flex-shrink-0 sm:ml-4">
                         <Link href={`/clubs/${clubId}/rounds/${round.id}`}>
-                          <Button variant="ghost" size="sm">
-                            View Details
+                          <Button variant="ghost" size="sm" className="w-full sm:w-auto">
+                            <span className="hidden sm:inline">View Details</span>
+                            <span className="sm:hidden">View</span>
                           </Button>
                         </Link>
                       </div>

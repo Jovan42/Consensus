@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { useNotifications, Notification } from '../contexts/NotificationContext';
-import { Bell, Check, CheckCheck, Clock, Users, Trophy, Lightbulb, Settings, Trash2 } from 'lucide-react';
+import { Bell, Check, CheckCheck, Clock, Users, Trophy, Lightbulb, Settings, Trash2, ArrowLeft } from 'lucide-react';
 import { useConfirmationDialog } from '../components/ui/ConfirmationDialog';
+import { Layout } from '../components/layout/Layout';
+import { Button } from '../components/ui/Button';
 
 export default function NotificationsPage() {
   const {
@@ -206,36 +209,45 @@ export default function NotificationsPage() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <Layout>
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Notifications
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : 'All caught up!'}
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
+              </Button>
+            </Link>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Notifications</h1>
+              <p className="text-muted-foreground mt-1">
+                {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : 'All caught up!'}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {notifications.filter(n => n.status === 'read').length > 0 && (
-              <button
+              <Button
                 onClick={handleDeleteAllRead}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                variant="destructive"
+                size="sm"
+                className="flex items-center gap-2"
               >
-                <Trash2 className="h-4 w-4" />
-                Delete all read
-              </button>
+                <Trash2 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Delete all read</span>
+              </Button>
             )}
             {unreadCount > 0 && (
-              <button
+              <Button
                 onClick={handleMarkAllAsRead}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                size="sm"
+                className="flex items-center gap-2"
               >
-                <CheckCheck className="h-4 w-4" />
-                Mark all as read
-              </button>
+                <CheckCheck className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Mark all as read</span>
+              </Button>
             )}
           </div>
         </div>
@@ -405,6 +417,6 @@ export default function NotificationsPage() {
       
       {/* Custom Confirmation Dialog */}
       <ConfirmationDialog />
-    </div>
+    </Layout>
   );
 }

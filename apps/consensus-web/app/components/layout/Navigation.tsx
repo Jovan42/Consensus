@@ -23,9 +23,10 @@ const Navigation: React.FC = () => {
           <div className="flex items-center space-x-8">
             <Link href="/dashboard" className="flex items-center space-x-2">
               <BookOpen className="w-8 h-8 text-primary" />
-              <span className="text-xl font-bold text-foreground">Consensus</span>
+              <span className="text-xl font-bold text-foreground hidden sm:block">Consensus</span>
             </Link>
             
+            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-6">
               <Link
                 href="/dashboard"
@@ -63,11 +64,33 @@ const Navigation: React.FC = () => {
                 </>
               )}
             </div>
+
+            {/* Mobile Navigation - Icon Only */}
+            <div className="flex md:hidden items-center space-x-3">
+              <Link
+                href="/dashboard"
+                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                title="Dashboard"
+              >
+                <Home className="w-5 h-5" />
+              </Link>
+              
+              <Link
+                href="/clubs"
+                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                title="Clubs"
+              >
+                <Users className="w-5 h-5" />
+              </Link>
+            </div>
           </div>
           
           <div className="flex items-center space-x-4">
-            <RealtimeStatus showText={false} showForAdminsOnly={false} />
-            <NotificationIcon />
+            {/* Socket Connection & Notifications Group */}
+            <div className="flex items-center space-x-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <RealtimeStatus showText={false} showForAdminsOnly={false} />
+              <NotificationIcon />
+            </div>
             <SimpleThemeToggle />
             <UserProfile />
           </div>

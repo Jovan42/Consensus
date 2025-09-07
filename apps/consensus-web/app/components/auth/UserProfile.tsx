@@ -52,13 +52,27 @@ const UserProfile: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted transition-colors"
+        title={`${user.name} (${user.email})`}
       >
-        <div className="text-left">
+        {/* Desktop: Show full user info */}
+        <div className="text-left hidden sm:block">
           <p className="text-sm font-medium text-foreground">{user.name}</p>
           <p className="text-xs text-muted-foreground">{user.email}</p>
         </div>
+        
+        {/* Mobile: Show only icon */}
+        <div className="relative sm:hidden">
+          <User className="w-6 h-6 text-foreground" />
+          {isTestAccount && (
+            <div className="absolute -top-1 -right-1">
+              <TestTube className="w-3 h-3 text-warning-600" />
+            </div>
+          )}
+        </div>
+        
+        {/* Desktop: Show test account indicator separately */}
         {isTestAccount && (
-          <div title="Test Account">
+          <div className="hidden sm:block" title="Test Account">
             <TestTube className="w-4 h-4 text-warning-600" />
           </div>
         )}

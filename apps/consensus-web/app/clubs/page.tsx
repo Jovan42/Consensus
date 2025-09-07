@@ -148,8 +148,8 @@ export default function ClubsPage() {
             
             <Link href="/clubs/create-club">
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Club
+                <Plus className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Create Club</span>
               </Button>
             </Link>
           </div>
@@ -287,8 +287,10 @@ export default function ClubsPage() {
                 )}
                 <Link href="/clubs/create-club">
                   <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {isAdmin && showOnlyMyClubs ? 'Create Club' : 'Create First Club'}
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">
+                      {isAdmin && showOnlyMyClubs ? 'Create Club' : 'Create First Club'}
+                    </span>
                   </Button>
                 </Link>
               </div>

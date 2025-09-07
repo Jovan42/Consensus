@@ -237,8 +237,8 @@ export default function Voting() {
           <p className="text-muted-foreground mb-6">The round you're looking for doesn't exist.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Club
+              <ArrowLeft className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back to Club</span>
             </Button>
           </Link>
         </div>

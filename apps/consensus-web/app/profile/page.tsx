@@ -85,19 +85,19 @@ export default function ProfilePage() {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Profile</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Profile</h1>
+            <p className="text-muted-foreground mt-2 hidden sm:block">
               Manage your account information and preferences
             </p>
           </div>
           <Link href="/dashboard">
-            <Button variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+            <Button variant="outline" size="sm" className="sm:size-default">
+              <ArrowLeft className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back to Dashboard</span>
             </Button>
           </Link>
         </div>
@@ -120,15 +120,15 @@ export default function ProfilePage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-foreground">Profile Information</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-foreground">Profile Information</h2>
                   {!isEditing && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setIsEditing(true)}
                     >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
+                      <Edit className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Edit</span>
                     </Button>
                   )}
                 </div>
@@ -155,7 +155,7 @@ export default function ProfilePage() {
                       <div className="mt-2">
                         <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-800">
                           <TestTube className="h-3 w-3" />
-                          <span>Test Account</span>
+                          <span className="hidden sm:inline">Test Account</span>
                         </span>
                       </div>
                     )}
@@ -163,17 +163,17 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Account Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Email</label>
+                    <label className="text-sm font-medium text-foreground hidden sm:block">Email</label>
                     <div className="flex items-center space-x-2 text-foreground">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>{user.email}</span>
+                      <span className="text-sm sm:text-base truncate">{user.email}</span>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Role</label>
+                    <label className="text-sm font-medium text-foreground hidden sm:block">Role</label>
                     <div className="flex items-center space-x-2">
                       {user.role === 'admin' ? (
                         <Crown className="h-4 w-4 text-error" />
@@ -185,34 +185,34 @@ export default function ProfilePage() {
                           ? 'bg-error/10 text-error' 
                           : 'bg-primary/10 text-primary'
                       }`}>
-                        {user.role === 'admin' ? 'Site Admin' : 'Member'}
+                        {user.role === 'admin' ? 'Admin' : 'Member'}
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">User ID</label>
+                    <label className="text-sm font-medium text-foreground hidden sm:block">User ID</label>
                     <div className="flex items-center space-x-2 text-foreground">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-mono text-sm">{user.sub}</span>
+                      <span className="font-mono text-xs sm:text-sm truncate">{user.sub}</span>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Account Type</label>
+                    <label className="text-sm font-medium text-foreground hidden sm:block">Account Type</label>
                     <div className="flex items-center space-x-2">
                       {isTestAccount ? (
                         <>
                           <TestTube className="h-4 w-4 text-warning-500" />
                           <span className="px-2 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-800">
-                            Test Account
+                            Test
                           </span>
                         </>
                       ) : (
                         <>
                           <Shield className="h-4 w-4 text-success-500" />
                           <span className="px-2 py-1 rounded-full text-xs font-medium bg-success-100 text-success-800">
-                            OAuth Account
+                            OAuth
                           </span>
                         </>
                       )}
@@ -222,25 +222,29 @@ export default function ProfilePage() {
 
                 {/* Edit Actions */}
                 {isEditing && (
-                  <div className="flex items-center space-x-3 pt-4 border-t border-border">
+                  <div className="flex items-center space-x-2 sm:space-x-3 pt-4 border-t border-border">
                     <Button
                       onClick={handleSave}
                       disabled={isSaving}
+                      size="sm"
+                      className="sm:size-default"
                     >
                       {isSaving ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white sm:mr-2"></div>
                       ) : (
-                        <Save className="h-4 w-4 mr-2" />
+                        <Save className="h-4 w-4 sm:mr-2" />
                       )}
-                      {isSaving ? 'Saving...' : 'Save Changes'}
+                      <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save Changes'}</span>
                     </Button>
                     <Button
                       variant="outline"
                       onClick={handleCancel}
                       disabled={isSaving}
+                      size="sm"
+                      className="sm:size-default"
                     >
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel
+                      <X className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Cancel</span>
                     </Button>
                   </div>
                 )}
@@ -249,48 +253,54 @@ export default function ProfilePage() {
           </div>
 
           {/* Account Actions */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <Card>
               <CardHeader>
-                <h3 className="text-lg font-semibold text-foreground">Account Actions</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Account Actions</h3>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 <Button
                   variant="outline"
                   className="w-full justify-start"
+                  size="sm"
                   onClick={() => {
                     // In a real app, this would open a change password modal
                     alert('Change password functionality would be implemented here');
                   }}
+                  title="Change Password"
                 >
-                  <Shield className="h-4 w-4 mr-2" />
-                  Change Password
+                  <Shield className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Change Password</span>
                 </Button>
 
                 <Button
                   variant="outline"
                   className="w-full justify-start"
+                  size="sm"
                   onClick={() => {
                     // In a real app, this would open notification preferences
                     alert('Notification preferences would be implemented here');
                   }}
+                  title="Notification Settings"
                 >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Notification Settings
+                  <Calendar className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Notification Settings</span>
                 </Button>
 
-                <div className="pt-4 border-t border-border">
+                <div className="pt-3 sm:pt-4 border-t border-border">
                   <Button
                     variant="outline"
                     className="w-full justify-start text-destructive hover:text-destructive/80 hover:bg-destructive/10"
+                    size="sm"
                     onClick={() => {
                       if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
                         alert('Account deletion would be implemented here');
                       }
                     }}
+                    title="Delete Account"
                   >
-                    <X className="h-4 w-4 mr-2" />
-                    Delete Account
+                    <X className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Delete Account</span>
                   </Button>
                 </div>
               </CardContent>
@@ -299,11 +309,12 @@ export default function ProfilePage() {
             {/* Account Information */}
             <Card>
               <CardHeader>
-                <h3 className="text-lg font-semibold text-foreground">Account Information</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Account Information</h3>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="text-sm">
-                  <span className="text-muted-foreground">Last updated:</span>
+                  <span className="text-muted-foreground hidden sm:inline">Last updated:</span>
+                  <span className="text-muted-foreground sm:hidden">Updated:</span>
                   <span className="ml-2 text-foreground">
                     {new Date().toLocaleDateString()}
                   </span>
@@ -315,8 +326,11 @@ export default function ProfilePage() {
                       <TestTube className="h-4 w-4 text-warning-600 mt-0.5" />
                       <div className="text-sm">
                         <p className="text-warning-800 font-medium">Test Account</p>
-                        <p className="text-warning-700">
+                        <p className="text-warning-700 hidden sm:block">
                           This is a development test account. Changes are stored locally.
+                        </p>
+                        <p className="text-warning-700 sm:hidden">
+                          Development test account.
                         </p>
                       </div>
                     </div>

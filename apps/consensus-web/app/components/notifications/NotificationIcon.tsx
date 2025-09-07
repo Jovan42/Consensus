@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { Notification } from '../../contexts/NotificationContext';
 
@@ -13,6 +14,7 @@ export const NotificationIcon: React.FC<NotificationIconProps> = ({ className = 
   const { unreadCount, unreadNotifications, notifications, markAsRead, markAllAsRead } = useNotifications();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -38,6 +40,23 @@ export const NotificationIcon: React.FC<NotificationIconProps> = ({ className = 
   const handleMarkAllAsRead = async () => {
     await markAllAsRead();
     setIsDropdownOpen(false);
+  };
+
+  const handleNotificationIconClick = () => {
+    // Check if we're on mobile (screen width < 640px)
+    if (window.innerWidth < 640) {
+      // Mobile behavior
+      if (window.location.pathname === '/notifications') {
+        // If we're on the notifications page, go back to previous page
+        router.back();
+      } else {
+        // Redirect to notifications page on mobile
+        router.push('/notifications');
+      }
+    } else {
+      // Desktop behavior - always show dropdown (unchanged)
+      setIsDropdownOpen(!isDropdownOpen);
+    }
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -88,7 +107,7 @@ export const NotificationIcon: React.FC<NotificationIconProps> = ({ className = 
     <div className="relative" ref={dropdownRef}>
       {/* Notification Bell Icon */}
       <button
-        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        onClick={handleNotificationIconClick}
         className={`relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${className}`}
         aria-label="Notifications"
       >
@@ -100,9 +119,9 @@ export const NotificationIcon: React.FC<NotificationIconProps> = ({ className = 
         )}
       </button>
 
-      {/* Dropdown */}
+      {/* Dropdown - Only show on desktop */}
       {isDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 hidden sm:block">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

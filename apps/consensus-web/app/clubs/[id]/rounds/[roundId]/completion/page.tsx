@@ -125,8 +125,8 @@ export default function CompletionTracking() {
           <p className="text-muted-foreground mb-6">The round you're looking for doesn't exist.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Club
+              <ArrowLeft className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back to Club</span>
             </Button>
           </Link>
         </div>
@@ -172,8 +172,8 @@ export default function CompletionTracking() {
           <p className="text-muted-foreground mb-6">This club doesn't have any members yet.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Club
+              <ArrowLeft className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back to Club</span>
             </Button>
           </Link>
         </div>
@@ -188,8 +188,8 @@ export default function CompletionTracking() {
         <div className="flex items-center space-x-4">
           <Link href={`/clubs/${clubId}/rounds/${roundId}`}>
             <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Round
+              <ArrowLeft className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back to Round</span>
             </Button>
           </Link>
           <div>
@@ -296,33 +296,33 @@ export default function CompletionTracking() {
                 return (
                   <div
                     key={member.id}
-                    className={`flex items-center justify-between p-4 rounded-lg ${
+                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-lg gap-3 ${
                       canMarkCompletion ? 'bg-muted' : 'bg-muted opacity-60'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-primary/10 rounded-full">
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
+                      <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
                         <User className="h-5 w-5 text-primary" />
                       </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <p className="font-medium text-foreground">{member.name}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 gap-1">
+                          <p className="font-medium text-foreground truncate">{member.name}</p>
                           {isAdminAction && (
-                            <span className="px-2 py-1 bg-warning/10 text-warning text-xs font-medium rounded-full">
+                            <span className="px-2 py-1 bg-warning/10 text-warning text-xs font-medium rounded-full self-start">
                               Admin Action
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground">{member.email}</p>
+                        <p className="text-sm text-muted-foreground truncate">{member.email}</p>
                         {!canMarkCompletion && (
-                          <p className="text-xs text-error mt-1">
+                          <p className="text-xs text-error mt-1 line-clamp-2">
                             You can only mark completion for yourself
                           </p>
                         )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 flex-shrink-0">
                       <div className="flex items-center space-x-2">
                         {isCompleted ? (
                           <CheckCircle className="h-5 w-5 text-success" />
@@ -376,21 +376,24 @@ export default function CompletionTracking() {
                 <p className="text-muted-foreground mb-4">
                   Everyone has completed the winning recommendation. You can now finish this round and start a new one.
                 </p>
-                <div className="flex justify-center space-x-4">
+                <div className="flex flex-col sm:flex-row sm:justify-center sm:space-x-4 gap-3">
                   <Link href={`/clubs/${clubId}/rounds/${roundId}`}>
-                    <Button variant="outline">
-                      Back to Round
+                    <Button variant="outline" className="w-full sm:w-auto">
+                      <span className="hidden sm:inline">Back to Round</span>
+                      <span className="sm:hidden">Back</span>
                     </Button>
                   </Link>
                   {(hasRole('admin') || (user && round?.currentRecommender && user.email === round.currentRecommender.email)) ? (
                     <Button 
                       onClick={handleFinishAndStartNew}
                       loading={isFinishingRound}
+                      className="w-full sm:w-auto"
                     >
-                      Start New Round
+                      <span className="hidden sm:inline">Start New Round</span>
+                      <span className="sm:hidden">New Round</span>
                     </Button>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground text-center">
                       Only {round?.currentRecommender?.name || 'the current recommender'} or admins can start a new round.
                     </p>
                   )}
