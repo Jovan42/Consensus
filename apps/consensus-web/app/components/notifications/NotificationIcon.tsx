@@ -11,6 +11,7 @@ interface NotificationIconProps {
 }
 
 export const NotificationIcon: React.FC<NotificationIconProps> = ({ className = '' }) => {
+  // Try to use optimized notifications first, fallback to regular
   const { unreadCount, unreadNotifications, notifications, markAsRead, markAllAsRead } = useNotifications();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

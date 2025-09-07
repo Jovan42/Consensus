@@ -84,6 +84,38 @@ export const getUnreadCount = async (req: AuthenticatedRequest, res: Response) =
   }
 };
 
+// Combined endpoint for unread notifications and count
+export const getUnreadNotificationsWithCount = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Get both unread notifications and count in one request
+    const [notifications, count] = await Promise.all([
+      NotificationService.getUnreadNotifications(req.user.email),
+      NotificationService.getUnreadCount(req.user.email)
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        notifications,
+        count
+      }
+    });
+  } catch (error) {
+    console.error('Error getting unread notifications with count:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 export const markAsRead = async (req: AuthenticatedRequest, res: Response) => {
   try {
     if (!req.user) {

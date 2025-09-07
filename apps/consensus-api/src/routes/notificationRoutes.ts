@@ -4,6 +4,7 @@ import {
   getNotifications,
   getUnreadNotifications,
   getUnreadCount,
+  getUnreadNotificationsWithCount,
   markAsRead,
   markAllAsRead,
   deleteNotification,
@@ -23,6 +24,9 @@ router.get('/unread', getUnreadNotifications);
 
 // GET /api/notifications/unread/count - Get unread notification count
 router.get('/unread/count', getUnreadCount);
+
+// GET /api/notifications/unread/combined - Get unread notifications and count in one request
+router.get('/unread/combined', getUnreadNotificationsWithCount);
 
 // PUT /api/notifications/read-all - Mark all notifications as read
 router.put('/read-all', markAllAsRead);

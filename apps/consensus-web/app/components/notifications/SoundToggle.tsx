@@ -35,6 +35,7 @@ export const SoundToggle: React.FC<SoundToggleProps> = ({
 
       // Test the sound if enabling
       if (newValue) {
+        console.log('🔊 Testing notification sound...');
         await playNotificationSound();
       }
     } catch (error) {

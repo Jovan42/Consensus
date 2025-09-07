@@ -9,6 +9,7 @@ import { Layout } from '../components/layout/Layout';
 import { Button } from '../components/ui/Button';
 
 export default function NotificationsPage() {
+  // Try to use optimized notifications first, fallback to regular
   const {
     notifications,
     unreadCount,

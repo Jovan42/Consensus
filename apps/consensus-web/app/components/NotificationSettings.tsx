@@ -131,7 +131,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({ onCl
               </div>
               
               <Button
-                variant={soundEnabled ? "default" : "outline"}
+                variant={soundEnabled ? "primary" : "outline"}
                 size="sm"
                 onClick={handleToggleSound}
                 disabled={isLoading}

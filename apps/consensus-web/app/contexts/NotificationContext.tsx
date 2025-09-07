@@ -14,7 +14,7 @@ export interface Notification {
   title: string;
   message: string;
   data?: any;
-  memberId: string;
+  userEmail: string;
   clubId: string;
   roundId?: string;
   createdAt: string;
@@ -139,7 +139,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         // Only play sound if we have new notifications (count increased)
         // Skip sound on initial load to avoid playing sound when user first logs in
         if (newCount > previousCount && !isInitialLoad) {
+          console.log('🔔 Playing notification sound - new count:', newCount, 'previous count:', previousCount);
           playNotificationSoundIfEnabled();
+        } else {
+          console.log('🔇 Not playing sound - new count:', newCount, 'previous count:', previousCount, 'isInitialLoad:', isInitialLoad);
         }
         
         // Mark that initial load is complete

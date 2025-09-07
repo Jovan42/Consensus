@@ -21,6 +21,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         revalidateOnReconnect: true,
         errorRetryCount: 3,
         errorRetryInterval: 5000,
+        // Add deduplication for SWR to reduce requests
+        dedupingInterval: 2000,
       }}
     >
       <ThemeProvider>
