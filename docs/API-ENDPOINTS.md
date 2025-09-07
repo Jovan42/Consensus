@@ -7,7 +7,10 @@ This document contains all the API endpoints for the Consensus application.
 - **Production**: `https://your-api-domain.com`
 
 ## Authentication
-Currently, the MVP has no authentication. All endpoints are public.
+All endpoints require authentication via JWT token in the Authorization header:
+```
+Authorization: Bearer <jwt_token>
+```
 
 ## Input Validation
 All endpoints use `class-validator` for input validation. Invalid requests will return detailed validation errors.
@@ -227,6 +230,86 @@ Mark completion for a member.
 
 ### POST /api/rounds/:roundId/finish
 Finish the round and start the next one.
+
+## Member Notes
+
+Private notes that members can keep for each round. Notes are only visible to the member who created them.
+
+### GET /api/member-notes/round/:roundId
+Get or create a member note for a specific round.
+
+**Parameters:**
+- `roundId` (string, required) - The round ID
+
+**Response:**
+```json
+{
+  "id": "uuid",
+  "title": "My Notes Title",
+  "content": "My private notes content...",
+  "roundId": "uuid",
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}
+```
+
+### PUT /api/member-notes/:noteId
+Update a member note.
+
+**Parameters:**
+- `noteId` (string, required) - The note ID
+
+**Request Body:**
+```json
+{
+  "title": "Updated Title",
+  "content": "Updated content..."
+}
+```
+
+**Response:**
+```json
+{
+  "id": "uuid",
+  "title": "Updated Title",
+  "content": "Updated content...",
+  "roundId": "uuid",
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "updatedAt": "2025-01-01T00:00:00.000Z"
+}
+```
+
+### GET /api/member-notes
+Get all notes for the authenticated member.
+
+**Response:**
+```json
+[
+  {
+    "id": "uuid",
+    "title": "My Notes Title",
+    "content": "My private notes content...",
+    "roundId": "uuid",
+    "roundTitle": "Round 1",
+    "clubName": "My Book Club",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  }
+]
+```
+
+### DELETE /api/member-notes/:noteId
+Delete a member note.
+
+**Parameters:**
+- `noteId` (string, required) - The note ID
+
+**Response:**
+```json
+{
+  "message": "Note deleted successfully"
+}
+```
 
 ## Error Responses
 

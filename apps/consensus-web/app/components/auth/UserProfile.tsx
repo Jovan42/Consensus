@@ -1,15 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { User, LogOut, Settings, Shield, TestTube } from 'lucide-react';
+import { User, LogOut, Settings, Shield, Crown, TestTube } from 'lucide-react';
 import { getRoleColors } from '@/lib/color-utils';
 
 const UserProfile: React.FC = () => {
   const { user, logout, isTestAccount } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   if (!user) return null;
 
@@ -21,7 +39,7 @@ const UserProfile: React.FC = () => {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'admin':
-        return <Shield className="w-4 h-4" />;
+        return <Crown className="w-4 h-4" />;
       case 'member':
         return <User className="w-4 h-4" />;
       default:
@@ -30,7 +48,7 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted transition-colors"

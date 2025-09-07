@@ -20,10 +20,10 @@ export function Alert({
   ...props
 }: AlertProps) {
   const variants = {
-    success: 'bg-success-50 border-success-200 text-success-800',
-    error: 'bg-error-50 border-error-200 text-error-800',
-    warning: 'bg-warning-50 border-warning-200 text-warning-800',
-    info: 'bg-info-50 border-info-200 text-info-800',
+    success: 'bg-success/10 border-success/20 text-success',
+    error: 'bg-error/10 border-error/20 text-error',
+    warning: 'bg-warning/10 border-warning/20 text-warning',
+    info: 'bg-primary/10 border-primary/20 text-primary',
   };
 
   const icons = {

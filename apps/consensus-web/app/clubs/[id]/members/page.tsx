@@ -13,6 +13,7 @@ import { Alert } from '../../../components/ui/Alert';
 import { useClub, useClubMembers, useAddMember, useRemoveMember } from '../../../hooks/useApi';
 import { useAuth } from '../../../contexts/AuthContext';
 import { Member } from '../../../context/AppContext';
+import { getTestAccount } from '../../../../lib/auth0';
 import { 
   ArrowLeft, 
   Plus, 
@@ -21,7 +22,7 @@ import {
   User,
   Users,
   Shield,
-  ShieldCheck
+  Crown
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -47,6 +48,37 @@ export default function ClubMembers() {
   const { members, isLoading: membersLoading, mutate } = useClubMembers(clubId);
   const addMember = useAddMember();
   const removeMember = useRemoveMember();
+
+  // Permission checks
+  const currentUserMember = members?.find((m: Member) => m.email === user?.email);
+  const canManageMembers = hasRole('admin') || currentUserMember?.isClubManager;
+  const isMember = !!currentUserMember || hasRole('admin');
+
+  // Helper function to check if a member is a site admin
+  const isSiteAdmin = (memberEmail: string): boolean => {
+    const testAccount = getTestAccount(memberEmail);
+    return testAccount?.role === 'admin';
+  };
+
+  // Helper function to get member role priority for sorting
+  const getMemberRolePriority = (member: Member): number => {
+    if (isSiteAdmin(member.email)) return 1; // Site Admin - highest priority
+    if (member.isClubManager) return 2; // Club Manager - medium priority
+    return 3; // Regular Member - lowest priority
+  };
+
+  // Sort members by role importance
+  const sortedMembers = members ? [...members].sort((a, b) => {
+    const priorityA = getMemberRolePriority(a);
+    const priorityB = getMemberRolePriority(b);
+    
+    // If same priority, sort alphabetically by name
+    if (priorityA === priorityB) {
+      return a.name.localeCompare(b.name);
+    }
+    
+    return priorityA - priorityB;
+  }) : [];
 
   const {
     register,
@@ -122,7 +154,7 @@ export default function ClubMembers() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </Layout>
     );
@@ -132,12 +164,30 @@ export default function ClubMembers() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Club Not Found</h2>
-          <p className="text-gray-600 mb-6">The club you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Club Not Found</h2>
+          <p className="text-muted-foreground mb-6">The club you're looking for doesn't exist.</p>
           <Link href="/">
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
+            </Button>
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Check if user is a member of the club
+  if (!isMember) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-foreground mb-4">Access Denied</h2>
+          <p className="text-muted-foreground mb-6">You must be a member of this club to view its members.</p>
+          <Link href={`/clubs/${clubId}`}>
+            <Button>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Club
             </Button>
           </Link>
         </div>
@@ -158,11 +208,16 @@ export default function ClubMembers() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Members</h1>
-              <p className="text-gray-600">{club.name}</p>
+              <h1 className="text-3xl font-bold text-foreground">Members</h1>
+              <p className="text-muted-foreground">{club.name}</p>
+              {!canManageMembers && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  View-only mode - you can see members but cannot make changes
+                </p>
+              )}
             </div>
           </div>
-          {(hasRole('admin') || members?.find((m: Member) => m.email === user?.email)?.isClubManager) && (
+          {canManageMembers && (
             <Button onClick={() => setShowAddForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Member
@@ -178,7 +233,7 @@ export default function ClubMembers() {
         )}
 
         {/* Add Member Form */}
-        {showAddForm && (hasRole('admin') || members?.find((m: Member) => m.email === user?.email)?.isClubManager) && (
+        {showAddForm && canManageMembers && (
           <Card>
             <CardHeader>
               <h2 className="text-xl font-semibold">Add New Member</h2>
@@ -228,7 +283,7 @@ export default function ClubMembers() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Club Members</h2>
-              <div className="flex items-center text-sm text-gray-600">
+              <div className="flex items-center text-sm text-muted-foreground">
                 <Users className="h-4 w-4 mr-1" />
                 {membersLoading ? '...' : members?.length || 0} members
               </div>
@@ -237,39 +292,51 @@ export default function ClubMembers() {
           <CardContent>
             {membersLoading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
               </div>
-            ) : members && members.length > 0 ? (
+            ) : sortedMembers && sortedMembers.length > 0 ? (
               <div className="space-y-3">
-                {members.map((member: Member) => {
-                  const currentUserMember = members.find((m: Member) => m.email === user?.email);
-                  const canManageMembers = hasRole('admin') || currentUserMember?.isClubManager;
+                {sortedMembers.map((member: Member) => {
                   const isCurrentUser = member.email === user?.email;
+                  const memberIsSiteAdmin = isSiteAdmin(member.email);
                   
                   return (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                      className="flex items-center justify-between p-4 bg-muted rounded-lg"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-full ${member.isClubManager ? 'bg-purple-100' : 'bg-blue-100'}`}>
-                          {member.isClubManager ? (
-                            <ShieldCheck className="h-5 w-5 text-purple-600" />
+                        <div className={`p-2 rounded-full ${
+                          memberIsSiteAdmin ? 'bg-error/10' : 
+                          member.isClubManager ? 'bg-warning/10' : 'bg-primary/10'
+                        }`}>
+                          {memberIsSiteAdmin ? (
+                            <Crown className="h-5 w-5 text-error" />
+                          ) : member.isClubManager ? (
+                            <Users className="h-5 w-5 text-warning" />
                           ) : (
-                            <User className="h-5 w-5 text-blue-600" />
+                            <User className="h-5 w-5 text-primary" />
                           )}
                         </div>
                         <div>
                           <div className="flex items-center space-x-2">
-                            <p className="font-medium text-gray-900">{member.name}</p>
-                            {member.isClubManager && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                <Shield className="h-3 w-3 mr-1" />
-                                Manager
-                              </span>
-                            )}
+                            <p className="font-medium text-foreground">{member.name}</p>
+                            <div className="flex items-center space-x-1">
+                              {memberIsSiteAdmin && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-error/10 text-error">
+                                  <Crown className="h-3 w-3 mr-1" />
+                                  Site Admin
+                                </span>
+                              )}
+                              {member.isClubManager && !memberIsSiteAdmin && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
+                                  <Users className="h-3 w-3 mr-1" />
+                                  Manager
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center text-sm text-gray-600">
+                          <div className="flex items-center text-sm text-muted-foreground">
                             <Mail className="h-4 w-4 mr-1" />
                             {member.email}
                           </div>
@@ -284,8 +351,8 @@ export default function ClubMembers() {
                             onClick={() => handleUpdateManagerStatus(member.id, !member.isClubManager)}
                             loading={updatingManager === member.id}
                             className={member.isClubManager 
-                              ? "text-orange-600 hover:text-orange-700 hover:bg-orange-50" 
-                              : "text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                              ? "text-warning hover:text-warning hover:bg-warning/10" 
+                              : "text-warning hover:text-warning hover:bg-warning/10"
                             }
                           >
                             {member.isClubManager ? (
@@ -295,7 +362,7 @@ export default function ClubMembers() {
                               </>
                             ) : (
                               <>
-                                <ShieldCheck className="h-4 w-4 mr-1" />
+                                <Users className="h-4 w-4 mr-1" />
                                 Promote
                               </>
                             )}
@@ -308,7 +375,7 @@ export default function ClubMembers() {
                             size="sm"
                             onClick={() => handleRemoveMember(member.id)}
                             loading={removingMember === member.id}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-error hover:text-error hover:bg-error/10"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -320,15 +387,17 @@ export default function ClubMembers() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No members yet</h3>
-                <p className="text-gray-600 mb-4">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No members yet</h3>
+                <p className="text-muted-foreground mb-4">
                   Add members to your club to start organizing activities
                 </p>
-                <Button onClick={() => setShowAddForm(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Member
-                </Button>
+                {canManageMembers && (
+                  <Button onClick={() => setShowAddForm(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add First Member
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>

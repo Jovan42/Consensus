@@ -191,7 +191,7 @@ export default function Voting() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </Layout>
     );
@@ -201,8 +201,8 @@ export default function Voting() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Round Not Found</h2>
-          <p className="text-gray-600 mb-6">The round you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Round Not Found</h2>
+          <p className="text-muted-foreground mb-6">The round you're looking for doesn't exist.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -218,8 +218,8 @@ export default function Voting() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Voting Not Available</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-4">Voting Not Available</h2>
+          <p className="text-muted-foreground mb-6">
             This round is currently in the {round.status} phase and voting is not available.
           </p>
           <Link href={`/clubs/${clubId}/rounds/${roundId}`}>
@@ -237,8 +237,8 @@ export default function Voting() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Recommendations</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-4">No Recommendations</h2>
+          <p className="text-muted-foreground mb-6">
             There are no recommendations to vote on yet.
           </p>
           <Link href={`/clubs/${clubId}/rounds/${roundId}`}>
@@ -273,10 +273,10 @@ export default function Voting() {
               Back to Members
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-foreground">
                 {member?.name}'s Vote
               </h1>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 {isViewOnly 
                   ? 'View voting results (read-only)' 
                   : hasVoted 
@@ -286,8 +286,8 @@ export default function Voting() {
               </p>
               {hasVoted && (
                 <div className="flex items-center mt-2">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-                  <span className="text-sm text-green-600 font-medium">Vote submitted</span>
+                  <CheckCircle className="h-4 w-4 text-success mr-1" />
+                  <span className="text-sm text-success font-medium">Vote submitted</span>
                 </div>
               )}
             </div>
@@ -305,15 +305,15 @@ export default function Voting() {
             <Alert variant="warning">
               <div className="flex items-start space-x-2">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-warning" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-yellow-800">
+                  <h3 className="text-sm font-medium text-foreground">
                     {hasRole('admin') ? 'Admin Action' : 'Club Manager Action'}
                   </h3>
-                  <p className="text-sm text-yellow-700 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     You are casting a vote on behalf of <strong>{member.name}</strong>. This is an administrative action that will be recorded in the system.
                   </p>
                 </div>
@@ -339,23 +339,23 @@ export default function Voting() {
                   const existingVote = memberVotes.find((v: Vote) => v.recommendationId === rec.id);
                   
                   return (
-                    <div key={rec.id} className="p-4 border border-gray-200 rounded-lg">
+                    <div key={rec.id} className="p-4 border border-border rounded-lg">
                       <div className="space-y-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          <h3 className="text-lg font-semibold text-foreground mb-2">
                             {rec.title}
                           </h3>
                           {rec.description && (
-                            <p className="text-gray-600 mb-3">{rec.description}</p>
+                            <p className="text-muted-foreground mb-3">{rec.description}</p>
                           )}
-                          <div className="flex items-center text-sm text-gray-500">
+                          <div className="flex items-center text-sm text-muted-foreground">
                             <User className="h-4 w-4 mr-1" />
                             Recommended by {rec.recommender?.name || 'Unknown'}
                           </div>
                         </div>
 
                         <div className="flex items-center space-x-3">
-                          <Star className="h-5 w-5 text-yellow-500" />
+                          <Star className="h-5 w-5 text-warning" />
                           <Select
                             label="Points"
                             options={votingOptions}
@@ -392,7 +392,7 @@ export default function Voting() {
                 )}
 
                 {/* Submit Button */}
-                <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                <div className="flex justify-end space-x-4 pt-6 border-t border-border">
                   <Button variant="outline" type="button" onClick={() => setSelectedMember(null)}>
                     {isViewOnly ? 'Back to Members' : hasVoted ? 'Back to Members' : 'Cancel'}
                   </Button>
@@ -427,8 +427,8 @@ export default function Voting() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Voting</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-foreground">Voting</h1>
+            <p className="text-muted-foreground">
               Current standings and member voting
             </p>
           </div>
@@ -438,7 +438,7 @@ export default function Voting() {
         <Card>
           <CardHeader>
             <h2 className="text-xl font-semibold flex items-center">
-              <Trophy className="h-5 w-5 mr-2 text-yellow-500" />
+              <Trophy className="h-5 w-5 mr-2 text-warning" />
               Current Rankings
             </h2>
           </CardHeader>
@@ -446,30 +446,30 @@ export default function Voting() {
             <div className="space-y-3">
               {rankings.map((item: any, index: number) => {
                 const getRankIcon = (rank: number) => {
-                  if (rank === 0) return <Trophy className="h-5 w-5 text-yellow-500" />;
-                  if (rank === 1) return <Medal className="h-5 w-5 text-gray-400" />;
-                  if (rank === 2) return <Award className="h-5 w-5 text-amber-600" />;
-                  return <span className="text-lg font-bold text-gray-500">#{rank + 1}</span>;
+                  if (rank === 0) return <Trophy className="h-5 w-5 text-warning" />;
+                  if (rank === 1) return <Medal className="h-5 w-5 text-muted-foreground" />;
+                  if (rank === 2) return <Award className="h-5 w-5 text-warning" />;
+                  return <span className="text-lg font-bold text-muted-foreground">#{rank + 1}</span>;
                 };
 
                 return (
-                  <div key={item.recommendation.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={item.recommendation.id} className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
                     <div className="flex items-center space-x-3">
                       {getRankIcon(index)}
                       <div>
-                        <h3 className="font-semibold text-gray-900">
+                        <h3 className="font-semibold text-foreground">
                           {item.recommendation.title}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           Recommended by {item.recommendation.recommender?.name || 'Unknown'}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-blue-600">
+                      <div className="text-lg font-bold text-primary">
                         {item.totalPoints} points
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         {item.voteCount} vote{item.voteCount !== 1 ? 's' : ''}
                       </div>
                     </div>
@@ -484,10 +484,10 @@ export default function Voting() {
         <Card>
           <CardHeader>
             <h2 className="text-xl font-semibold flex items-center">
-              <User className="h-5 w-5 mr-2 text-blue-500" />
+              <User className="h-5 w-5 mr-2 text-primary" />
               Members
             </h2>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Click on a member to cast your vote, view your submitted vote, or view voting results
             </p>
           </CardHeader>
@@ -505,42 +505,42 @@ export default function Voting() {
                     key={member.id}
                     className={`p-4 border rounded-lg transition-colors ${
                       !canView
-                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+                        ? 'border-border bg-muted cursor-not-allowed opacity-60'
                         : hasVoted 
-                          ? 'border-green-200 bg-green-50 hover:bg-green-100 cursor-pointer' 
-                          : 'border-gray-200 bg-white hover:bg-gray-50 cursor-pointer'
+                          ? 'border-success/20 bg-success/10 hover:bg-success/20 cursor-pointer' 
+                          : 'border-border bg-card hover:bg-muted cursor-pointer'
                     }`}
                     onClick={() => canView && setSelectedMember(member.id)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          hasVoted ? 'bg-green-100' : 'bg-gray-100'
+                          hasVoted ? 'bg-success/10' : 'bg-muted'
                         }`}>
-                          <User className={`h-5 w-5 ${hasVoted ? 'text-green-600' : 'text-gray-600'}`} />
+                          <User className={`h-5 w-5 ${hasVoted ? 'text-success' : 'text-muted-foreground'}`} />
                         </div>
                         <div>
                           <div className="flex items-center space-x-2">
-                            <h3 className="font-semibold text-gray-900">{member.name}</h3>
+                            <h3 className="font-semibold text-foreground">{member.name}</h3>
                             {isAdminAction && (
-                              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                              <span className="px-2 py-1 bg-warning/10 text-warning text-xs font-medium rounded-full">
                                 Admin Action
                               </span>
                             )}
                             {isViewOnly && hasVoted && (
-                              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                              <span className="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
                                 View Only
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600">{member.email}</p>
+                          <p className="text-sm text-muted-foreground">{member.email}</p>
                           {!canVote && !hasVoted && (
-                            <p className="text-xs text-red-600 mt-1">
+                            <p className="text-xs text-error mt-1">
                               You can only vote for yourself
                             </p>
                           )}
                           {isViewOnly && hasVoted && (
-                            <p className="text-xs text-blue-600 mt-1">
+                            <p className="text-xs text-primary mt-1">
                               View voting results
                             </p>
                           )}
@@ -549,13 +549,13 @@ export default function Voting() {
                       <div className="flex items-center space-x-2">
                         {hasVoted ? (
                           <>
-                            <CheckCircle className="h-5 w-5 text-green-500" />
-                            <span className="text-sm text-green-600 font-medium">Voted</span>
+                            <CheckCircle className="h-5 w-5 text-success" />
+                            <span className="text-sm text-success font-medium">Voted</span>
                           </>
                         ) : canVote ? (
-                          <VoteIcon className="h-5 w-5 text-gray-400" />
+                          <VoteIcon className="h-5 w-5 text-muted-foreground" />
                         ) : (
-                          <VoteIcon className="h-5 w-5 text-gray-300" />
+                          <VoteIcon className="h-5 w-5 text-muted-foreground" />
                         )}
                       </div>
                     </div>

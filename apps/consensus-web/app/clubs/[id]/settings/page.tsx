@@ -108,7 +108,7 @@ export default function ClubSettings() {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
       </Layout>
     );
@@ -118,8 +118,8 @@ export default function ClubSettings() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Club Not Found</h2>
-          <p className="text-gray-600 mb-6">The club you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Club Not Found</h2>
+          <p className="text-muted-foreground mb-6">The club you're looking for doesn't exist.</p>
           <Link href="/">
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -135,8 +135,8 @@ export default function ClubSettings() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
-          <p className="text-gray-600 mb-6">You don't have permission to edit this club's settings.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Access Denied</h2>
+          <p className="text-muted-foreground mb-6">You don't have permission to edit this club's settings.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -161,8 +161,8 @@ export default function ClubSettings() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Club Settings</h1>
-              <p className="text-gray-600">{club.name}</p>
+              <h1 className="text-3xl font-bold text-foreground">Club Settings</h1>
+              <p className="text-muted-foreground">{club.name}</p>
             </div>
           </div>
         </div>
@@ -184,14 +184,14 @@ export default function ClubSettings() {
         {/* Club Settings Form */}
         <Card>
           <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900">General Settings</h2>
-            <p className="text-gray-600">Update your club's basic information</p>
+            <h2 className="text-xl font-semibold text-foreground">General Settings</h2>
+            <p className="text-muted-foreground">Update your club's basic information</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSave} className="space-y-6">
               {/* Club Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
                   Club Name
                 </label>
                 <input
@@ -201,14 +201,14 @@ export default function ClubSettings() {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring bg-card text-foreground"
                   placeholder="Enter club name"
                 />
               </div>
 
               {/* Club Type */}
               <div>
-                <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="type" className="block text-sm font-medium text-foreground mb-2">
                   Club Type
                 </label>
                 <select
@@ -216,7 +216,7 @@ export default function ClubSettings() {
                   name="type"
                   value={formData.type}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring bg-card text-foreground"
                 >
                   <option value="book">Book Club</option>
                   <option value="movie">Movie Club</option>
@@ -228,7 +228,7 @@ export default function ClubSettings() {
 
               {/* Description */}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">
                   Description
                 </label>
                 <textarea
@@ -237,7 +237,7 @@ export default function ClubSettings() {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring bg-card text-foreground"
                   placeholder="Describe your club's purpose and interests"
                 />
               </div>
@@ -262,17 +262,17 @@ export default function ClubSettings() {
         </Card>
 
         {/* Danger Zone */}
-        <Card className="border-red-200">
+        <Card className="border-error/20">
           <CardHeader>
-            <h2 className="text-xl font-semibold text-red-600">Danger Zone</h2>
-            <p className="text-gray-600">Irreversible and destructive actions</p>
+            <h2 className="text-xl font-semibold text-error">Danger Zone</h2>
+            <p className="text-muted-foreground">Irreversible and destructive actions</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
+              <div className="flex items-center justify-between p-4 border border-error/20 rounded-lg bg-error/10">
                 <div>
-                  <h3 className="text-lg font-medium text-red-800">Delete Club</h3>
-                  <p className="text-red-600 text-sm">
+                  <h3 className="text-lg font-medium text-error">Delete Club</h3>
+                  <p className="text-error text-sm">
                     Permanently delete this club and all its data. This action cannot be undone.
                   </p>
                 </div>
@@ -292,12 +292,12 @@ export default function ClubSettings() {
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4">
               <div className="flex items-center mb-4">
-                <AlertTriangle className="h-6 w-6 text-red-600 mr-3" />
-                <h3 className="text-lg font-semibold text-gray-900">Delete Club</h3>
+                <AlertTriangle className="h-6 w-6 text-error mr-3" />
+                <h3 className="text-lg font-semibold text-foreground">Delete Club</h3>
               </div>
-              <p className="text-gray-600 mb-6">
+              <p className="text-muted-foreground mb-6">
                 Are you sure you want to delete "{club.name}"? This will permanently remove the club 
                 and all its data including rounds, recommendations, and votes. This action cannot be undone.
               </p>

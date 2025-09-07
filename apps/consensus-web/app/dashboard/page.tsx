@@ -76,7 +76,7 @@ const DashboardPage: React.FC = () => {
                     className="relative group bg-card p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-ring rounded-lg border border-border hover:border-border/80 transition-colors"
                   >
                     <div>
-                      <span className="rounded-lg inline-flex p-3 bg-purple-50 text-purple-700 ring-4 ring-background">
+                      <span className="rounded-lg inline-flex p-3 bg-primary/10 text-primary ring-4 ring-background">
                         <Calendar className="h-6 w-6" />
                       </span>
                     </div>

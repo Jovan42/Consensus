@@ -6,6 +6,7 @@ import { Round } from '../entities/Round';
 import { Recommendation } from '../entities/Recommendation';
 import { Vote } from '../entities/Vote';
 import { Completion } from '../entities/Completion';
+import { MemberNote } from '../entities/MemberNote';
 
 config();
 
@@ -14,7 +15,7 @@ export const AppDataSource = new DataSource({
   url: process.env.DATABASE_URL,
   synchronize: process.env.NODE_ENV === 'development', // Only in development
   logging: process.env.NODE_ENV === 'development',
-  entities: [Club, Member, Round, Recommendation, Vote, Completion],
+  entities: [Club, Member, Round, Recommendation, Vote, Completion, MemberNote],
   migrations: [],
   subscribers: [],
 });

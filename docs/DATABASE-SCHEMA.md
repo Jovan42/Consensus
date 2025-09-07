@@ -122,6 +122,25 @@ Tracks completion status of winning recommendations by members.
 | `createdAt` | `timestamp` | NO | `now()` | Creation timestamp |
 | `updatedAt` | `timestamp` | NO | `now()` | Last update timestamp |
 
+### 7. `member_notes`
+
+Stores private notes that members can keep for each round. Notes are only visible to the member who created them.
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key, unique identifier |
+| `content` | `text` | YES | NULL | Note content |
+| `title` | `character varying(255)` | YES | NULL | Optional note title |
+| `member_id` | `uuid` | NO | NULL | Foreign key to `members.id` |
+| `round_id` | `uuid` | NO | NULL | Foreign key to `rounds.id` |
+| `createdAt` | `timestamp` | NO | `now()` | Creation timestamp |
+| `updatedAt` | `timestamp` | NO | `now()` | Last update timestamp |
+
+**Indexes:**
+- `IDX_member_notes_member_id` - Index on `member_id` for performance
+- `IDX_member_notes_round_id` - Index on `round_id` for performance  
+- `IDX_member_notes_member_round_unique` - Unique constraint on `(member_id, round_id)` to ensure one note per member per round
+
 ## Relationships
 
 ### Foreign Key Relationships
@@ -138,6 +157,8 @@ Tracks completion status of winning recommendations by members.
 | `votes` | `recommendationId` | `recommendations` | `id` | What was voted on |
 | `completions` | `memberId` | `members` | `id` | Who completed the recommendation |
 | `completions` | `recommendationId` | `recommendations` | `id` | What was completed |
+| `member_notes` | `member_id` | `members` | `id` | Note belongs to a member |
+| `member_notes` | `round_id` | `rounds` | `id` | Note belongs to a round |
 
 ## Indexes
 

@@ -160,8 +160,8 @@ export default function ClubsPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <Users className="h-6 w-6 text-blue-600" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Total Clubs</p>
@@ -174,8 +174,8 @@ export default function ClubsPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <div className="p-2 bg-green-50 rounded-lg">
-                  <BookOpen className="h-6 w-6 text-green-600" />
+                <div className="p-2 bg-success/10 rounded-lg">
+                  <BookOpen className="h-6 w-6 text-success" />
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Book Clubs</p>
@@ -190,8 +190,8 @@ export default function ClubsPage() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <div className="p-2 bg-red-50 rounded-lg">
-                  <Film className="h-6 w-6 text-red-600" />
+                <div className="p-2 bg-error/10 rounded-lg">
+                  <Film className="h-6 w-6 text-error" />
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-muted-foreground">Movie Clubs</p>
@@ -219,7 +219,7 @@ export default function ClubsPage() {
                         <div className="flex items-center space-x-2">
                           <h3 className="text-lg font-semibold text-foreground">{club.name}</h3>
                           {user && club.members?.some((member: any) => member.email === user.email) && (
-                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                            <span className="px-2 py-1 bg-success/10 text-success text-xs font-medium rounded-full">
                               Member
                             </span>
                           )}
@@ -249,7 +249,7 @@ export default function ClubsPage() {
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-4 pt-4 border-t border-border">
                     <Link href={`/clubs/${club.id}`}>
                       <Button className="w-full">
                         View Club
@@ -263,7 +263,7 @@ export default function ClubsPage() {
         ) : (
           <Card>
             <CardContent className="text-center py-12">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-foreground mb-2">
                 {isAdmin && showOnlyMyClubs ? 'No Clubs Found' : 'No Clubs Available'}
               </h3>

@@ -141,55 +141,55 @@ export const semanticColors = {
     focus: 'hsl(var(--ring))',
   },
   
-  // Status colors
+  // Status colors (using semantic colors that adapt to theme)
   status: {
     success: {
-      background: baseColors.green[50],
-      border: baseColors.green[200],
-      text: baseColors.green[800],
-      icon: baseColors.green[600],
+      background: 'hsl(var(--success))',
+      border: 'hsl(var(--success))',
+      text: 'hsl(var(--success))',
+      icon: 'hsl(var(--success))',
     },
     error: {
-      background: baseColors.red[50],
-      border: baseColors.red[200],
-      text: baseColors.red[800],
-      icon: baseColors.red[600],
+      background: 'hsl(var(--destructive))',
+      border: 'hsl(var(--destructive))',
+      text: 'hsl(var(--destructive))',
+      icon: 'hsl(var(--destructive))',
     },
     warning: {
-      background: baseColors.yellow[50],
-      border: baseColors.yellow[200],
-      text: baseColors.yellow[800],
-      icon: baseColors.yellow[600],
+      background: 'hsl(var(--warning))',
+      border: 'hsl(var(--warning))',
+      text: 'hsl(var(--warning))',
+      icon: 'hsl(var(--warning))',
     },
     info: {
-      background: baseColors.blue[50],
-      border: baseColors.blue[200],
-      text: baseColors.blue[800],
-      icon: baseColors.blue[600],
+      background: 'hsl(var(--primary))',
+      border: 'hsl(var(--primary))',
+      text: 'hsl(var(--primary))',
+      icon: 'hsl(var(--primary))',
     },
   },
   
-  // Role-based colors
+  // Role-based colors (using semantic colors that adapt to theme)
   roles: {
     admin: {
-      background: baseColors.red[100],
-      text: baseColors.red[800],
-      icon: baseColors.red[600],
+      background: 'hsl(var(--destructive))',
+      text: 'hsl(var(--destructive))',
+      icon: 'hsl(var(--destructive))',
     },
     manager: {
-      background: baseColors.blue[100],
-      text: baseColors.blue[800],
-      icon: baseColors.blue[600],
+      background: 'hsl(var(--primary))',
+      text: 'hsl(var(--primary))',
+      icon: 'hsl(var(--primary))',
     },
     member: {
-      background: baseColors.gray[100],
-      text: baseColors.gray[800],
-      icon: baseColors.gray[600],
+      background: 'hsl(var(--muted))',
+      text: 'hsl(var(--foreground))',
+      icon: 'hsl(var(--muted-foreground))',
     },
     test: {
-      background: baseColors.yellow[100],
-      text: baseColors.yellow[800],
-      icon: baseColors.yellow[600],
+      background: 'hsl(var(--warning))',
+      text: 'hsl(var(--warning))',
+      icon: 'hsl(var(--warning))',
     },
   },
   

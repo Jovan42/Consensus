@@ -111,7 +111,7 @@ export default function CompletionTracking() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </Layout>
     );
@@ -121,8 +121,8 @@ export default function CompletionTracking() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Round Not Found</h2>
-          <p className="text-gray-600 mb-6">The round you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Round Not Found</h2>
+          <p className="text-muted-foreground mb-6">The round you're looking for doesn't exist.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -138,8 +138,8 @@ export default function CompletionTracking() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Winner Selected</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-4">No Winner Selected</h2>
+          <p className="text-muted-foreground mb-6">
             This round doesn't have a winning recommendation yet.
           </p>
           <Link href={`/clubs/${clubId}/rounds/${roundId}`}>
@@ -168,8 +168,8 @@ export default function CompletionTracking() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Members Found</h2>
-          <p className="text-gray-600 mb-6">This club doesn't have any members yet.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">No Members Found</h2>
+          <p className="text-muted-foreground mb-6">This club doesn't have any members yet.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -193,8 +193,8 @@ export default function CompletionTracking() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Completion Tracking</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-foreground">Completion Tracking</h1>
+            <p className="text-muted-foreground">
               Track who has completed the winning recommendation
             </p>
           </div>
@@ -204,17 +204,17 @@ export default function CompletionTracking() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-start space-x-4">
-              <div className="p-3 bg-yellow-100 rounded-full">
-                <Trophy className="h-8 w-8 text-yellow-600" />
+              <div className="p-3 bg-warning/10 rounded-full">
+                <Trophy className="h-8 w-8 text-warning" />
               </div>
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
                   {winner.title}
                 </h2>
                 {winner.description && (
-                  <p className="text-gray-600 mb-3">{winner.description}</p>
+                  <p className="text-muted-foreground mb-3">{winner.description}</p>
                 )}
-                <div className="flex items-center text-sm text-gray-500">
+                <div className="flex items-center text-sm text-muted-foreground">
                   <User className="h-4 w-4 mr-1" />
                   Recommended by {winner.recommender?.name || 'Unknown'}
                 </div>
@@ -232,19 +232,19 @@ export default function CompletionTracking() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <Users className="h-6 w-6 text-blue-600" />
-                  <span className="text-lg font-medium text-gray-900">
+                  <Users className="h-6 w-6 text-primary" />
+                  <span className="text-lg font-medium text-foreground">
                     {completedCount} of {totalCount} members completed
                   </span>
                 </div>
-                <span className="text-2xl font-bold text-blue-600">
+                <span className="text-2xl font-bold text-primary">
                   {completionPercentage}%
                 </span>
               </div>
               
-              <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className="w-full bg-muted-foreground/20 rounded-full h-3">
                 <div
-                  className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                  className="bg-primary h-3 rounded-full transition-all duration-300"
                   style={{ width: `${completionPercentage}%` }}
                 />
               </div>
@@ -264,15 +264,15 @@ export default function CompletionTracking() {
           <Alert variant="warning">
             <div className="flex items-start space-x-2">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5 text-warning" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-yellow-800">
+                <h3 className="text-sm font-medium text-foreground">
                   {hasRole('admin') ? 'Admin Mode' : 'Club Manager Mode'}
                 </h3>
-                <p className="text-sm text-yellow-700 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   You can mark completion for any member. This is an administrative action that will be recorded in the system.
                 </p>
               </div>
@@ -297,25 +297,25 @@ export default function CompletionTracking() {
                   <div
                     key={member.id}
                     className={`flex items-center justify-between p-4 rounded-lg ${
-                      canMarkCompletion ? 'bg-gray-50' : 'bg-gray-100 opacity-60'
+                      canMarkCompletion ? 'bg-muted' : 'bg-muted opacity-60'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-blue-100 rounded-full">
-                        <User className="h-5 w-5 text-blue-600" />
+                      <div className="p-2 bg-primary/10 rounded-full">
+                        <User className="h-5 w-5 text-primary" />
                       </div>
                       <div>
                         <div className="flex items-center space-x-2">
-                          <p className="font-medium text-gray-900">{member.name}</p>
+                          <p className="font-medium text-foreground">{member.name}</p>
                           {isAdminAction && (
-                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                            <span className="px-2 py-1 bg-warning/10 text-warning text-xs font-medium rounded-full">
                               Admin Action
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600">{member.email}</p>
+                        <p className="text-sm text-muted-foreground">{member.email}</p>
                         {!canMarkCompletion && (
-                          <p className="text-xs text-red-600 mt-1">
+                          <p className="text-xs text-error mt-1">
                             You can only mark completion for yourself
                           </p>
                         )}
@@ -325,12 +325,12 @@ export default function CompletionTracking() {
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center space-x-2">
                         {isCompleted ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <CheckCircle className="h-5 w-5 text-success" />
                         ) : (
-                          <Circle className="h-5 w-5 text-gray-400" />
+                          <Circle className="h-5 w-5 text-muted-foreground" />
                         )}
                         <span className={`text-sm font-medium ${
-                          isCompleted ? 'text-green-600' : 'text-gray-500'
+                          isCompleted ? 'text-success' : 'text-muted-foreground'
                         }`}>
                           {isCompleted ? 'Completed' : 'Not completed'}
                         </span>
@@ -368,12 +368,12 @@ export default function CompletionTracking() {
             <CardContent className="p-6">
               <div className="text-center">
                 <div className="flex justify-center mb-4">
-                  <CheckCircle className="h-12 w-12 text-green-600" />
+                  <CheckCircle className="h-12 w-12 text-success" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-foreground mb-2">
                   All Members Completed!
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   Everyone has completed the winning recommendation. You can now finish this round and start a new one.
                 </p>
                 <div className="flex justify-center space-x-4">
@@ -390,7 +390,7 @@ export default function CompletionTracking() {
                       Start New Round
                     </Button>
                   ) : (
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       Only {round?.currentRecommender?.name || 'the current recommender'} or admins can start a new round.
                     </p>
                   )}

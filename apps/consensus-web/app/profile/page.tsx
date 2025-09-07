@@ -12,6 +12,7 @@ import {
   Mail, 
   Calendar,
   Shield,
+  Crown,
   Edit,
   Save,
   X,
@@ -174,13 +175,17 @@ export default function ProfilePage() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-foreground">Role</label>
                     <div className="flex items-center space-x-2">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
+                      {user.role === 'admin' ? (
+                        <Crown className="h-4 w-4 text-error" />
+                      ) : (
+                        <Shield className="h-4 w-4 text-muted-foreground" />
+                      )}
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         user.role === 'admin' 
-                          ? 'bg-error-100 text-error-800' 
-                          : 'bg-info-100 text-info-800'
+                          ? 'bg-error/10 text-error' 
+                          : 'bg-primary/10 text-primary'
                       }`}>
-                        {user.role === 'admin' ? 'Administrator' : 'Member'}
+                        {user.role === 'admin' ? 'Site Admin' : 'Member'}
                       </span>
                     </div>
                   </div>

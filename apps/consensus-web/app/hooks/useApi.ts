@@ -1,7 +1,7 @@
 'use client';
 
 import useSWR from 'swr';
-import { Club, Member, Round, Recommendation, Vote, Completion } from '../context/AppContext';
+import { Club, Member, Round, Recommendation, Vote, Completion, MemberNote } from '../context/AppContext';
 import { authenticatedFetch } from '../utils/authenticatedFetch';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
@@ -304,5 +304,57 @@ export function useUpdateCompletion() {
       isCompleted,
     });
     return response.data;
+  };
+}
+
+// Member Notes API functions
+export function useMemberNote(roundId: string) {
+  const { data, error, isLoading, mutate } = useSWR(
+    roundId ? `/member-notes/round/${roundId}` : null,
+    async (url: string) => {
+      try {
+        return await api.get(url);
+      } catch (error: any) {
+        // Handle 404 as "note doesn't exist" - not an error
+        if (error.message?.includes('404')) {
+          return null;
+        }
+        // Re-throw other errors
+        throw error;
+      }
+    }
+  );
+  return {
+    note: data as MemberNote | null,
+    error,
+    isLoading,
+    mutate,
+  };
+}
+
+export function useMemberNotes() {
+  const { data, error, isLoading, mutate } = useSWR(
+    '/member-notes',
+    api.get
+  );
+  return {
+    notes: data || [],
+    error,
+    isLoading,
+    mutate,
+  };
+}
+
+export function useUpdateMemberNote() {
+  return async (noteId: string, updateData: { title?: string; content?: string }) => {
+    const response = await api.put(`/member-notes/${noteId}`, updateData);
+    return response;
+  };
+}
+
+export function useDeleteMemberNote() {
+  return async (noteId: string) => {
+    const response = await api.delete(`/member-notes/${noteId}`);
+    return response;
   };
 }

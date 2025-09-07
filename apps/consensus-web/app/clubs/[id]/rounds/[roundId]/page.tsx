@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '../../../../components/ui/Card';
 import { Button } from '../../../../components/ui/Button';
 import { Alert } from '../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useRoundVotes, useUpdateRoundStatus, useCloseVoting, useRoundCompletions, useClubMembers } from '../../../../hooks/useApi';
+import { NotesSection } from '../../../../components/ui/NotesSection';
 import { Recommendation, Vote, Completion, Member } from '../../../../context/AppContext';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { 
@@ -38,6 +39,10 @@ export default function RoundDetail() {
   // Check if current user is the recommender
   const isCurrentRecommender = user && round?.currentRecommender && 
     user.email === round.currentRecommender.email;
+
+  // Check if current user is a member of the club
+  const currentUserMember = members?.find((member: Member) => member.email === user?.email);
+  const isMember = !!currentUserMember || hasRole('admin');
 
   // Check if current user can add recommendations (recommender or admin)
   const canAddRecommendations = isCurrentRecommender || hasRole('admin');
@@ -84,10 +89,10 @@ export default function RoundDetail() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'recommending': return 'bg-blue-100 text-blue-800';
-      case 'voting': return 'bg-yellow-100 text-yellow-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'recommending': return 'bg-primary/10 text-primary';
+      case 'voting': return 'bg-warning/10 text-warning';
+      case 'completed': return 'bg-success/10 text-success';
+      default: return 'bg-muted text-foreground';
     }
   };
 
@@ -104,7 +109,7 @@ export default function RoundDetail() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </Layout>
     );
@@ -114,8 +119,8 @@ export default function RoundDetail() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Round Not Found</h2>
-          <p className="text-gray-600 mb-6">The round you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Round Not Found</h2>
+          <p className="text-muted-foreground mb-6">The round you're looking for doesn't exist.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -143,8 +148,8 @@ export default function RoundDetail() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Round Details</h1>
-              <p className="text-gray-600">
+              <h1 className="text-3xl font-bold text-foreground">Round Details</h1>
+              <p className="text-muted-foreground">
                 Started {new Date(round.createdAt).toLocaleDateString()}
               </p>
             </div>
@@ -162,10 +167,10 @@ export default function RoundDetail() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <User className="h-8 w-8 text-blue-600" />
+                <User className="h-8 w-8 text-primary" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Recommender</p>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">Recommender</p>
+                  <p className="text-lg font-semibold text-foreground">
                     {round.currentRecommender?.name || 'Unknown'}
                   </p>
                 </div>
@@ -176,10 +181,10 @@ export default function RoundDetail() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Calendar className="h-8 w-8 text-green-600" />
+                <Calendar className="h-8 w-8 text-success" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Recommendations</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">Recommendations</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {recommendationsLoading ? '...' : recommendations?.length || 0}
                   </p>
                 </div>
@@ -190,10 +195,10 @@ export default function RoundDetail() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Users className="h-8 w-8 text-purple-600" />
+                <Users className="h-8 w-8 text-primary" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Votes</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">Votes</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {votesLoading ? '...' : votes?.length || 0}
                   </p>
                 </div>
@@ -219,7 +224,7 @@ export default function RoundDetail() {
           <CardContent>
             {recommendationsLoading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
               </div>
             ) : recommendations && recommendations.length > 0 ? (
               <div className="space-y-4">
@@ -232,17 +237,17 @@ export default function RoundDetail() {
                     <div
                       key={rec.id}
                       className={`p-4 rounded-lg border-2 ${
-                        isWinner ? 'border-yellow-300 bg-yellow-50' : 'border-gray-200 bg-white'
+                        isWinner ? 'border-warning bg-warning/10' : 'border-border bg-muted'
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className={`text-lg font-semibold ${isWinner ? 'text-foreground' : 'text-foreground'}`}>
                               {rec.title}
                             </h3>
                             {isWinner && (
-                              <div className="flex items-center text-yellow-600">
+                              <div className="flex items-center text-warning">
                                 <Trophy className="h-4 w-4 mr-1" />
                                 <span className="text-sm font-medium">Winner</span>
                               </div>
@@ -250,10 +255,10 @@ export default function RoundDetail() {
                           </div>
                           
                           {rec.description && (
-                            <p className="text-gray-600 mb-3">{rec.description}</p>
+                            <p className={`mb-3 ${isWinner ? 'text-foreground' : 'text-muted-foreground'}`}>{rec.description}</p>
                           )}
                           
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <div className={`flex items-center space-x-4 text-sm ${isWinner ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
                             <span>By {rec.recommender?.name || 'Unknown'}</span>
                             <span>•</span>
                             <span>{totalPoints} points</span>
@@ -269,7 +274,7 @@ export default function RoundDetail() {
                 
                 {/* Single Vote Button */}
                 {round.status === 'voting' && (
-                  <div className="pt-4 border-t border-gray-200">
+                  <div className="pt-4 border-t border-border">
                     <div className="flex justify-center">
                       <Link href={`/clubs/${clubId}/rounds/${roundId}/voting`}>
                         <Button>
@@ -283,9 +288,9 @@ export default function RoundDetail() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No recommendations yet</h3>
-                <p className="text-gray-600 mb-4">
+                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No recommendations yet</h3>
+                <p className="text-muted-foreground mb-4">
                   {round.currentRecommender?.name || 'The recommender'} hasn't added any recommendations yet.
                 </p>
                 {round.status === 'recommending' && canAddRecommendations && (
@@ -296,7 +301,7 @@ export default function RoundDetail() {
                   </Link>
                 )}
                 {round.status === 'recommending' && !canAddRecommendations && (
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-muted-foreground">
                     Only {round.currentRecommender?.name || 'the current recommender'} can add recommendations.
                   </div>
                 )}
@@ -310,10 +315,10 @@ export default function RoundDetail() {
           <Card>
             <CardContent className="p-6">
               <div className="text-center">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-foreground mb-2">
                   Ready to start voting?
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   All recommendations have been added. You can now start the voting phase.
                 </p>
                 {(hasRole('admin') || isCurrentRecommender) ? (
@@ -331,7 +336,7 @@ export default function RoundDetail() {
                     Start Voting
                   </Button>
                 ) : (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     Only {round.currentRecommender?.name || 'the current recommender'} or admins can start voting.
                   </p>
                 )}
@@ -344,10 +349,10 @@ export default function RoundDetail() {
           <Card>
             <CardContent className="p-6">
               <div className="text-center">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <h3 className="text-lg font-medium text-foreground mb-2">
                   Voting in progress
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   {votes && votes.length > 0 
                     ? `${votes.length} vote(s) have been cast. Continue voting or close the round when ready.`
                     : 'Voting is now open. Members can cast their votes.'
@@ -385,12 +390,12 @@ export default function RoundDetail() {
             <CardContent className="p-6">
               <div className="text-center">
                 <div className="flex justify-center mb-4">
-                  <Trophy className="h-12 w-12 text-yellow-600" />
+                  <Trophy className="h-12 w-12 text-warning" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-foreground mb-2">
                   Voting Complete!
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   <strong>{winner.recommendation.title}</strong> won with {winner.totalPoints} points.
                   <br />
                   Now everyone can track their completion of this item.
@@ -400,30 +405,30 @@ export default function RoundDetail() {
                 {(() => {
                   const progress = getCompletionProgress();
                   return (
-                    <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div className="mb-6 p-4 bg-muted rounded-lg">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">Completion Progress</span>
-                        <span className="text-sm text-gray-600">{progress.percentage}%</span>
+                        <span className="text-sm font-medium text-foreground">Completion Progress</span>
+                        <span className="text-sm text-muted-foreground">{progress.percentage}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                      <div className="w-full bg-muted-foreground/20 rounded-full h-2 mb-2">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          className="bg-primary h-2 rounded-full transition-all duration-300"
                           style={{ width: `${progress.percentage}%` }}
                         ></div>
                       </div>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {progress.completed} of {progress.total} members completed
                       </p>
                       
                       {/* Show missing members if 3 or fewer */}
                       {progress.missingMembers.length > 0 && progress.missingMembers.length <= 3 && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <p className="text-sm font-medium text-gray-700 mb-2">Still waiting for:</p>
+                        <div className="mt-3 pt-3 border-t border-border">
+                          <p className="text-sm font-medium text-foreground mb-2">Still waiting for:</p>
                           <div className="space-y-1">
                             {progress.missingMembers.map((member: Member) => (
                               <div key={member.id} className="flex items-center space-x-2">
-                                <User className="h-4 w-4 text-gray-400" />
-                                <span className="text-sm text-gray-600">{member.name}</span>
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">{member.name}</span>
                               </div>
                             ))}
                           </div>
@@ -439,6 +444,19 @@ export default function RoundDetail() {
                   </Button>
                 </Link>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Private Notes Section */}
+        {isMember && (
+          <Card>
+            <CardContent className="p-6">
+              <NotesSection
+                roundId={roundId}
+                roundTitle={round?.title || 'Round'}
+                isMember={isMember}
+              />
             </CardContent>
           </Card>
         )}

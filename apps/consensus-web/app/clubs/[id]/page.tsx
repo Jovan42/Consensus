@@ -80,7 +80,7 @@ export default function ClubDetail() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </Layout>
     );
@@ -90,8 +90,8 @@ export default function ClubDetail() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Club Not Found</h2>
-          <p className="text-gray-600 mb-6">The club you're looking for doesn't exist or has been deleted.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Club Not Found</h2>
+          <p className="text-muted-foreground mb-6">The club you're looking for doesn't exist or has been deleted.</p>
           <Link href="/">
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -119,26 +119,27 @@ export default function ClubDetail() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{club.name}</h1>
-              <p className="text-gray-600 capitalize">{club.type} club</p>
+              <h1 className="text-3xl font-bold text-foreground">{club.name}</h1>
+              <p className="text-muted-foreground capitalize">{club.type} club</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
+            {/* Members button - visible to all members */}
+            <Link href={`/clubs/${clubId}/members`}>
+              <Button variant="outline">
+                <Users className="h-4 w-4 mr-2" />
+                {hasRole('admin') || currentUserMember?.isClubManager ? 'Manage Members' : 'View Members'}
+              </Button>
+            </Link>
+            
+            {/* Settings button - only for managers and admins */}
             {(hasRole('admin') || currentUserMember?.isClubManager) && (
-              <>
-                <Link href={`/clubs/${clubId}/members`}>
-                  <Button variant="outline">
-                    <Users className="h-4 w-4 mr-2" />
-                    Manage Members
-                  </Button>
-                </Link>
-                <Link href={`/clubs/${clubId}/settings`}>
-                  <Button variant="outline">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
-                  </Button>
-                </Link>
-              </>
+              <Link href={`/clubs/${clubId}/settings`}>
+                <Button variant="outline">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
             )}
           </div>
         </div>
@@ -155,10 +156,10 @@ export default function ClubDetail() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Users className="h-8 w-8 text-blue-600" />
+                <Users className="h-8 w-8 text-primary" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Members</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">Members</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {membersLoading ? '...' : members?.length || 0}
                   </p>
                 </div>
@@ -169,10 +170,10 @@ export default function ClubDetail() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Calendar className="h-8 w-8 text-green-600" />
+                <Calendar className="h-8 w-8 text-success" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Rounds</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">Total Rounds</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {roundsLoading ? '...' : rounds?.length || 0}
                   </p>
                 </div>
@@ -183,10 +184,10 @@ export default function ClubDetail() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
-                <Trophy className="h-8 w-8 text-yellow-600" />
+                <Trophy className="h-8 w-8 text-warning" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Completed</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                  <p className="text-2xl font-bold text-foreground">
                     {roundsLoading ? '...' : completedRounds.length}
                   </p>
                 </div>
@@ -202,9 +203,9 @@ export default function ClubDetail() {
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Current Round</h2>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  currentRound.status === 'recommending' ? 'bg-blue-100 text-blue-800' :
-                  currentRound.status === 'voting' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-green-100 text-green-800'
+                  currentRound.status === 'recommending' ? 'bg-primary/10 text-primary' :
+                  currentRound.status === 'voting' ? 'bg-warning/10 text-warning' :
+                  'bg-success/10 text-success'
                 }`}>
                   {currentRound.status}
                 </span>
@@ -212,7 +213,7 @@ export default function ClubDetail() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm text-muted-foreground">
                   <User className="h-4 w-4 mr-2" />
                   Current recommender: {currentRound.currentRecommender?.name || 'Unknown'}
                 </div>
@@ -254,7 +255,7 @@ export default function ClubDetail() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   {members && members.length > 0 
                     ? 'Ready to start a new round? The first member will be the recommender.'
                     : 'Add at least one member to start a round.'
@@ -285,38 +286,38 @@ export default function ClubDetail() {
             <CardContent>
               <div className="space-y-4">
                 {completedRounds.slice(0, 5).map((round: any) => (
-                  <div key={round.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div key={round.id} className="p-4 bg-muted rounded-lg border border-border">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-3 flex-1">
-                        <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                        <CheckCircle className="h-5 w-5 text-success mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2 mb-1">
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-foreground">
                               Round by {round.currentRecommender?.name || 'Unknown'}
                             </p>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success/10 text-success">
                               Completed
                             </span>
                           </div>
                           
                           {round.winningRecommendation ? (
                             <div className="mb-2">
-                              <p className="text-sm font-medium text-gray-700 mb-1">
+                              <p className="text-sm font-medium text-foreground mb-1">
                                 🏆 Winner: {round.winningRecommendation.title}
                               </p>
                               {round.winningRecommendation.description && (
-                                <p className="text-sm text-gray-600 truncate">
+                                <p className="text-sm text-muted-foreground truncate">
                                   {round.winningRecommendation.description}
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <p className="text-sm text-gray-500 mb-2">
+                            <p className="text-sm text-muted-foreground mb-2">
                               No winner selected
                             </p>
                           )}
                           
-                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                             <span className="flex items-center">
                               <Calendar className="h-3 w-3 mr-1" />
                               {new Date(round.createdAt).toLocaleDateString()}

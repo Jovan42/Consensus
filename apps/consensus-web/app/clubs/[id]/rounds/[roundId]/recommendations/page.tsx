@@ -95,7 +95,7 @@ export default function AddRecommendations() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </Layout>
     );
@@ -105,8 +105,8 @@ export default function AddRecommendations() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Round Not Found</h2>
-          <p className="text-gray-600 mb-6">The round you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Round Not Found</h2>
+          <p className="text-muted-foreground mb-6">The round you're looking for doesn't exist.</p>
           <Link href={`/clubs/${clubId}`}>
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -122,8 +122,8 @@ export default function AddRecommendations() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Round Not in Recommending Phase</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-4">Round Not in Recommending Phase</h2>
+          <p className="text-muted-foreground mb-6">
             This round is currently in the {round.status} phase and cannot accept new recommendations.
           </p>
           <Link href={`/clubs/${clubId}/rounds/${roundId}`}>
@@ -141,8 +141,8 @@ export default function AddRecommendations() {
     return (
       <Layout>
         <div className="text-center py-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Restricted</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-4">Access Restricted</h2>
+          <p className="text-muted-foreground mb-6">
             Only {round.currentRecommender?.name || 'the current recommender'} can add recommendations to this round.
           </p>
           <Link href={`/clubs/${clubId}/rounds/${roundId}`}>
@@ -168,8 +168,8 @@ export default function AddRecommendations() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Add Recommendations</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-foreground">Add Recommendations</h1>
+            <p className="text-muted-foreground">
               Add your recommendations for this round
             </p>
           </div>
@@ -179,12 +179,12 @@ export default function AddRecommendations() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-3">
-              <User className="h-6 w-6 text-blue-600" />
+              <User className="h-6 w-6 text-primary" />
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-foreground">
                   Current recommender: {round.currentRecommender?.name || 'Unknown'}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Add your recommendations below. You can add multiple items.
                 </p>
               </div>
@@ -204,15 +204,15 @@ export default function AddRecommendations() {
           <Alert variant="warning">
             <div className="flex items-start space-x-2">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5 text-warning" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
                 <div>
-                  <h3 className="text-sm font-medium text-yellow-800">
+                  <h3 className="text-sm font-medium text-foreground">
                     {hasRole('admin') ? 'Admin Action' : 'Club Manager Action'}
                   </h3>
-                  <p className="text-sm text-yellow-700 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     You are adding recommendations on behalf of <strong>{round.currentRecommender?.name || 'the current recommender'}</strong>. This is an administrative action that will be recorded in the system.
                   </p>
                 </div>
@@ -239,9 +239,9 @@ export default function AddRecommendations() {
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {fields.map((field, index) => (
-                <div key={field.id} className="space-y-4 p-4 border border-gray-200 rounded-lg">
+                <div key={field.id} className="space-y-4 p-4 border border-border rounded-lg">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-foreground">
                       Recommendation {index + 1}
                     </h3>
                     {fields.length > 1 && (
@@ -250,7 +250,7 @@ export default function AddRecommendations() {
                         variant="ghost"
                         size="sm"
                         onClick={() => remove(index)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-error hover:text-error hover:bg-error/10"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -281,7 +281,7 @@ export default function AddRecommendations() {
               )}
 
               {/* Submit Button */}
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+              <div className="flex justify-end space-x-4 pt-6 border-t border-border">
                 <Link href={`/clubs/${clubId}/rounds/${roundId}`}>
                   <Button variant="outline" type="button">
                     Cancel

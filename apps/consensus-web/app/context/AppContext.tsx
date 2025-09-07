@@ -84,6 +84,16 @@ export interface Completion {
   recommendation?: Recommendation;
 }
 
+export interface MemberNote {
+  id: string;
+  title: string | null;
+  content: string | null;
+  roundId: string;
+  createdAt: string;
+  updatedAt: string;
+  round?: Round;
+}
+
 // State
 interface AppState {
   currentClub: Club | null;

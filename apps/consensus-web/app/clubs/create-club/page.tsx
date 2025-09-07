@@ -127,8 +127,8 @@ export default function CreateClub() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create New Club</h1>
-            <p className="mt-2 text-gray-600">
+            <h1 className="text-3xl font-bold text-foreground">Create New Club</h1>
+            <p className="mt-2 text-muted-foreground">
               Set up a new club for your group activities
             </p>
           </div>
@@ -150,7 +150,7 @@ export default function CreateClub() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Basic Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
+                <h3 className="text-lg font-medium text-foreground">Basic Information</h3>
                 
                 <Input
                   label="Club Name"
@@ -169,7 +169,7 @@ export default function CreateClub() {
 
               {/* Configuration */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Configuration</h3>
+                <h3 className="text-lg font-medium text-foreground">Configuration</h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
