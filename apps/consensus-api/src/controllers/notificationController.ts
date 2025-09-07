@@ -18,19 +18,8 @@ export const getNotifications = async (req: AuthenticatedRequest, res: Response)
     const pageNum = parseInt(page as string, 10);
     const limitNum = parseInt(limit as string, 10);
 
-    // Get user's member record
-    const member = await AppDataSource.getRepository(Member).findOne({
-      where: { email: req.user.email }
-    });
-
-    if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: 'Member not found'
-      });
-    }
-
-    const result = await NotificationService.getNotifications(member.id, pageNum, limitNum);
+    // Get notifications for the user by email
+    const result = await NotificationService.getNotifications(req.user.email, pageNum, limitNum);
 
     res.status(200).json({
       success: true,
@@ -54,19 +43,8 @@ export const getUnreadNotifications = async (req: AuthenticatedRequest, res: Res
       });
     }
 
-    // Get user's member record
-    const member = await AppDataSource.getRepository(Member).findOne({
-      where: { email: req.user.email }
-    });
-
-    if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: 'Member not found'
-      });
-    }
-
-    const notifications = await NotificationService.getUnreadNotifications(member.id);
+    // Get unread notifications for the user by email
+    const notifications = await NotificationService.getUnreadNotifications(req.user.email);
 
     res.status(200).json({
       success: true,
@@ -90,19 +68,8 @@ export const getUnreadCount = async (req: AuthenticatedRequest, res: Response) =
       });
     }
 
-    // Get user's member record
-    const member = await AppDataSource.getRepository(Member).findOne({
-      where: { email: req.user.email }
-    });
-
-    if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: 'Member not found'
-      });
-    }
-
-    const count = await NotificationService.getUnreadCount(member.id);
+    // Get unread count for the user by email
+    const count = await NotificationService.getUnreadCount(req.user.email);
 
     res.status(200).json({
       success: true,
@@ -135,19 +102,8 @@ export const markAsRead = async (req: AuthenticatedRequest, res: Response) => {
       });
     }
 
-    // Get user's member record
-    const member = await AppDataSource.getRepository(Member).findOne({
-      where: { email: req.user.email }
-    });
-
-    if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: 'Member not found'
-      });
-    }
-
-    const notification = await NotificationService.markAsRead(notificationId, member.id);
+    // Mark notification as read for the user
+    const notification = await NotificationService.markAsRead(notificationId, req.user.email);
 
     if (!notification) {
       return res.status(404).json({
@@ -178,19 +134,8 @@ export const markAllAsRead = async (req: AuthenticatedRequest, res: Response) =>
       });
     }
 
-    // Get user's member record
-    const member = await AppDataSource.getRepository(Member).findOne({
-      where: { email: req.user.email }
-    });
-
-    if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: 'Member not found'
-      });
-    }
-
-    await NotificationService.markAllAsRead(member.id);
+    // Mark all notifications as read for the user
+    await NotificationService.markAllAsRead(req.user.email);
 
     res.status(200).json({
       success: true,
@@ -216,23 +161,11 @@ export const deleteNotification = async (req: AuthenticatedRequest, res: Respons
 
     const { notificationId } = req.params;
 
-    // Get user's member record
-    const member = await AppDataSource.getRepository(Member).findOne({
-      where: { email: req.user.email }
-    });
-
-    if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: 'Member not found'
-      });
-    }
-
-    // Find the notification and verify ownership
+    // Find the notification and verify ownership for the user
     const notification = await AppDataSource.getRepository(Notification).findOne({
       where: { 
         id: notificationId,
-        memberId: member.id
+        userEmail: req.user.email
       }
     });
 
@@ -268,24 +201,13 @@ export const deleteAllRead = async (req: AuthenticatedRequest, res: Response) =>
       });
     }
 
-    // Get user's member record
-    const member = await AppDataSource.getRepository(Member).findOne({
-      where: { email: req.user.email }
-    });
-
-    if (!member) {
-      return res.status(404).json({
-        success: false,
-        message: 'Member not found'
-      });
-    }
-
-    // Delete all read notifications for this member
+    // Delete all read notifications for the user
     const result = await AppDataSource.getRepository(Notification)
-      .delete({
-        memberId: member.id,
-        status: NotificationStatus.READ
-      });
+      .createQueryBuilder()
+      .delete()
+      .where('userEmail = :userEmail', { userEmail: req.user.email })
+      .andWhere('status = :status', { status: NotificationStatus.READ })
+      .execute();
 
     res.json({
       success: true,

@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Member } from './Member';
 import { Club } from './Club';
 import { Round } from './Round';
 
@@ -47,8 +46,8 @@ export class Notification {
   @Column('jsonb', { nullable: true })
   data: any;
 
-  @Column('uuid')
-  memberId: string;
+  @Column('varchar')
+  userEmail: string;
 
   @Column('uuid')
   clubId: string;
@@ -61,10 +60,6 @@ export class Notification {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @ManyToOne(() => Member, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'memberId' })
-  member: Member;
 
   @ManyToOne(() => Club, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'clubId' })

@@ -16,9 +16,11 @@ import {
   Edit,
   Save,
   X,
-  TestTube
+  TestTube,
+  Bell
 } from 'lucide-react';
 import Link from 'next/link';
+import { NotificationSettings } from '../components/NotificationSettings';
 
 export default function ProfilePage() {
   const { user, isTestAccount } = useAuth();
@@ -27,6 +29,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
 
   const handleSave = async () => {
     if (!editedName.trim()) {
@@ -277,13 +280,10 @@ export default function ProfilePage() {
                   variant="outline"
                   className="w-full justify-start"
                   size="sm"
-                  onClick={() => {
-                    // In a real app, this would open notification preferences
-                    alert('Notification preferences would be implemented here');
-                  }}
+                  onClick={() => setShowNotificationSettings(true)}
                   title="Notification Settings"
                 >
-                  <Calendar className="h-4 w-4 sm:mr-2" />
+                  <Bell className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Notification Settings</span>
                 </Button>
 
@@ -341,6 +341,11 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Notification Settings Modal */}
+      {showNotificationSettings && (
+        <NotificationSettings onClose={() => setShowNotificationSettings(false)} />
+      )}
     </Layout>
   );
 }

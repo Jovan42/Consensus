@@ -67,6 +67,9 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
     // Merge with existing headers
     const headers = {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
       ...authHeaders,
       ...options.headers,
     };

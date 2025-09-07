@@ -6,6 +6,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 import UserProfile from '../auth/UserProfile';
 import { SimpleThemeToggle } from '../ThemeToggle';
 import { NotificationIcon } from '../notifications/NotificationIcon';
+import { SoundToggle } from '../notifications/SoundToggle';
 import { RealtimeStatus } from '../ui/RealtimeStatus';
 import { Home, Users, BookOpen, Settings } from 'lucide-react';
 
@@ -89,6 +90,7 @@ const Navigation: React.FC = () => {
             {/* Socket Connection & Notifications Group */}
             <div className="flex items-center space-x-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <RealtimeStatus showText={false} showForAdminsOnly={false} />
+              <SoundToggle />
               <NotificationIcon />
             </div>
             <SimpleThemeToggle />

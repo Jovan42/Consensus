@@ -9,6 +9,7 @@ import { getSocketManager, emitMemberAdded, emitMemberRemoved, emitMemberRoleCha
 import { NotificationService } from '../services/notificationService';
 import { NotificationType } from '../entities/Notification';
 
+
 export const addMemberToClub = async (req: Request, res: Response) => {
   try {
     const { clubId } = req.params;

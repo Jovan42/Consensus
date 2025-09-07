@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
 import { useTargetedUpdates } from '../hooks/useTargetedUpdates';
 import { authenticatedFetch } from '../utils/authenticatedFetch';
+import { playNotificationSoundIfEnabled } from '../utils/notificationSound';
 
 export interface Notification {
   id: string;
@@ -65,6 +66,8 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [lastNotificationCount, setLastNotificationCount] = useState(0);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -75,7 +78,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       setLoading(true);
       setError(null);
 
-      const response = await authenticatedFetch(`${API_BASE_URL}/notifications?page=${page}&limit=${limit}`);
+      // Add cache-busting parameter to ensure fresh data
+      const cacheBuster = Date.now();
+      const response = await authenticatedFetch(`${API_BASE_URL}/notifications?page=${page}&limit=${limit}&_t=${cacheBuster}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch notifications');
@@ -115,7 +120,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     try {
       setError(null);
 
-      const response = await authenticatedFetch(`${API_BASE_URL}/notifications/unread`);
+      // Add cache-busting parameter to ensure fresh data
+      const cacheBuster = Date.now();
+      const response = await authenticatedFetch(`${API_BASE_URL}/notifications/unread?_t=${cacheBuster}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch unread notifications');
@@ -123,8 +130,22 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
       const result = await response.json();
       if (result.success) {
+        const newCount = result.data.length;
+        const previousCount = unreadCount;
+        
         setUnreadNotifications(result.data);
-        setUnreadCount(result.data.length); // Update count from array length
+        setUnreadCount(newCount);
+        
+        // Only play sound if we have new notifications (count increased)
+        // Skip sound on initial load to avoid playing sound when user first logs in
+        if (newCount > previousCount && !isInitialLoad) {
+          playNotificationSoundIfEnabled();
+        }
+        
+        // Mark that initial load is complete
+        if (isInitialLoad) {
+          setIsInitialLoad(false);
+        }
       } else {
         throw new Error(result.message || 'Failed to fetch unread notifications');
       }
@@ -140,7 +161,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     try {
       setError(null);
 
-      const response = await authenticatedFetch(`${API_BASE_URL}/notifications/unread/count`);
+      // Add cache-busting parameter to ensure fresh data
+      const cacheBuster = Date.now();
+      const response = await authenticatedFetch(`${API_BASE_URL}/notifications/unread/count?_t=${cacheBuster}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch unread count');
@@ -331,6 +354,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       console.log('Notification created event received:', data);
       
       // Use debounced fetch to prevent excessive requests
+      // Sound will be played in fetchUnreadNotifications if count increases
       debouncedFetchUnreadCount();
     };
 

@@ -13,12 +13,12 @@ export interface CreateNotificationData {
   data?: any;
   clubId: string;
   roundId?: string;
-  memberId?: string; // If not provided, will notify all club members
+  userEmail?: string; // If not provided, will notify all club members
 }
 
 export class NotificationService {
   /**
-   * Create and save a notification for a specific member
+   * Create and save a notification for a specific user
    */
   static async createNotification(data: CreateNotificationData): Promise<Notification> {
     const notification = new Notification();
@@ -26,7 +26,7 @@ export class NotificationService {
     notification.title = data.title;
     notification.message = data.message;
     notification.data = data.data || {};
-    notification.memberId = data.memberId!;
+    notification.userEmail = data.userEmail!;
     notification.clubId = data.clubId;
     notification.roundId = data.roundId || null;
     notification.status = NotificationStatus.UNREAD;
@@ -37,7 +37,7 @@ export class NotificationService {
   /**
    * Create notifications for all members in a club
    */
-  static async createClubNotification(data: Omit<CreateNotificationData, 'memberId'>): Promise<Notification[]> {
+  static async createClubNotification(data: Omit<CreateNotificationData, 'userEmail'>): Promise<Notification[]> {
     const members = await AppDataSource.getRepository(Member).find({
       where: { clubId: data.clubId }
     });
@@ -50,7 +50,7 @@ export class NotificationService {
       notification.title = data.title;
       notification.message = data.message;
       notification.data = data.data || {};
-      notification.memberId = member.id;
+      notification.userEmail = member.email;
       notification.clubId = data.clubId;
       notification.roundId = data.roundId || null;
       notification.status = NotificationStatus.UNREAD;
@@ -81,7 +81,7 @@ export class NotificationService {
    */
   static async createAndEmitClubNotification(
     req: Request,
-    data: Omit<CreateNotificationData, 'memberId'>
+    data: Omit<CreateNotificationData, 'userEmail'>
   ): Promise<Notification[]> {
     const notifications = await this.createClubNotification(data);
     
@@ -100,24 +100,25 @@ export class NotificationService {
   }
 
   /**
-   * Get unread notifications for a member
+   * Get unread notifications for a user
    */
-  static async getUnreadNotifications(memberId: string): Promise<Notification[]> {
+  static async getUnreadNotifications(userEmail: string): Promise<Notification[]> {
     return await AppDataSource.getRepository(Notification)
       .createQueryBuilder('notification')
       .leftJoinAndSelect('notification.club', 'club')
       .leftJoinAndSelect('notification.round', 'round')
-      .where('notification.memberId = :memberId', { memberId })
+      .where('notification.userEmail = :userEmail', { userEmail })
       .andWhere('notification.status = :status', { status: NotificationStatus.UNREAD })
       .orderBy('notification.createdAt', 'DESC')
       .getMany();
   }
 
+
   /**
-   * Get all notifications for a member (with pagination)
+   * Get all notifications for a user (with pagination)
    */
   static async getNotifications(
-    memberId: string,
+    userEmail: string,
     page: number = 1,
     limit: number = 20
   ): Promise<{ notifications: Notification[]; total: number; hasMore: boolean }> {
@@ -127,7 +128,7 @@ export class NotificationService {
       .createQueryBuilder('notification')
       .leftJoinAndSelect('notification.club', 'club')
       .leftJoinAndSelect('notification.round', 'round')
-      .where('notification.memberId = :memberId', { memberId })
+      .where('notification.userEmail = :userEmail', { userEmail })
       .orderBy('notification.createdAt', 'DESC')
       .skip(offset)
       .take(limit)
@@ -140,12 +141,13 @@ export class NotificationService {
     };
   }
 
+
   /**
    * Mark notification as read
    */
-  static async markAsRead(notificationId: string, memberId: string): Promise<Notification | null> {
+  static async markAsRead(notificationId: string, userEmail: string): Promise<Notification | null> {
     const notification = await AppDataSource.getRepository(Notification).findOne({
-      where: { id: notificationId, memberId }
+      where: { id: notificationId, userEmail }
     });
 
     if (!notification) {
@@ -157,28 +159,30 @@ export class NotificationService {
   }
 
   /**
-   * Mark all notifications as read for a member
+   * Mark all notifications as read for a user
    */
-  static async markAllAsRead(memberId: string): Promise<void> {
+  static async markAllAsRead(userEmail: string): Promise<void> {
     await AppDataSource.getRepository(Notification)
       .createQueryBuilder()
       .update(Notification)
       .set({ status: NotificationStatus.READ })
-      .where('memberId = :memberId', { memberId })
+      .where('userEmail = :userEmail', { userEmail })
       .andWhere('status = :status', { status: NotificationStatus.UNREAD })
       .execute();
   }
 
+
   /**
-   * Get unread count for a member
+   * Get unread count for a user
    */
-  static async getUnreadCount(memberId: string): Promise<number> {
+  static async getUnreadCount(userEmail: string): Promise<number> {
     return await AppDataSource.getRepository(Notification)
       .createQueryBuilder('notification')
-      .where('notification.memberId = :memberId', { memberId })
+      .where('notification.userEmail = :userEmail', { userEmail })
       .andWhere('notification.status = :status', { status: NotificationStatus.UNREAD })
       .getCount();
   }
+
 
   /**
    * Delete old notifications (cleanup)
