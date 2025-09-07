@@ -133,28 +133,8 @@ export default function ProfilePage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Profile Picture */}
+                {/* User Information */}
                 <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    {user.picture ? (
-                      <img
-                        src={user.picture}
-                        alt={user.name}
-                        className="h-20 w-20 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
-                        <span className="text-3xl">👤</span>
-                      </div>
-                    )}
-                    {isTestAccount && (
-                      <div className="absolute -top-1 -right-1">
-                        <div className="bg-warning-100 text-warning-800 p-1 rounded-full">
-                          <TestTube className="h-3 w-3" />
-                        </div>
-                      </div>
-                    )}
-                  </div>
                   <div>
                     <h3 className="text-lg font-medium text-foreground">
                       {isEditing ? (
@@ -170,6 +150,14 @@ export default function ProfilePage() {
                       )}
                     </h3>
                     <p className="text-sm text-muted-foreground">{user.email}</p>
+                    {isTestAccount && (
+                      <div className="mt-2">
+                        <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-800">
+                          <TestTube className="h-3 w-3" />
+                          <span>Test Account</span>
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

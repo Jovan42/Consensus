@@ -7,6 +7,7 @@ export default {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -15,6 +16,8 @@ export default {
         
         // Semantic colors (using CSS variables for theme support)
         background: 'hsl(var(--background))',
+        'page-background': 'hsl(var(--page-background))',
+        'content-background': 'hsl(var(--content-background))',
         foreground: 'hsl(var(--foreground))',
         card: {
           DEFAULT: 'hsl(var(--card))',

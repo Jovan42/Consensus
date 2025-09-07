@@ -97,7 +97,9 @@ export const semanticColors = {
   // Background colors
   background: {
     primary: 'hsl(var(--background))',
-    secondary: 'hsl(var(--card))',
+    page: 'hsl(var(--page-background))',
+    content: 'hsl(var(--content-background))',
+    card: 'hsl(var(--card))',
     muted: 'hsl(var(--muted))',
     accent: 'hsl(var(--accent))',
   },

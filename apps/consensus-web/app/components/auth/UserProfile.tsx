@@ -35,17 +35,6 @@ const UserProfile: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted transition-colors"
       >
-        {user.picture ? (
-          <img
-            src={user.picture}
-            alt={user.name}
-            className="w-8 h-8 rounded-full"
-          />
-        ) : (
-          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-            <User className="w-5 h-5 text-muted-foreground" />
-          </div>
-        )}
         <div className="text-left">
           <p className="text-sm font-medium text-foreground">{user.name}</p>
           <p className="text-xs text-muted-foreground">{user.email}</p>
@@ -61,17 +50,6 @@ const UserProfile: React.FC = () => {
         <div className="absolute right-0 mt-2 w-64 bg-background rounded-lg shadow-lg border border-border z-50">
           <div className="p-4 border-b border-border">
             <div className="flex items-center space-x-3">
-              {user.picture ? (
-                <img
-                  src={user.picture}
-                  alt={user.name}
-                  className="w-12 h-12 rounded-full"
-                />
-              ) : (
-                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                  <span className="text-xl">👤</span>
-                </div>
-              )}
               <div>
                 <p className="font-medium text-foreground">{user.name}</p>
                 <p className="text-sm text-muted-foreground">{user.email}</p>

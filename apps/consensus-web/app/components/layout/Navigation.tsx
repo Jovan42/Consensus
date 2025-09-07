@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import UserProfile from '../auth/UserProfile';
+import { SimpleThemeToggle } from '../ThemeToggle';
 import { Home, Users, BookOpen, Settings } from 'lucide-react';
 
 const Navigation: React.FC = () => {
@@ -41,18 +42,29 @@ const Navigation: React.FC = () => {
               </Link>
               
               {hasRole('admin') && (
-                <Link
-                  href="/admin"
-                  className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Admin</span>
-                </Link>
+                <>
+                  <Link
+                    href="/theme-demo"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Theme Demo</span>
+                  </Link>
+                  
+                  <Link
+                    href="/admin"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Admin</span>
+                  </Link>
+                </>
               )}
             </div>
           </div>
           
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            <SimpleThemeToggle />
             <UserProfile />
           </div>
         </div>

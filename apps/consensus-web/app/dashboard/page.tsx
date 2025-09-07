@@ -11,9 +11,9 @@ const DashboardPage: React.FC = () => {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-page-background">
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
+          <div className="bg-background shadow-sm rounded-lg px-4 py-6 sm:px-6">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-foreground">
                 Welcome back, {user?.name}!
@@ -25,7 +25,7 @@ const DashboardPage: React.FC = () => {
 
 
             {/* Quick Actions */}
-            <div className="bg-card shadow rounded-lg">
+            <div className="bg-background shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-foreground mb-4">
                   Quick Actions
