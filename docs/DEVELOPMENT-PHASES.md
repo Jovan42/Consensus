@@ -41,6 +41,11 @@ This document outlines the development phases for the Consensus application with
   - [x] Fix completion status 404 errors
   - [x] Fix completed rounds count display
   - [x] Enhance Recent Rounds section with detailed information
+  - [x] Implement comprehensive theme system with dark mode
+  - [x] Create centralized color system with semantic tokens
+  - [x] Implement role-based UI styling and management
+  - [x] Add member notes system for private round notes
+  - [x] Enhance user experience with improved navigation and interactions
 
 - [x] **Core Workflow Implementation**
   - [x] Club creation with configuration
@@ -58,6 +63,16 @@ This document outlines the development phases for the Consensus application with
   - [x] Turn order (sequential vs random)
   - [x] Tie-breaking methods (random, recommender decides, re-vote)
   - [x] Minimum participation requirements
+
+- [x] **UI/UX Enhancements**
+  - [x] Comprehensive theme system with light/dark modes
+  - [x] Centralized color system with semantic tokens
+  - [x] Role-based visual styling (Site Admin, Club Manager, Regular Member)
+  - [x] Enhanced member management with role distinction and sorting
+  - [x] Improved form styling and user interactions
+  - [x] Click-outside-to-close dropdown functionality
+  - [x] Consistent loading states and button hover effects
+  - [x] Member notes system for private round documentation
 
 - [x] **Testing & Quality Assurance**
   - [x] Unit tests for API endpoints (Postman collection)
