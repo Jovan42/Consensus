@@ -6,6 +6,8 @@ import { Club } from '../entities/Club';
 import { NotFoundError, asyncHandler } from '../middleware/error.middleware';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { getSocketManager, emitMemberAdded, emitMemberRemoved, emitMemberRoleChanged, emitNotification } from '../utils/socket';
+import { NotificationService } from '../services/notificationService';
+import { NotificationType } from '../entities/Notification';
 
 export const addMemberToClub = async (req: Request, res: Response) => {
   try {
@@ -60,6 +62,20 @@ export const addMemberToClub = async (req: Request, res: Response) => {
       `${savedMember.name} has been added to the club`,
       clubId
     );
+
+    // Create and save notifications for all existing club members
+    await NotificationService.createAndEmitClubNotification(req, {
+      type: NotificationType.MEMBER_ADDED,
+      title: 'New Member Added',
+      message: `${savedMember.name} has been added to the club`,
+      clubId: clubId,
+      data: {
+        newMemberName: savedMember.name,
+        newMemberEmail: savedMember.email,
+        newMemberId: savedMember.id,
+        isClubManager: savedMember.isClubManager
+      }
+    });
 
     res.status(201).json({
       success: true,
@@ -207,6 +223,18 @@ export const removeMember = async (req: Request, res: Response) => {
       memberInfo.clubId
     );
 
+    // Create and save notifications for all remaining club members
+    await NotificationService.createAndEmitClubNotification(req, {
+      type: NotificationType.MEMBER_REMOVED,
+      title: 'Member Removed',
+      message: `${memberInfo.name} has been removed from the club`,
+      clubId: memberInfo.clubId,
+      data: {
+        removedMemberName: memberInfo.name,
+        removedMemberId: memberInfo.id
+      }
+    });
+
     res.json({
       success: true,
       message: 'Member removed successfully'
@@ -310,6 +338,21 @@ export const updateMemberManagerStatus = async (req: AuthenticatedRequest, res: 
       `${member.name} has been ${actionText} club manager`,
       member.clubId
     );
+
+    // Create and save notifications for all club members
+    await NotificationService.createAndEmitClubNotification(req, {
+      type: NotificationType.MEMBER_ROLE_CHANGED,
+      title: 'Role Changed',
+      message: `${member.name} has been ${actionText} club manager`,
+      clubId: member.clubId,
+      data: {
+        memberName: member.name,
+        memberId: member.id,
+        oldRole: oldRole,
+        newRole: newRole,
+        action: actionText
+      }
+    });
 
     res.json({
       success: true,

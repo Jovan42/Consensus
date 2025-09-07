@@ -100,6 +100,15 @@ export interface SocketEvents {
     roundId?: string;
     timestamp: string;
   };
+  
+  notification_created: {
+    type: string;
+    title: string;
+    message: string;
+    clubId: string;
+    roundId?: string;
+    notificationCount: number;
+  };
 }
 
 class SocketManager {
@@ -239,6 +248,10 @@ class SocketManager {
     this.socket?.on('notification', callback);
   }
 
+  onNotificationCreated(callback: (data: SocketEvents['notification_created']) => void) {
+    this.socket?.on('notification_created', callback);
+  }
+
   // Remove event listeners
   offVoteCast(callback?: (data: SocketEvents['vote_cast']) => void) {
     this.socket?.off('vote_cast', callback);
@@ -282,6 +295,10 @@ class SocketManager {
 
   offNotification(callback?: (data: SocketEvents['notification']) => void) {
     this.socket?.off('notification', callback);
+  }
+
+  offNotificationCreated(callback?: (data: SocketEvents['notification_created']) => void) {
+    this.socket?.off('notification_created', callback);
   }
 
   get connected() {

@@ -141,6 +141,47 @@ Stores private notes that members can keep for each round. Notes are only visibl
 - `IDX_member_notes_round_id` - Index on `round_id` for performance  
 - `IDX_member_notes_member_round_unique` - Unique constraint on `(member_id, round_id)` to ensure one note per member per round
 
+### 8. `notifications`
+
+Stores notifications for club activities and member actions. Notifications are created for all club members when certain events occur.
+
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key, unique identifier |
+| `type` | `notification_type_enum` | NO | NULL | Type of notification |
+| `status` | `notification_status_enum` | NO | `'unread'` | Read status of notification |
+| `title` | `character varying` | NO | NULL | Notification title |
+| `message` | `text` | NO | NULL | Notification message |
+| `data` | `jsonb` | YES | NULL | Additional notification data |
+| `memberId` | `uuid` | NO | NULL | Foreign key to `members.id` (recipient) |
+| `clubId` | `uuid` | NO | NULL | Foreign key to `clubs.id` |
+| `roundId` | `uuid` | YES | NULL | Foreign key to `rounds.id` (if applicable) |
+| `createdAt` | `timestamp` | NO | `now()` | Creation timestamp |
+| `updatedAt` | `timestamp` | NO | `now()` | Last update timestamp |
+
+**Enum Values for `type`:**
+- `vote_cast` - When a member submits their vote
+- `voting_completed` - When voting is closed and a winner is determined
+- `recommendation_added` - When new recommendations are added to a round
+- `round_started` - When a new round begins
+- `round_completed` - When a round is completed
+- `member_added` - When a new member joins the club
+- `member_removed` - When a member leaves the club
+- `member_role_changed` - When a member's role changes
+- `club_updated` - When club settings are updated
+
+**Enum Values for `status`:**
+- `unread` - Notification has not been read
+- `read` - Notification has been read
+
+**Indexes:**
+- `IDX_notifications_member_id` - Index on `memberId` for performance
+- `IDX_notifications_club_id` - Index on `clubId` for performance
+- `IDX_notifications_round_id` - Index on `roundId` for performance
+- `IDX_notifications_status` - Index on `status` for performance
+- `IDX_notifications_created_at` - Index on `createdAt` for sorting
+- `IDX_notifications_member_status` - Composite index on `(memberId, status)` for efficient unread queries
+
 ## Relationships
 
 ### Foreign Key Relationships
@@ -159,6 +200,9 @@ Stores private notes that members can keep for each round. Notes are only visibl
 | `completions` | `recommendationId` | `recommendations` | `id` | What was completed |
 | `member_notes` | `member_id` | `members` | `id` | Note belongs to a member |
 | `member_notes` | `round_id` | `rounds` | `id` | Note belongs to a round |
+| `notifications` | `memberId` | `members` | `id` | Notification recipient |
+| `notifications` | `clubId` | `clubs` | `id` | Notification belongs to a club |
+| `notifications` | `roundId` | `rounds` | `id` | Notification related to a round (optional) |
 
 ## Indexes
 
@@ -170,6 +214,8 @@ All tables have primary key indexes on their `id` columns:
 - `recommendations`: `PK_23a8d2db26db8cabb6ae9d6cd87`
 - `votes`: `PK_f3d9fd4a0af865152c3f59db8ff`
 - `completions`: `PK_5beec6fc7e1d963597132268ef2`
+- `member_notes`: `PK_member_notes`
+- `notifications`: `PK_notifications`
 
 ## Workflow
 

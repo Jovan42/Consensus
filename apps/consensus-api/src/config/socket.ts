@@ -108,6 +108,15 @@ export interface SocketEvents {
     roundId?: string;
     timestamp: string;
   };
+  
+  notification_created: {
+    type: string;
+    title: string;
+    message: string;
+    clubId: string;
+    roundId?: string;
+    notificationCount: number;
+  };
 }
 
 export class SocketManager {

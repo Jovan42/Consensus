@@ -28,6 +28,9 @@ Complete documentation for the private notes system that allows members to keep 
 ### [Real-time Features](./REALTIME-FEATURES.md)
 Comprehensive guide to the real-time notification system, Socket.io integration, and live updates functionality.
 
+### [Notification System](./NOTIFICATION-SYSTEM.md)
+Complete documentation for the notification system including database persistence, real-time updates, and UI components.
+
 ### [Postman Collections](./postman-collections/)
 API testing collections including complete Phase 1 endpoints and happy path test scenarios.
 
@@ -49,6 +52,7 @@ API testing collections including complete Phase 1 endpoints and happy path test
 - ✅ Role-based UI styling and member management
 - ✅ Member notes system for private round notes
 - ✅ Real-time features with Socket.io integration
+- ✅ Comprehensive notification system with database persistence
 - ✅ Enhanced voting system with partial voting support
 - ✅ Enhanced user experience and interactions
 - ✅ Production deployment and testing

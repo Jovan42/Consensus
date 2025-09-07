@@ -7,6 +7,8 @@ import { RoundStatus } from '../types/enums';
 import { AddRecommendationDto, UpdateRecommendationDto } from '../dto/recommendation.dto';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { getSocketManager, emitRecommendationAdded, emitNotification } from '../utils/socket';
+import { NotificationService } from '../services/notificationService';
+import { NotificationType } from '../entities/Notification';
 
 export const addRecommendation = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -182,6 +184,24 @@ export const addRecommendation = async (req: AuthenticatedRequest, res: Response
           round.clubId,
           finalRoundId
         );
+
+        // Create and save notifications for all club members
+        await NotificationService.createAndEmitClubNotification(req, {
+          type: NotificationType.RECOMMENDATION_ADDED,
+          title: 'New Recommendations Added',
+          message: `${savedRecommendations.length} new recommendation(s) added by ${recommender?.name || 'Unknown'}`,
+          clubId: round.clubId,
+          roundId: finalRoundId,
+          data: {
+            recommenderName: recommender?.name || 'Unknown',
+            recommenderId: finalRecommenderId,
+            recommendations: savedRecommendations.map(r => ({
+              id: r.id,
+              title: r.title,
+              description: r.description
+            }))
+          }
+        });
       }
     } catch (socketError) {
       console.error('Error emitting recommendation notification:', socketError);

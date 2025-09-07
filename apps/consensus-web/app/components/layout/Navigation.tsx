@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import UserProfile from '../auth/UserProfile';
 import { SimpleThemeToggle } from '../ThemeToggle';
-import { NotificationSystem } from '../ui/NotificationSystem';
+import { NotificationIcon } from '../notifications/NotificationIcon';
 import { RealtimeStatus } from '../ui/RealtimeStatus';
 import { Home, Users, BookOpen, Settings } from 'lucide-react';
 
@@ -66,8 +66,8 @@ const Navigation: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <RealtimeStatus showText={false} showForAdminsOnly={true} />
-            <NotificationSystem />
+            <RealtimeStatus showText={false} showForAdminsOnly={false} />
+            <NotificationIcon />
             <SimpleThemeToggle />
             <UserProfile />
           </div>

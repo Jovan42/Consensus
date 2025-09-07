@@ -311,6 +311,147 @@ Delete a member note.
 }
 ```
 
+## Notifications
+
+The notification system provides real-time updates and persistent notification history for club activities.
+
+### GET /api/notifications
+Get all notifications for the authenticated user with pagination.
+
+**Query Parameters:**
+- `page` (number, optional) - Page number (default: 1)
+- `limit` (number, optional) - Items per page (default: 20)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "notifications": [
+      {
+        "id": "uuid",
+        "type": "vote_cast",
+        "status": "unread",
+        "title": "Vote Submitted",
+        "message": "John Doe has submitted their vote for this round",
+        "data": {
+          "voterName": "John Doe",
+          "voterId": "uuid",
+          "roundId": "uuid"
+        },
+        "memberId": "uuid",
+        "clubId": "uuid",
+        "roundId": "uuid",
+        "createdAt": "2025-01-01T00:00:00.000Z",
+        "updatedAt": "2025-01-01T00:00:00.000Z",
+        "club": {
+          "id": "uuid",
+          "name": "My Book Club",
+          "type": "book"
+        },
+        "round": {
+          "id": "uuid",
+          "status": "voting"
+        }
+      }
+    ],
+    "total": 25,
+    "hasMore": true
+  }
+}
+```
+
+### GET /api/notifications/unread
+Get all unread notifications for the authenticated user.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "type": "vote_cast",
+      "status": "unread",
+      "title": "Vote Submitted",
+      "message": "John Doe has submitted their vote for this round",
+      "data": { ... },
+      "memberId": "uuid",
+      "clubId": "uuid",
+      "roundId": "uuid",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "club": { ... },
+      "round": { ... }
+    }
+  ]
+}
+```
+
+### GET /api/notifications/unread/count
+Get the count of unread notifications for the authenticated user.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "count": 5
+  }
+}
+```
+
+### PUT /api/notifications/:notificationId/read
+Mark a specific notification as read.
+
+**Parameters:**
+- `notificationId` (string, required) - The notification ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "type": "vote_cast",
+    "status": "read",
+    "title": "Vote Submitted",
+    "message": "John Doe has submitted their vote for this round",
+    "data": { ... },
+    "memberId": "uuid",
+    "clubId": "uuid",
+    "roundId": "uuid",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  }
+}
+```
+
+### PUT /api/notifications/read-all
+Mark all notifications as read for the authenticated user.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "All notifications marked as read"
+}
+```
+
+### Notification Types
+
+The system supports the following notification types:
+
+- `vote_cast` - When a member submits their vote
+- `voting_completed` - When voting is closed and a winner is determined
+- `recommendation_added` - When new recommendations are added to a round
+- `round_started` - When a new round begins
+- `round_completed` - When a round is completed
+- `member_added` - When a new member joins the club
+- `member_removed` - When a member leaves the club
+- `member_role_changed` - When a member's role changes
+- `club_updated` - When club settings are updated
+
 ## Error Responses
 
 All endpoints may return the following error responses:

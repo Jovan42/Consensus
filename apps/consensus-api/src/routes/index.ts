@@ -6,6 +6,7 @@ import recommendationsRouter from './recommendations';
 import votesRouter from './votes';
 import completionsRouter from './completions';
 import memberNoteRouter from './memberNoteRoutes';
+import notificationRouter from './notificationRoutes';
 import { startNewRound, getClubRounds } from '../controllers/roundController';
 import { addRecommendation, getRecommendationsByRound } from '../controllers/recommendationController';
 import { validateDto } from '../middleware/validation.middleware';
@@ -26,6 +27,7 @@ router.use('/rounds', votesRouter); // Voting routes
 router.use('/rounds', completionsRouter); // Completion routes
 router.use('/recommendations', recommendationsRouter);
 router.use('/member-notes', memberNoteRouter); // Member notes routes
+router.use('/notifications', notificationRouter); // Notification routes
 
 // Health check route
 router.get('/health', (req, res) => {

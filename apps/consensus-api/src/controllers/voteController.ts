@@ -8,6 +8,8 @@ import { RoundStatus } from '../types/enums';
 import { SubmitVotesDto } from '../dto/vote.dto';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { getSocketManager, emitVoteCast, emitRoundStatusChanged, emitNotification } from '../utils/socket';
+import { NotificationService } from '../services/notificationService';
+import { NotificationType } from '../entities/Notification';
 
 export const submitVotes = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -203,16 +205,20 @@ export const submitVotes = async (req: AuthenticatedRequest, res: Response) => {
       );
     }
 
-    // Emit notification to club members
-    console.log('Emitting vote cast notification for member:', member.name, 'in club:', round.clubId);
-    emitNotification(
-      socketManager,
-      'success',
-      'Vote Submitted',
-      `${member.name} has submitted their vote for this round`,
-      round.clubId,
-      roundId
-    );
+    // Create and save notifications for all club members
+    console.log('Creating vote cast notifications for member:', member.name, 'in club:', round.clubId);
+    await NotificationService.createAndEmitClubNotification(req, {
+      type: NotificationType.VOTE_CAST,
+      title: 'Vote Submitted',
+      message: `${member.name} has submitted their vote for this round`,
+      clubId: round.clubId,
+      roundId: roundId,
+      data: {
+        voterName: member.name,
+        voterId: memberId,
+        roundId: roundId
+      }
+    });
 
     res.status(201).json(savedVotes);
   } catch (error) {
@@ -348,15 +354,24 @@ export const closeVoting = async (req: AuthenticatedRequest, res: Response) => {
       winningRecommendation?.title
     );
 
-    // Emit notification about voting completion
-    emitNotification(
-      socketManager,
-      'success',
-      'Voting Complete!',
-      `Voting has been closed. Winner: ${winningRecommendation?.title}`,
-      round.clubId,
-      roundId
-    );
+    // Create and save notifications about voting completion for all club members
+    await NotificationService.createAndEmitClubNotification(req, {
+      type: NotificationType.VOTING_COMPLETED,
+      title: 'Voting Complete!',
+      message: `Voting has been closed. Winner: ${winningRecommendation?.title}`,
+      clubId: round.clubId,
+      roundId: roundId,
+      data: {
+        winnerTitle: winningRecommendation?.title,
+        winnerId: winningRecommendationId,
+        totalPoints: recommendationTotals,
+        participation: {
+          voted: uniqueVoters.length,
+          total: members.length,
+          percentage: participationPercentage
+        }
+      }
+    });
 
     res.status(200).json({
       success: true,

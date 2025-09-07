@@ -6,6 +6,9 @@ import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
 import { StartRoundDto, UpdateRoundStatusDto } from '../dto/round.dto';
 import { getSocketManager, emitTurnChanged, emitRoundStatusChanged, emitNotification } from '../utils/socket';
+import { NotificationService } from '../services/notificationService';
+import { NotificationType } from '../entities/Notification';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 export const startNewRound = async (req: Request, res: Response) => {
   try {
@@ -243,15 +246,23 @@ export const updateRoundStatus = async (req: Request, res: Response) => {
     // Emit notification based on status change
     let notificationTitle = 'Round Status Updated';
     let notificationMessage = `Round status changed to ${status}`;
+    let notificationType = NotificationType.CLUB_UPDATED;
     
-    if (status === RoundStatus.COMPLETING) {
+    if (status === RoundStatus.VOTING) {
+      notificationTitle = 'Voting Started';
+      notificationMessage = 'Voting has started for this round';
+      notificationType = NotificationType.ROUND_STARTED;
+    } else if (status === RoundStatus.COMPLETING) {
       notificationTitle = 'Voting Closed';
       notificationMessage = 'Voting has been closed for this round';
+      notificationType = NotificationType.VOTING_COMPLETED;
     } else if (status === RoundStatus.FINISHED) {
       notificationTitle = 'Round Finished';
       notificationMessage = 'The round has been completed';
+      notificationType = NotificationType.ROUND_COMPLETED;
     }
 
+    // Emit real-time notification
     emitNotification(
       socketManager,
       'info',
@@ -260,6 +271,20 @@ export const updateRoundStatus = async (req: Request, res: Response) => {
       round.clubId,
       id
     );
+
+    // Create and save database notifications for all club members
+    await NotificationService.createAndEmitClubNotification(req as AuthenticatedRequest, {
+      type: notificationType,
+      title: notificationTitle,
+      message: notificationMessage,
+      clubId: round.clubId,
+      roundId: id,
+      data: {
+        roundId: id,
+        status: status,
+        previousStatus: round.status
+      }
+    });
 
     res.json({
       success: true,
@@ -402,6 +427,21 @@ export const finishRound = async (req: Request, res: Response) => {
         round.clubId,
         nextRound.id
       );
+
+      // Create and save database notifications for round completion and new round start
+      await NotificationService.createAndEmitClubNotification(req as AuthenticatedRequest, {
+        type: NotificationType.ROUND_COMPLETED,
+        title: 'Round Finished & New Round Started',
+        message: `Round finished! New round started with ${nextRecommender.name} as the recommender`,
+        clubId: round.clubId,
+        roundId: nextRound.id,
+        data: {
+          completedRoundId: roundId,
+          newRoundId: nextRound.id,
+          nextRecommenderName: nextRecommender.name,
+          nextRecommenderId: nextRecommenderId
+        }
+      });
     } else {
       // Just notify about round completion
       emitNotification(
@@ -412,6 +452,18 @@ export const finishRound = async (req: Request, res: Response) => {
         round.clubId,
         roundId
       );
+
+      // Create and save database notifications for round completion
+      await NotificationService.createAndEmitClubNotification(req as AuthenticatedRequest, {
+        type: NotificationType.ROUND_COMPLETED,
+        title: 'Round Finished',
+        message: 'The round has been completed successfully',
+        clubId: round.clubId,
+        roundId: roundId,
+        data: {
+          completedRoundId: roundId
+        }
+      });
     }
 
     res.status(200).json({

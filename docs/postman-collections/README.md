@@ -16,6 +16,7 @@ This collection contains all the API endpoints planned for Phase 1 of the Consen
 - **Recommendations** - Recommendation submission and management
 - **Voting** - Vote submission and voting closure
 - **Completions** - Completion tracking and round finishing
+- **Notifications** - Notification management and read status tracking
 
 **Usage**: Import this collection to explore and test all available API endpoints.
 
@@ -44,6 +45,19 @@ This collection implements the complete happy path workflow with 3 people and 3 
 
 **Usage**: Run this collection to test the complete workflow end-to-end.
 
+### 3. [Consensus-Notifications-API.postman_collection.json](./Consensus-Notifications-API.postman_collection.json)
+**Dedicated notification system testing collection**
+
+This collection focuses specifically on testing the notification system endpoints:
+
+- **Get All Notifications** - Retrieve paginated notification history
+- **Get Unread Notifications** - Fetch only unread notifications
+- **Get Unread Count** - Get the count of unread notifications
+- **Mark as Read** - Mark individual notifications as read
+- **Mark All as Read** - Mark all notifications as read for a user
+
+**Usage**: Use this collection to test notification functionality independently or after running the happy path test to verify notifications were created.
+
 ## 🚀 Getting Started
 
 ### 1. Import Collections
@@ -63,6 +77,7 @@ The collections use the following variables:
 - `round_id`: Round ID (auto-populated)
 - `rec_1_id`, `rec_2_id`, `rec_3_id`: Recommendation IDs (auto-populated)
 - `winner_id`: Winner recommendation ID (auto-populated)
+- `notification_id`: Notification ID for testing read status
 
 ### 3. Run Tests
 
@@ -146,6 +161,7 @@ The collections provide comprehensive test coverage for:
 - ✅ **Tie-Breaking** - Random selection when votes are tied
 - ✅ **Turn Management** - Sequential turn rotation
 - ✅ **Completion Tracking** - Member completion status
+- ✅ **Notification System** - Real-time notifications and read status tracking
 - ✅ **Data Validation** - Request/response format validation
 - ✅ **Error Handling** - Status code verification
 
