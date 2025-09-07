@@ -5,7 +5,7 @@ import { Club } from '../entities/Club';
 import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
 import { StartRoundDto, UpdateRoundStatusDto } from '../dto/round.dto';
-import { getSocketManager, emitTurnChanged, emitRoundStatusChanged, emitNotification } from '../utils/socket';
+import { getSocketManager, emitTurnChanged, emitRoundStatusChanged } from '../utils/socket';
 import { NotificationService } from '../services/notificationService';
 import { NotificationType } from '../entities/Notification';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
@@ -122,15 +122,7 @@ export const startNewRound = async (req: Request, res: Response) => {
         recommender.name
       );
 
-      // Emit notification
-      emitNotification(
-        socketManager,
-        'info',
-        'New Round Started',
-        `A new round has started with ${recommender.name} as the recommender`,
-        finalClubId,
-        savedRound.id
-      );
+      // Notification will be sent via createAndEmitClubNotification below
     }
 
     res.status(201).json({
@@ -261,16 +253,6 @@ export const updateRoundStatus = async (req: Request, res: Response) => {
       notificationMessage = 'The round has been completed';
       notificationType = NotificationType.ROUND_COMPLETED;
     }
-
-    // Emit real-time notification
-    emitNotification(
-      socketManager,
-      'info',
-      notificationTitle,
-      notificationMessage,
-      round.clubId,
-      id
-    );
 
     // Create and save database notifications for all club members
     await NotificationService.createAndEmitClubNotification(req as AuthenticatedRequest, {
@@ -418,16 +400,6 @@ export const finishRound = async (req: Request, res: Response) => {
         currentRecommender?.name
       );
 
-      // Emit notification about new round
-      emitNotification(
-        socketManager,
-        'success',
-        'Round Finished & New Round Started',
-        `Round finished! New round started with ${nextRecommender.name} as the recommender`,
-        round.clubId,
-        nextRound.id
-      );
-
       // Create and save database notifications for round completion and new round start
       await NotificationService.createAndEmitClubNotification(req as AuthenticatedRequest, {
         type: NotificationType.ROUND_COMPLETED,
@@ -443,16 +415,6 @@ export const finishRound = async (req: Request, res: Response) => {
         }
       });
     } else {
-      // Just notify about round completion
-      emitNotification(
-        socketManager,
-        'success',
-        'Round Finished',
-        'The round has been completed successfully',
-        round.clubId,
-        roundId
-      );
-
       // Create and save database notifications for round completion
       await NotificationService.createAndEmitClubNotification(req as AuthenticatedRequest, {
         type: NotificationType.ROUND_COMPLETED,

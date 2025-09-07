@@ -5,7 +5,7 @@ import { CreateMemberRequestDto, UpdateMemberDto } from '../dto/member.dto';
 import { Club } from '../entities/Club';
 import { NotFoundError, asyncHandler } from '../middleware/error.middleware';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
-import { getSocketManager, emitMemberAdded, emitMemberRemoved, emitMemberRoleChanged, emitNotification } from '../utils/socket';
+import { getSocketManager, emitMemberAdded, emitMemberRemoved, emitMemberRoleChanged } from '../utils/socket';
 import { NotificationService } from '../services/notificationService';
 import { NotificationType } from '../entities/Notification';
 
@@ -52,15 +52,6 @@ export const addMemberToClub = async (req: Request, res: Response) => {
       savedMember.name,
       savedMember.email,
       savedMember.isClubManager ? 'manager' : 'member'
-    );
-
-    // Emit notification
-    emitNotification(
-      socketManager,
-      'success',
-      'New Member Added',
-      `${savedMember.name} has been added to the club`,
-      clubId
     );
 
     // Create and save notifications for all existing club members
@@ -214,15 +205,6 @@ export const removeMember = async (req: Request, res: Response) => {
       memberInfo.name
     );
 
-    // Emit notification
-    emitNotification(
-      socketManager,
-      'warning',
-      'Member Removed',
-      `${memberInfo.name} has been removed from the club`,
-      memberInfo.clubId
-    );
-
     // Create and save notifications for all remaining club members
     await NotificationService.createAndEmitClubNotification(req, {
       type: NotificationType.MEMBER_REMOVED,
@@ -329,17 +311,8 @@ export const updateMemberManagerStatus = async (req: AuthenticatedRequest, res: 
       newRole
     );
 
-    // Emit notification
-    const actionText = newManagerStatus ? 'promoted to' : 'removed from';
-    emitNotification(
-      socketManager,
-      'info',
-      'Role Changed',
-      `${member.name} has been ${actionText} club manager`,
-      member.clubId
-    );
-
     // Create and save notifications for all club members
+    const actionText = newManagerStatus ? 'promoted to' : 'removed from';
     await NotificationService.createAndEmitClubNotification(req, {
       type: NotificationType.MEMBER_ROLE_CHANGED,
       title: 'Role Changed',

@@ -6,7 +6,9 @@ import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
 import { MarkCompletionDto } from '../dto/completion.dto';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
-import { getSocketManager, emitCompletionUpdated, emitNotification } from '../utils/socket';
+import { getSocketManager, emitCompletionUpdated } from '../utils/socket';
+import { NotificationService } from '../services/notificationService';
+import { NotificationType } from '../entities/Notification';
 
 export const markCompletion = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -134,16 +136,21 @@ export const markCompletion = async (req: AuthenticatedRequest, res: Response) =
       isCompleted
     );
 
-    // Emit notification
+    // Create and save notifications for all club members
     const statusText = isCompleted ? 'completed' : 'not completed';
-    emitNotification(
-      socketManager,
-      'info',
-      'Completion Updated',
-      `${member.name} has marked the recommendation as ${statusText}`,
-      round.clubId,
-      roundId
-    );
+    await NotificationService.createAndEmitClubNotification(req, {
+      type: NotificationType.CLUB_UPDATED,
+      title: 'Completion Updated',
+      message: `${member.name} has marked the recommendation as ${statusText}`,
+      clubId: round.clubId,
+      roundId: roundId,
+      data: {
+        memberName: member.name,
+        memberId: memberId,
+        isCompleted: isCompleted,
+        roundId: roundId
+      }
+    });
 
     res.status(201).json({
       success: true,

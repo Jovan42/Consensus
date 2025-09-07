@@ -6,7 +6,7 @@ import { Member } from '../entities/Member';
 import { RoundStatus } from '../types/enums';
 import { AddRecommendationDto, UpdateRecommendationDto } from '../dto/recommendation.dto';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
-import { getSocketManager, emitRecommendationAdded, emitNotification } from '../utils/socket';
+import { getSocketManager, emitRecommendationAdded } from '../utils/socket';
 import { NotificationService } from '../services/notificationService';
 import { NotificationType } from '../entities/Notification';
 
@@ -174,16 +174,6 @@ export const addRecommendation = async (req: AuthenticatedRequest, res: Response
             recommender?.name || 'Unknown'
           );
         }
-
-        // Emit general notification
-        emitNotification(
-          socketManager,
-          'success',
-          'New Recommendations Added',
-          `${savedRecommendations.length} new recommendation(s) added by ${recommender?.name || 'Unknown'}`,
-          round.clubId,
-          finalRoundId
-        );
 
         // Create and save notifications for all club members
         await NotificationService.createAndEmitClubNotification(req, {

@@ -99,7 +99,7 @@ export default function ClubMembers() {
 
     try {
       await addMember(clubId, data);
-      await mutate(); // Refresh the members list
+      // No need to manually mutate - targeted updates will handle the refresh
       reset();
       setShowAddForm(false);
     } catch (err) {
@@ -115,7 +115,7 @@ export default function ClubMembers() {
 
     try {
       await removeMember(clubId, memberId);
-      await mutate(); // Refresh the members list
+      // No need to manually mutate - targeted updates will handle the refresh
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove member');
     } finally {
@@ -146,7 +146,7 @@ export default function ClubMembers() {
         throw new Error(errorData.message || 'Failed to update manager status');
       }
 
-      await mutate(); // Refresh the members list
+      // No need to manually mutate - targeted updates will handle the refresh
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update manager status');
     } finally {

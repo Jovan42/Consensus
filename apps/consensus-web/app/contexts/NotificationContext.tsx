@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
+import { useTargetedUpdates } from '../hooks/useTargetedUpdates';
 import { authenticatedFetch } from '../utils/authenticatedFetch';
 
 export interface Notification {
@@ -54,7 +55,9 @@ interface NotificationProviderProps {
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
-  const { onNotification, onNotificationCreated, onVoteCast, onMemberAdded, onMemberRemoved, onMemberRoleChanged, onRecommendationAdded } = useSocket();
+  const { onNotificationCreated, onVoteCast, onMemberAdded, onMemberRemoved, onMemberRoleChanged, onRecommendationAdded, onCompletionUpdated } = useSocket();
+  const { handleNotificationUpdate } = useTargetedUpdates();
+  
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadNotifications, setUnreadNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -121,6 +124,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       const result = await response.json();
       if (result.success) {
         setUnreadNotifications(result.data);
+        setUnreadCount(result.data.length); // Update count from array length
       } else {
         throw new Error(result.message || 'Failed to fetch unread notifications');
       }
@@ -153,6 +157,15 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       setError(err instanceof Error ? err.message : 'Failed to fetch unread count');
     }
   };
+
+  // Debounced version to prevent excessive API calls
+  const debouncedFetchUnreadCount = useCallback(() => {
+    const timeoutId = setTimeout(() => {
+      fetchUnreadNotifications(); // This now also updates the count
+    }, 1000); // 1 second debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [user, authLoading, isAuthenticated]);
 
   const markAsRead = async (notificationId: string) => {
     if (!user || authLoading || !isAuthenticated) return;
@@ -299,13 +312,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     }
   }, [user, authLoading, isAuthenticated]);
 
-  // Set up periodic refresh for unread count (every 30 seconds)
+  // Set up periodic refresh for unread count (every 2 minutes)
   useEffect(() => {
     if (!user || authLoading || !isAuthenticated) return;
 
     const interval = setInterval(() => {
       fetchUnreadCount();
-    }, 30000);
+    }, 120000); // 2 minutes instead of 30 seconds
 
     return () => clearInterval(interval);
   }, [user, authLoading, isAuthenticated]);
@@ -314,63 +327,70 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   useEffect(() => {
     if (!user || authLoading || !isAuthenticated) return;
 
-    const handleNotification = (data: any) => {
-      // Refresh notifications when a new notification is received
-      console.log('Notification event received:', data);
-      refreshNotifications();
-    };
-
     const handleNotificationCreated = (data: any) => {
-      // Refresh notifications when a database notification is created
       console.log('Notification created event received:', data);
-      refreshNotifications();
+      
+      // Use debounced fetch to prevent excessive requests
+      debouncedFetchUnreadCount();
     };
 
     const handleVoteCast = (data: any) => {
-      // Refresh notifications when a vote is cast
+      // Use targeted updates instead of full refresh
       console.log('Vote cast event received:', data);
-      refreshNotifications();
+      handleNotificationUpdate(data);
+      // No need to fetch count for vote events
     };
 
     const handleMemberAdded = (data: any) => {
-      // Refresh notifications when a member is added
+      // Use targeted updates instead of full refresh
       console.log('Member added event received:', data);
-      refreshNotifications();
+      handleNotificationUpdate(data);
+      // No need to fetch count for member events
     };
 
     const handleMemberRemoved = (data: any) => {
-      // Refresh notifications when a member is removed
+      // Use targeted updates instead of full refresh
       console.log('Member removed event received:', data);
-      refreshNotifications();
+      handleNotificationUpdate(data);
+      // No need to fetch count for member events
     };
 
     const handleMemberRoleChanged = (data: any) => {
-      // Refresh notifications when a member role is changed
+      // Use targeted updates instead of full refresh
       console.log('Member role changed event received:', data);
-      refreshNotifications();
+      handleNotificationUpdate(data);
+      // No need to fetch count for member events
     };
 
     const handleRecommendationAdded = (data: any) => {
-      // Refresh notifications when a recommendation is added
+      // Use targeted updates instead of full refresh
       console.log('Recommendation added event received:', data);
-      refreshNotifications();
+      handleNotificationUpdate(data);
+      // No need to fetch count for recommendation events
+    };
+
+    const handleCompletionUpdated = (data: any) => {
+      // Use targeted updates instead of full refresh
+      console.log('Completion updated event received:', data);
+      handleNotificationUpdate(data);
+      // No need to fetch count for completion events
     };
 
     // Set up event listeners
-    onNotification(handleNotification);
     onNotificationCreated(handleNotificationCreated);
     onVoteCast(handleVoteCast);
     onMemberAdded(handleMemberAdded);
     onMemberRemoved(handleMemberRemoved);
     onMemberRoleChanged(handleMemberRoleChanged);
     onRecommendationAdded(handleRecommendationAdded);
+    onCompletionUpdated(handleCompletionUpdated);
 
     // Cleanup function to remove listeners
     return () => {
       // Note: The socket manager should handle cleanup, but we can't easily remove specific callbacks
       // The socket manager will clean up when the component unmounts
     };
-  }, [user, authLoading, isAuthenticated, onNotification, onNotificationCreated, onVoteCast, onMemberAdded, onMemberRemoved, onMemberRoleChanged, onRecommendationAdded]);
+  }, [user, authLoading, isAuthenticated, onNotificationCreated, onVoteCast, onMemberAdded, onMemberRemoved, onMemberRoleChanged, onRecommendationAdded, onCompletionUpdated, handleNotificationUpdate, debouncedFetchUnreadCount]);
 
   const value: NotificationContextType = {
     notifications,

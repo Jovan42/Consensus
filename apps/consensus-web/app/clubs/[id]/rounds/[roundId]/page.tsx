@@ -35,8 +35,10 @@ export default function RoundDetail() {
   const { round, isLoading: roundLoading, error: roundError, mutate: mutateRound } = useRound(roundId);
   const { recommendations, isLoading: recommendationsLoading } = useRoundRecommendations(roundId);
   const { votes, isLoading: votesLoading } = useRoundVotes(roundId);
-  const { completions } = useRoundCompletions(roundId, !!round?.winningRecommendationId);
+  const hasWinningRecommendation = !!round?.winningRecommendationId;
+  const { completions } = useRoundCompletions(roundId, hasWinningRecommendation);
   const { members } = useClubMembers(clubId);
+  
   const updateRoundStatus = useUpdateRoundStatus();
   const closeVoting = useCloseVoting();
 
@@ -72,17 +74,17 @@ export default function RoundDetail() {
       return { completed: 0, total: 0, percentage: 0, missingMembers: [] };
     }
 
-    const completedCount = completions.filter((c: Completion) => 
-      c.isCompleted && c.recommendationId === winner.recommendation.id
-    ).length;
+    // The completions array from the API contains completion status for the winning recommendation
+    // Each completion object has: memberId, memberName, isCompleted, completedAt
+    const completedCount = completions.filter((c: any) => c.isCompleted).length;
     
     const totalCount = members.length;
     const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
     // Find members who haven't completed
     const completedMemberIds = completions
-      .filter((c: Completion) => c.isCompleted && c.recommendationId === winner.recommendation.id)
-      .map((c: Completion) => c.memberId);
+      .filter((c: any) => c.isCompleted)
+      .map((c: any) => c.memberId);
     
     const missingMembers = members.filter((member: Member) => 
       !completedMemberIds.includes(member.id)
@@ -423,6 +425,7 @@ export default function RoundDetail() {
                       <p className="text-sm text-muted-foreground">
                         {progress.completed} of {progress.total} members completed
                       </p>
+                      
                       
                       {/* Show missing members if 3 or fewer */}
                       {progress.missingMembers.length > 0 && progress.missingMembers.length <= 3 && (

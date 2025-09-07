@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Layout } from '../../../../../components/layout/Layout';
 import { Card, CardContent, CardHeader } from '../../../../../components/ui/Card';
@@ -9,6 +9,7 @@ import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useRoundCompletions, useUpdateCompletion, useClubMembers, useFinishRound } from '../../../../../hooks/useApi';
 import { Recommendation, Completion, Member } from '../../../../../context/AppContext';
 import { useAuth } from '../../../../../contexts/AuthContext';
+import { useRealtimeUpdates } from '../../../../../hooks/useRealtimeUpdates';
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -29,11 +30,14 @@ export default function CompletionTracking() {
   const [isFinishingRound, setIsFinishingRound] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { round, isLoading: roundLoading } = useRound(roundId);
-  const { recommendations, isLoading: recommendationsLoading } = useRoundRecommendations(roundId);
-  const { members, isLoading: membersLoading } = useClubMembers(clubId);
+  const { round, isLoading: roundLoading, mutate: mutateRound } = useRound(roundId);
+  const { recommendations, isLoading: recommendationsLoading, mutate: mutateRecommendations } = useRoundRecommendations(roundId);
+  const { members, isLoading: membersLoading, mutate: mutateMembers } = useClubMembers(clubId);
   const updateCompletion = useUpdateCompletion();
   const finishRound = useFinishRound();
+  
+  // Enable real-time updates for this page
+  useRealtimeUpdates({ clubId, roundId });
 
   // Get current user's member info
   const currentUserMember = members?.find((member: Member) => member.email === user?.email);
@@ -49,7 +53,9 @@ export default function CompletionTracking() {
   const winner = getWinner();
   
   // Get completion data for the round (only if there's a winning recommendation)
-  const { completions, summary, isLoading: completionsLoading, mutate: mutateCompletions } = useRoundCompletions(roundId, !!round?.winningRecommendationId);
+  const hasWinningRecommendation = !!round?.winningRecommendationId;
+  console.log('Round data:', { round, hasWinningRecommendation, roundId });
+  const { completions, summary, isLoading: completionsLoading, mutate: mutateCompletions } = useRoundCompletions(roundId, hasWinningRecommendation);
 
   // Check if current user can mark completion for a specific member
   const canMarkCompletionForMember = (member: Member) => {
@@ -77,7 +83,10 @@ export default function CompletionTracking() {
     try {
       await updateCompletion(roundId, memberId, recommendationId, !isCompleted);
       // Refresh completion data to show updated status
-      await mutateCompletions();
+      console.log('Completion updated, refreshing data...');
+      // Force refresh with revalidate
+      await mutateCompletions(undefined, { revalidate: true });
+      console.log('Completion data refreshed');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update completion status');
     } finally {
@@ -164,6 +173,31 @@ export default function CompletionTracking() {
   const totalCount = summary ? summary.total : (members ? members.length : 0);
   const completionPercentage = summary ? Math.round(summary.percentage) : (totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0);
 
+  // Debug logging
+  console.log('Completion data:', { 
+    completions, 
+    summary, 
+    completedCount, 
+    totalCount, 
+    completionPercentage,
+    completionsLoading,
+    hasWinningRecommendation,
+    round: round?.winningRecommendationId
+  });
+
+  // Debug alert to make sure we can see the data
+  if (completions && completions.length > 0) {
+    console.log('COMPLETIONS FOUND:', completions);
+  } else {
+    console.log('NO COMPLETIONS FOUND');
+  }
+  
+  if (summary) {
+    console.log('SUMMARY FOUND:', summary);
+  } else {
+    console.log('NO SUMMARY FOUND');
+  }
+
   if (!members || members.length === 0) {
     return (
       <Layout>
@@ -219,6 +253,26 @@ export default function CompletionTracking() {
                   Recommended by {winner.recommender?.name || 'Unknown'}
                 </div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Debug Info */}
+        <Card className="bg-yellow-100 dark:bg-yellow-900">
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-yellow-800 dark:text-yellow-200">Debug Info</h2>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm text-yellow-800 dark:text-yellow-200">
+              <p>Round ID: {roundId}</p>
+              <p>Has Winning Recommendation: {hasWinningRecommendation ? 'Yes' : 'No'}</p>
+              <p>Round Winning ID: {round?.winningRecommendationId || 'None'}</p>
+              <p>Completions Loading: {completionsLoading ? 'Yes' : 'No'}</p>
+              <p>Completions Count: {completions?.length || 0}</p>
+              <p>Summary: {summary ? JSON.stringify(summary) : 'None'}</p>
+              <p>Completed Count: {completedCount}</p>
+              <p>Total Count: {totalCount}</p>
+              <p>Percentage: {completionPercentage}%</p>
             </div>
           </CardContent>
         </Card>

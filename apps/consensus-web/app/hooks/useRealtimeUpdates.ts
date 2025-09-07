@@ -100,16 +100,23 @@ export function useRealtimeUpdates({
 
     const handleVoteCast = (data: any) => {
       if (clubId && data.clubId === clubId) {
-        // Invalidate voting-related cache
-        invalidateCache(`/api/rounds/${roundId}/votes`);
-        invalidateCache(`/api/rounds/${roundId}`);
-        invalidateCache(`/api/clubs/${clubId}/rounds`);
+        console.log('Vote cast event received, refreshing voting data');
+        // Force refresh votes specifically
+        if (roundId) {
+          mutate(`/rounds/${roundId}/votes`, undefined, { revalidate: true });
+        }
+        // Also invalidate other related cache with correct keys (SWR keys, not API URLs)
+        invalidateCache(`/rounds/${roundId}/votes`);
+        invalidateCache(`/rounds/${roundId}`);
+        invalidateCache(`/clubs/${clubId}/rounds`);
+        // Refresh member data since voting status changes
+        mutate(`/clubs/${clubId}/members`, undefined, { revalidate: true });
       }
     };
 
     onVoteCast(handleVoteCast);
     return () => offVoteCast(handleVoteCast);
-  }, [enabled, clubId, roundId, onVoteCast, offVoteCast, invalidateCache]);
+  }, [enabled, clubId, roundId, onVoteCast, offVoteCast, invalidateCache, mutate]);
 
   // Completion updated handler
   useEffect(() => {
@@ -117,9 +124,10 @@ export function useRealtimeUpdates({
 
     const handleCompletionUpdated = (data: any) => {
       if (clubId && data.clubId === clubId) {
-        // Invalidate completion-related cache
-        invalidateCache(`/api/rounds/${roundId}/completions`);
-        invalidateCache(`/api/rounds/${roundId}`);
+        console.log('Completion updated event received, refreshing completion data');
+        // Invalidate completion-related cache with correct key (SWR key, not API URL)
+        invalidateCache(`/rounds/${roundId}/completion-status`);
+        invalidateCache(`/rounds/${roundId}`);
       }
     };
 
@@ -133,10 +141,10 @@ export function useRealtimeUpdates({
 
     const handleRoundStatusChanged = (data: any) => {
       if (clubId && data.clubId === clubId) {
-        // Invalidate round-related cache
-        invalidateCache(`/api/rounds/${data.roundId}`);
-        invalidateCache(`/api/clubs/${clubId}/rounds`);
-        invalidateCache(`/api/clubs/${clubId}`);
+        // Invalidate round-related cache with correct keys (SWR keys, not API URLs)
+        invalidateCache(`/rounds/${data.roundId}`);
+        invalidateCache(`/clubs/${clubId}/rounds`);
+        invalidateCache(`/clubs/${clubId}`);
       }
     };
 
@@ -150,9 +158,9 @@ export function useRealtimeUpdates({
 
     const handleTurnChanged = (data: any) => {
       if (clubId && data.clubId === clubId) {
-        // Invalidate round-related cache
-        invalidateCache(`/api/rounds/${data.roundId}`);
-        invalidateCache(`/api/clubs/${clubId}/rounds`);
+        // Invalidate round-related cache with correct keys (SWR keys, not API URLs)
+        invalidateCache(`/rounds/${data.roundId}`);
+        invalidateCache(`/clubs/${clubId}/rounds`);
       }
     };
 
@@ -204,9 +212,9 @@ export function useRealtimeUpdates({
 
     const handleMemberRoleChanged = (data: any) => {
       if (clubId && data.clubId === clubId) {
-        // Invalidate member-related cache
-        invalidateCache(`/api/clubs/${clubId}/members`);
-        invalidateCache(`/api/clubs/${clubId}`);
+        // Invalidate member-related cache with correct keys (SWR keys, not API URLs)
+        invalidateCache(`/clubs/${clubId}/members`);
+        invalidateCache(`/clubs/${clubId}`);
       }
     };
 
@@ -272,37 +280,6 @@ export function useRealtimeUpdates({
     return () => offRecommendationRemoved(handleRecommendationRemoved);
   }, [enabled, clubId, roundId, onRecommendationRemoved, offRecommendationRemoved, invalidateCache, mutate]);
 
-  // Recommendation added handler
-  useEffect(() => {
-    if (!enabled) return;
-
-    const handleRecommendationAdded = (data: any) => {
-      if (clubId && data.clubId === clubId) {
-        // Invalidate recommendation-related cache
-        invalidateCache(`/api/rounds/${data.roundId}/recommendations`);
-        invalidateCache(`/api/rounds/${data.roundId}`);
-      }
-    };
-
-    onRecommendationAdded(handleRecommendationAdded);
-    return () => offRecommendationAdded(handleRecommendationAdded);
-  }, [enabled, clubId, onRecommendationAdded, offRecommendationAdded, invalidateCache]);
-
-  // Recommendation removed handler
-  useEffect(() => {
-    if (!enabled) return;
-
-    const handleRecommendationRemoved = (data: any) => {
-      if (clubId && data.clubId === clubId) {
-        // Invalidate recommendation-related cache
-        invalidateCache(`/api/rounds/${data.roundId}/recommendations`);
-        invalidateCache(`/api/rounds/${data.roundId}`);
-      }
-    };
-
-    onRecommendationRemoved(handleRecommendationRemoved);
-    return () => offRecommendationRemoved(handleRecommendationRemoved);
-  }, [enabled, clubId, onRecommendationRemoved, offRecommendationRemoved, invalidateCache]);
 
   // Notification handler - force refresh main data when notifications are received
   useEffect(() => {

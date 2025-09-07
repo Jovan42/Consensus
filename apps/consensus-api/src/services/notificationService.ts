@@ -3,7 +3,7 @@ import { Notification, NotificationType, NotificationStatus } from '../entities/
 import { Member } from '../entities/Member';
 import { Club } from '../entities/Club';
 import { Round } from '../entities/Round';
-import { getSocketManager, emitNotification } from '../utils/socket';
+import { getSocketManager } from '../utils/socket';
 import { Request } from 'express';
 
 export interface CreateNotificationData {
@@ -71,16 +71,7 @@ export class NotificationService {
   ): Promise<Notification> {
     const notification = await this.createNotification(data);
     
-    // Emit real-time notification
-    const socketManager = getSocketManager(req);
-    emitNotification(
-      socketManager,
-      'info',
-      data.title,
-      data.message,
-      data.clubId,
-      data.roundId
-    );
+    // Note: Real-time notification is handled by createAndEmitClubNotification
 
     return notification;
   }
@@ -94,18 +85,8 @@ export class NotificationService {
   ): Promise<Notification[]> {
     const notifications = await this.createClubNotification(data);
     
-    // Emit real-time notification to all club members
-    const socketManager = getSocketManager(req);
-    emitNotification(
-      socketManager,
-      'info',
-      data.title,
-      data.message,
-      data.clubId,
-      data.roundId
-    );
-
     // Emit a specific event for database notifications being created
+    const socketManager = getSocketManager(req);
     socketManager.emitToClub(data.clubId, 'notification_created', {
       type: data.type,
       title: data.title,
