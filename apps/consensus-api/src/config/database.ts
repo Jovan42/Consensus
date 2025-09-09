@@ -35,7 +35,15 @@ export const initializeDatabase = async () => {
     }
     
     console.log('🔄 Connecting to database...');
-    await AppDataSource.initialize();
+    console.log('📊 Database URL:', process.env.DATABASE_URL ? 'configured' : 'missing');
+    
+    // Add timeout to prevent hanging
+    const connectionPromise = AppDataSource.initialize();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Database connection timeout after 30 seconds')), 30000)
+    );
+    
+    await Promise.race([connectionPromise, timeoutPromise]);
     console.log('✅ Database connection established');
     
     // Skip migrations in production since database is already set up
@@ -48,7 +56,9 @@ export const initializeDatabase = async () => {
     }
   } catch (error) {
     console.error('❌ Database connection failed:', error);
+    console.error('Error details:', error instanceof Error ? error.message : String(error));
     if (process.env.NODE_ENV === 'production') {
+      console.log('🚨 Production deployment failed - check database configuration');
       throw error; // Fail fast in production
     }
     console.log('⚠️  Continuing without database connection for development');
