@@ -11,7 +11,8 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/config/database.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/config/database.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/database.ts",
-    "populate:users": "tsx src/scripts/populateTestUsers.ts"
+    "populate:users": "tsx src/scripts/populateTestUsers.ts",
+    "migrate": "tsx src/scripts/runMigrations.ts"
   },
   "dependencies": {
     "@types/cors": "^2.8.0",
