@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource({
   synchronize: false, // Never use synchronize in production, use migrations instead
   logging: process.env.NODE_ENV === 'development',
   entities: [Club, Member, Round, Recommendation, Vote, Completion, MemberNote, Notification, User, UserSettings],
-  migrations: ['src/migrations/*.ts'],
+  migrations: [process.env.NODE_ENV === 'production' ? 'dist/migrations/*.js' : 'src/migrations/*.ts'],
   subscribers: [],
 });
 
