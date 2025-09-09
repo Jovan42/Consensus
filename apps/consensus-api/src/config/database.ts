@@ -16,7 +16,7 @@ config();
 export const AppDataSource = new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
-  synchronize: process.env.NODE_ENV === 'development', // Only in development
+  synchronize: false, // Never use synchronize in production, use migrations instead
   logging: process.env.NODE_ENV === 'development',
   entities: [Club, Member, Round, Recommendation, Vote, Completion, MemberNote, Notification, User, UserSettings],
   migrations: ['src/migrations/*.ts'],

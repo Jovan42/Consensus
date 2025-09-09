@@ -15,10 +15,15 @@ async function runMigrations() {
     await AppDataSource.runMigrations();
     console.log('✅ Migrations completed successfully');
 
-    console.log('🔄 Populating test users...');
-    const { populateTestUsers } = await import('./populateTestUsers');
-    await populateTestUsers();
-    console.log('✅ Test users populated');
+    // Only populate test users in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 Populating test users...');
+      const { populateTestUsers } = await import('./populateTestUsers');
+      await populateTestUsers();
+      console.log('✅ Test users populated');
+    } else {
+      console.log('ℹ️  Skipping test user population in production');
+    }
 
   } catch (error) {
     console.error('❌ Migration failed:', error);
