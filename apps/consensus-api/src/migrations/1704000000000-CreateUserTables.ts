@@ -181,42 +181,56 @@ export class CreateUserTables1704000000000 implements MigrationInterface {
       true
     );
 
-    // Add foreign key constraint
-    await queryRunner.createForeignKey(
-      'user_settings',
-      new TableForeignKey({
-        columnNames: ['userId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'users',
-        onDelete: 'CASCADE',
-      })
-    );
-
-    // Insert test users
-    await queryRunner.query(`
-      INSERT INTO users (id, email, name, picture, role, isActive, emailVerified, timezone, locale, "createdAt", "updatedAt") VALUES
-      ('550e8400-e29b-41d4-a716-446655440001', 'admin@consensus.com', 'Admin User', 'https://via.placeholder.com/150/007bff/ffffff?text=A', 'admin', true, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440002', 'john.doe@example.com', 'John Doe', 'https://via.placeholder.com/150/28a745/ffffff?text=J', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440003', 'jane.smith@example.com', 'Jane Smith', 'https://via.placeholder.com/150/dc3545/ffffff?text=J', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440004', 'bob.wilson@example.com', 'Bob Wilson', 'https://via.placeholder.com/150/ffc107/000000?text=B', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440005', 'alice.brown@example.com', 'Alice Brown', 'https://via.placeholder.com/150/6f42c1/ffffff?text=A', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440006', 'charlie.davis@example.com', 'Charlie Davis', 'https://via.placeholder.com/150/20c997/ffffff?text=C', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440007', 'diana.miller@example.com', 'Diana Miller', 'https://via.placeholder.com/150/fd7e14/ffffff?text=D', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440008', 'eve.jones@example.com', 'Eve Jones', 'https://via.placeholder.com/150/e83e8c/ffffff?text=E', 'user', true, true, 'UTC', 'en', NOW(), NOW())
+    // Add foreign key constraint (only if it doesn't exist)
+    const foreignKeyExists = await queryRunner.query(`
+      SELECT 1 FROM information_schema.table_constraints 
+      WHERE constraint_name = 'FK_986a2b6d3c05eb4091bb8066f78' 
+      AND table_name = 'user_settings'
     `);
+    
+    if (foreignKeyExists.length === 0) {
+      await queryRunner.createForeignKey(
+        'user_settings',
+        new TableForeignKey({
+          columnNames: ['userId'],
+          referencedColumnNames: ['id'],
+          referencedTableName: 'users',
+          onDelete: 'CASCADE',
+        })
+      );
+    }
 
-    // Insert default settings for test users
-    await queryRunner.query(`
-      INSERT INTO user_settings (id, "userId", theme, "showOnlineStatus", "enableNotifications", "enableNotificationSound", "notificationSound", "notificationDuration", "emailNotifications", "pushNotifications", language, "itemsPerPage", "showProfilePicture", "showEmailInProfile", "autoJoinClubs", "showVoteProgress", "showCompletionProgress", "createdAt", "updatedAt") VALUES
-      ('settings-550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', 'dark', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
-      ('settings-550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440002', 'light', true, true, true, 'chime', 3000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
-      ('settings-550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440003', 'system', true, true, false, 'none', 7000, true, false, 'en', 12, true, false, false, true, true, NOW(), NOW()),
-      ('settings-550e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440004', 'dark', false, true, true, 'bell', 4000, false, true, 'en', 12, true, true, true, true, true, NOW(), NOW()),
-      ('settings-550e8400-e29b-41d4-a716-446655440005', '550e8400-e29b-41d4-a716-446655440005', 'light', true, false, false, 'none', 5000, false, false, 'en', 12, false, true, false, true, true, NOW(), NOW()),
-      ('settings-550e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440006', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
-      ('settings-550e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440007', 'dark', true, true, true, 'chime', 6000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
-      ('settings-550e8400-e29b-41d4-a716-446655440008', '550e8400-e29b-41d4-a716-446655440008', 'light', true, true, true, 'bell', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW())
-    `);
+    // Insert test users (only if they don't exist)
+    const existingUsers = await queryRunner.query(`SELECT COUNT(*) as count FROM users`);
+    if (existingUsers[0].count === '0') {
+      await queryRunner.query(`
+        INSERT INTO users (id, email, name, picture, role, isActive, emailVerified, timezone, locale, "createdAt", "updatedAt") VALUES
+        ('550e8400-e29b-41d4-a716-446655440001', 'admin@consensus.com', 'Admin User', 'https://via.placeholder.com/150/007bff/ffffff?text=A', 'admin', true, true, 'UTC', 'en', NOW(), NOW()),
+        ('550e8400-e29b-41d4-a716-446655440002', 'john.doe@example.com', 'John Doe', 'https://via.placeholder.com/150/28a745/ffffff?text=J', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
+        ('550e8400-e29b-41d4-a716-446655440003', 'jane.smith@example.com', 'Jane Smith', 'https://via.placeholder.com/150/dc3545/ffffff?text=J', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
+        ('550e8400-e29b-41d4-a716-446655440004', 'bob.wilson@example.com', 'Bob Wilson', 'https://via.placeholder.com/150/ffc107/000000?text=B', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
+        ('550e8400-e29b-41d4-a716-446655440005', 'alice.brown@example.com', 'Alice Brown', 'https://via.placeholder.com/150/6f42c1/ffffff?text=A', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
+        ('550e8400-e29b-41d4-a716-446655440006', 'charlie.davis@example.com', 'Charlie Davis', 'https://via.placeholder.com/150/20c997/ffffff?text=C', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
+        ('550e8400-e29b-41d4-a716-446655440007', 'diana.miller@example.com', 'Diana Miller', 'https://via.placeholder.com/150/fd7e14/ffffff?text=D', 'user', true, true, 'UTC', 'en', NOW(), NOW()),
+        ('550e8400-e29b-41d4-a716-446655440008', 'eve.jones@example.com', 'Eve Jones', 'https://via.placeholder.com/150/e83e8c/ffffff?text=E', 'user', true, true, 'UTC', 'en', NOW(), NOW())
+      `);
+    }
+
+    // Insert default settings for test users (only if they don't exist)
+    const existingSettings = await queryRunner.query(`SELECT COUNT(*) as count FROM user_settings`);
+    if (existingSettings[0].count === '0') {
+      await queryRunner.query(`
+        INSERT INTO user_settings (id, "userId", theme, "showOnlineStatus", "enableNotifications", "enableNotificationSound", "notificationSound", "notificationDuration", "emailNotifications", "pushNotifications", language, "itemsPerPage", "showProfilePicture", "showEmailInProfile", "autoJoinClubs", "showVoteProgress", "showCompletionProgress", "createdAt", "updatedAt") VALUES
+        ('settings-550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', 'dark', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+        ('settings-550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440002', 'light', true, true, true, 'chime', 3000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+        ('settings-550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440003', 'system', true, true, false, 'none', 7000, true, false, 'en', 12, true, false, false, true, true, NOW(), NOW()),
+        ('settings-550e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440004', 'dark', false, true, true, 'bell', 4000, false, true, 'en', 12, true, true, true, true, true, NOW(), NOW()),
+        ('settings-550e8400-e29b-41d4-a716-446655440005', '550e8400-e29b-41d4-a716-446655440005', 'light', true, false, false, 'none', 5000, false, false, 'en', 12, false, true, false, true, true, NOW(), NOW()),
+        ('settings-550e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440006', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+        ('settings-550e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440007', 'dark', true, true, true, 'chime', 6000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+        ('settings-550e8400-e29b-41d4-a716-446655440008', '550e8400-e29b-41d4-a716-446655440008', 'light', true, true, true, 'bell', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW())
+      `);
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
