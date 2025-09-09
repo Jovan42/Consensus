@@ -2,6 +2,8 @@
 
 This document provides comprehensive information about the Consensus notification system, including implementation details, usage examples, and testing procedures.
 
+> **📋 For a complete reference of all notification types and their UI refresh behavior, see [NOTIFICATION-SYSTEM-REFERENCE.md](./NOTIFICATION-SYSTEM-REFERENCE.md)**
+
 ## 📋 Overview
 
 The notification system provides real-time updates and persistent notification history for club activities. When users perform actions like voting or adding recommendations, notifications are automatically created for all club members and stored in the database.

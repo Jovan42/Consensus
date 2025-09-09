@@ -2,6 +2,8 @@
 
 This system allows each component to register its own handlers for specific notification types, providing better separation of concerns and reducing duplicate requests.
 
+> **📋 For a complete reference of all notification types and their UI refresh behavior, see [NOTIFICATION-SYSTEM-REFERENCE.md](../../../docs/NOTIFICATION-SYSTEM-REFERENCE.md)**
+
 ## How It Works
 
 1. **Event Emission**: The notification context receives socket events and emits them to the notification event manager
