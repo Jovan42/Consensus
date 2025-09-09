@@ -1,3 +1,5 @@
+import { requestDeduplication } from './requestDeduplication';
+
 // Helper function to get user info from localStorage
 const getUserInfo = () => {
   if (typeof window === 'undefined') return null;
@@ -74,7 +76,7 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
       ...options.headers,
     };
     
-    const response = await fetch(url, {
+    const response = await requestDeduplication.deduplicatedFetch(url, {
       ...options,
       headers,
     });
@@ -93,8 +95,8 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
     return response;
   }
   
-  // For non-API calls, use regular fetch
-  return fetch(url, options);
+  // For non-API calls, use deduplicated fetch
+  return requestDeduplication.deduplicatedFetch(url, options);
 };
 
 // Export the helper functions for use in other parts of the app

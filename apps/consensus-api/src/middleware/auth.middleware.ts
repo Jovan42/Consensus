@@ -98,6 +98,11 @@ export const authenticateUser = (req: AuthenticatedRequest, res: Response, next:
     const userSub = req.headers['x-user-sub'] as string;
     const userType = req.headers['x-user-type'] as string;
 
+    // Debug logging for member-notes requests
+    if (req.path.includes('member-notes')) {
+      console.log(`[Auth] Member-notes request from ${userEmail} (${userType})`);
+    }
+
     // Require authentication headers for all API requests
     if (!userEmail) {
       return res.status(401).json({

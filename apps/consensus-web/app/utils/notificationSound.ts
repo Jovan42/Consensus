@@ -42,9 +42,13 @@ const SOUND_DEBOUNCE_MS = 1000; // Minimum 1 second between sounds
  * Play a notification sound
  */
 export const playNotificationSound = async (): Promise<void> => {
+  console.log('🔊 playNotificationSound called');
   try {
     // Check if audio is allowed (user interaction required)
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+      console.log('🔇 Window is undefined, cannot play sound');
+      return;
+    }
 
     // Debounce: prevent rapid-fire sounds
     const now = Date.now();
@@ -53,12 +57,16 @@ export const playNotificationSound = async (): Promise<void> => {
       return;
     }
     lastSoundTime = now;
+    console.log('🔊 Sound not debounced, proceeding to play...');
 
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    console.log('🔊 Audio context created, state:', audioContext.state);
     
     // Resume audio context if it's suspended (required by some browsers)
     if (audioContext.state === 'suspended') {
+      console.log('🔊 Audio context suspended, resuming...');
       await audioContext.resume();
+      console.log('🔊 Audio context resumed, new state:', audioContext.state);
     }
 
     // Create or reuse the notification buffer
@@ -122,8 +130,9 @@ export const setNotificationSoundEnabled = (enabled: boolean): void => {
  */
 export const playNotificationSoundIfEnabled = async (): Promise<void> => {
   const enabled = isNotificationSoundEnabled();
-  console.log('🔊 Sound enabled:', enabled);
+  console.log('🔊 playNotificationSoundIfEnabled called - Sound enabled:', enabled);
   if (enabled) {
+    console.log('🔊 Calling playNotificationSound...');
     await playNotificationSound();
   } else {
     console.log('🔇 Sound disabled, not playing');

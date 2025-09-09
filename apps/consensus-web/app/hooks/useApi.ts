@@ -146,6 +146,13 @@ export function useUpdateMember() {
   };
 }
 
+export function useUpdateMemberManagerStatus() {
+  return async (memberId: string, isClubManager: boolean) => {
+    const response = await api.put(`/members/${memberId}/manager-status`, { isClubManager });
+    return response.data;
+  };
+}
+
 export function useRemoveMember() {
   return async (clubId: string, memberId: string) => {
     await api.delete(`/clubs/${clubId}/members/${memberId}`);
@@ -318,6 +325,20 @@ export function useMemberNote(roundId: string) {
         // Handle 404 as "note doesn't exist" - not an error
         if (error.message?.includes('404')) {
           return null;
+        }
+        // Handle 403 as potential timing issue - retry after a short delay
+        if (error.message?.includes('403')) {
+          console.log('Member notes 403 error, retrying after delay...');
+          await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms
+          try {
+            return await api.get(url);
+          } catch (retryError: any) {
+            // If still 403 after retry, treat as permission denied
+            if (retryError.message?.includes('403')) {
+              throw new Error('Access denied: You are not a member of this club');
+            }
+            throw retryError;
+          }
         }
         // Re-throw other errors
         throw error;

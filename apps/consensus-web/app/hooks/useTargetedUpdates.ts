@@ -13,14 +13,14 @@ export function useTargetedUpdates() {
   const debounceTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   // Debounced mutate function to prevent rapid successive calls
-  const debouncedMutate = useCallback((key: string, delay: number = 1000) => {
+  const debouncedMutate = useCallback((key: string, delay: number = 500) => {
     // Clear existing timeout for this key
     const existingTimeout = debounceTimeouts.current.get(key);
     if (existingTimeout) {
       clearTimeout(existingTimeout);
     }
 
-    // Set new timeout with longer delay to prevent excessive calls
+    // Set new timeout with shorter delay for better responsiveness
     const timeout = setTimeout(() => {
       mutate(key);
       debounceTimeouts.current.delete(key);

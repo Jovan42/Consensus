@@ -9,6 +9,8 @@ import { Alert } from '../../components/ui/Alert';
 import { useClub, useClubMembers, useClubRounds, useStartRound } from '../../hooks/useApi';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSocket } from '../../contexts/SocketContext';
+import { useNotificationHandler } from '../../hooks/useNotificationHandler';
 import { Member } from '../../context/AppContext';
 import { 
   ArrowLeft, 
@@ -32,9 +34,20 @@ export default function ClubDetail() {
   const [isStartingRound, setIsStartingRound] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { club, isLoading: clubLoading, error: clubError } = useClub(clubId);
+  const { club, isLoading: clubLoading, error: clubError, mutate: mutateClub } = useClub(clubId);
   const { members, isLoading: membersLoading } = useClubMembers(clubId);
-  const { rounds, isLoading: roundsLoading } = useClubRounds(clubId);
+  const { rounds, isLoading: roundsLoading, mutate: mutateRounds } = useClubRounds(clubId);
+  
+  // Connect to socket for real-time updates
+  const { isConnected, joinClubs } = useSocket();
+  
+  // Join the club for real-time updates
+  React.useEffect(() => {
+    if (isConnected && clubId) {
+      joinClubs([clubId]);
+      console.log('🔌 Club page joined club for real-time updates:', clubId);
+    }
+  }, [isConnected, clubId, joinClubs]);
   const startRound = useStartRound();
 
   // Get current user's member info
@@ -45,6 +58,43 @@ export default function ClubDetail() {
       setCurrentClub(club);
     }
   }, [club, setCurrentClub]);
+
+  // Register notification handler for round creation events
+  useNotificationHandler({
+    component: 'ClubPage',
+    notificationTypes: ['turn_changed', 'round_status_changed', 'notification_created'],
+    handler: (event) => {
+      console.log('Club page received notification:', event);
+      
+      // Only handle events for this specific club
+      if (event.data.clubId === clubId) {
+        switch (event.type) {
+          case 'turn_changed':
+            console.log('Turn changed - new round started, refreshing club data');
+            // Refresh club data to show the new round
+            mutateClub();
+            mutateRounds();
+            break;
+          case 'round_status_changed':
+            console.log('Round status changed, refreshing club data');
+            // Refresh club data to show updated round status
+            mutateClub();
+            mutateRounds();
+            break;
+          case 'notification_created':
+            // Check if this is a round or voting related notification
+            if (event.data.type === 'ROUND_STARTED' || event.data.type === 'VOTING_STARTED') {
+              console.log(`${event.data.type} notification received, refreshing club data`);
+              // Refresh club data to show the updated round status
+              mutateClub();
+              mutateRounds();
+            }
+            break;
+        }
+      }
+    },
+    priority: 10 // High priority for round-related events
+  });
 
   const handleStartRound = async () => {
     if (!members || members.length === 0) {

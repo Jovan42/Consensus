@@ -11,6 +11,7 @@ import { NotesSection } from '../../../../components/ui/NotesSection';
 import { Recommendation, Vote, Completion, Member } from '../../../../context/AppContext';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useRealtimeUpdates } from '../../../../hooks/useRealtimeUpdates';
+import { useNotificationHandler } from '../../../../hooks/useNotificationHandler';
 import { 
   ArrowLeft, 
   User, 
@@ -33,14 +34,47 @@ export default function RoundDetail() {
   useRealtimeUpdates({ clubId, roundId });
 
   const { round, isLoading: roundLoading, error: roundError, mutate: mutateRound } = useRound(roundId);
-  const { recommendations, isLoading: recommendationsLoading } = useRoundRecommendations(roundId);
-  const { votes, isLoading: votesLoading } = useRoundVotes(roundId);
+  const { recommendations, isLoading: recommendationsLoading, mutate: mutateRecommendations } = useRoundRecommendations(roundId);
+  const { votes, isLoading: votesLoading, mutate: mutateVotes } = useRoundVotes(roundId);
   const hasWinningRecommendation = !!round?.winningRecommendationId;
   const { completions } = useRoundCompletions(roundId, hasWinningRecommendation);
   const { members } = useClubMembers(clubId);
   
   const updateRoundStatus = useUpdateRoundStatus();
   const closeVoting = useCloseVoting();
+
+  // Register notification handler for voting events
+  useNotificationHandler({
+    component: 'RoundDetailsPage',
+    notificationTypes: ['round_status_changed', 'notification_created'],
+    handler: (event) => {
+      console.log('Round details page received notification:', event);
+      
+      // Only handle events for this specific round
+      if (event.data.roundId === roundId) {
+        switch (event.type) {
+          case 'round_status_changed':
+            console.log('Round status changed, refreshing round data');
+            // Refresh round data to show updated status
+            mutateRound();
+            mutateRecommendations();
+            mutateVotes();
+            break;
+          case 'notification_created':
+            // Check if this is a voting-related notification
+            if (event.data.type === 'VOTING_STARTED') {
+              console.log('Voting started notification received, refreshing round data');
+              // Refresh round data to show voting state
+              mutateRound();
+              mutateRecommendations();
+              mutateVotes();
+            }
+            break;
+        }
+      }
+    },
+    priority: 10 // High priority for round-related events
+  });
 
   // Check if current user is the recommender
   const isCurrentRecommender = user && round?.currentRecommender && 

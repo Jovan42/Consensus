@@ -10,9 +10,10 @@ import { Card, CardContent, CardHeader } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Alert } from '../../../components/ui/Alert';
-import { useClub, useClubMembers, useAddMember, useRemoveMember } from '../../../hooks/useApi';
+import { useClub, useClubMembers, useAddMember, useRemoveMember, useUpdateMemberManagerStatus } from '../../../hooks/useApi';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useRealtimeUpdates } from '../../../hooks/useRealtimeUpdates';
+import { useNotificationHandler } from '../../../hooks/useNotificationHandler';
 import { Member } from '../../../context/AppContext';
 import { getTestAccount } from '../../../../lib/auth0';
 import { 
@@ -52,6 +53,35 @@ export default function ClubMembers() {
   const { members, isLoading: membersLoading, mutate } = useClubMembers(clubId);
   const addMember = useAddMember();
   const removeMember = useRemoveMember();
+  const updateMemberManagerStatus = useUpdateMemberManagerStatus();
+
+  // Register component-specific notification handlers
+  useNotificationHandler({
+    component: 'MembersPage',
+    notificationTypes: ['member_added', 'member_removed', 'member_role_changed'],
+    handler: (event) => {
+      console.log('Members page received notification:', event);
+      
+      // Only handle events for this specific club
+      if (event.data.clubId === clubId) {
+        switch (event.type) {
+          case 'member_added':
+            console.log('Member added to club, refreshing members list');
+            mutate(); // Refresh members list
+            break;
+          case 'member_removed':
+            console.log('Member removed from club, refreshing members list');
+            mutate(); // Refresh members list
+            break;
+          case 'member_role_changed':
+            console.log('Member role changed, refreshing members list');
+            mutate(); // Refresh members list
+            break;
+        }
+      }
+    },
+    priority: 10 // High priority for member-related events
+  });
 
   // Permission checks
   const currentUserMember = members?.find((m: Member) => m.email === user?.email);
@@ -128,24 +158,7 @@ export default function ClubMembers() {
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:3001/api/members/${memberId}/manager-status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-Email': user?.email || '',
-          'X-User-Name': user?.name || '',
-          'X-User-Role': user?.role || '',
-          'X-User-Sub': user?.sub || '',
-          'X-User-Type': user?.isTestAccount ? 'test' : 'auth0'
-        },
-        body: JSON.stringify({ isClubManager })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update manager status');
-      }
-
+      await updateMemberManagerStatus(memberId, isClubManager);
       // No need to manually mutate - targeted updates will handle the refresh
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update manager status');

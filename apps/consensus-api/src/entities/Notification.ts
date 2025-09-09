@@ -4,6 +4,7 @@ import { Round } from './Round';
 
 export enum NotificationType {
   VOTE_CAST = 'vote_cast',
+  VOTING_STARTED = 'voting_started',
   VOTING_COMPLETED = 'voting_completed',
   RECOMMENDATION_ADDED = 'recommendation_added',
   ROUND_STARTED = 'round_started',

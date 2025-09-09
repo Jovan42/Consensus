@@ -122,7 +122,19 @@ export const startNewRound = async (req: Request, res: Response) => {
         recommender.name
       );
 
-      // Notification will be sent via createAndEmitClubNotification below
+      // Create and save database notifications for round start
+      await NotificationService.createAndEmitClubNotification(req as AuthenticatedRequest, {
+        type: NotificationType.ROUND_STARTED,
+        title: 'New Round Started',
+        message: `A new round has started with ${recommender.name} as the recommender`,
+        clubId: finalClubId,
+        roundId: savedRound.id,
+        data: {
+          roundId: savedRound.id,
+          recommenderId: currentRecommenderId,
+          recommenderName: recommender.name
+        }
+      });
     }
 
     res.status(201).json({
@@ -243,7 +255,7 @@ export const updateRoundStatus = async (req: Request, res: Response) => {
     if (status === RoundStatus.VOTING) {
       notificationTitle = 'Voting Started';
       notificationMessage = 'Voting has started for this round';
-      notificationType = NotificationType.ROUND_STARTED;
+      notificationType = NotificationType.VOTING_STARTED;
     } else if (status === RoundStatus.COMPLETING) {
       notificationTitle = 'Voting Closed';
       notificationMessage = 'Voting has been closed for this round';

@@ -12,40 +12,44 @@ export const getMemberNoteByRound = asyncHandler(async (req: AuthenticatedReques
   const { roundId } = req.params;
   const userEmail = req.user?.email;
 
+  console.log(`[MemberNotes] Getting note for round ${roundId} by user ${userEmail}`);
+
   if (!userEmail) {
     res.status(401).json({ error: 'User not authenticated' });
     return;
   }
 
-  // Find the member for this user
-  const memberRepository = AppDataSource.getRepository(Member);
-  const member = await memberRepository.findOne({
-    where: { email: userEmail }
-  });
-
-  if (!member) {
-    res.status(404).json({ error: 'Member not found' });
-    return;
-  }
-
-  // Verify the round exists and member is part of the club
+  // Verify the round exists first
   const roundRepository = AppDataSource.getRepository(Round);
   const round = await roundRepository.findOne({
     where: { id: roundId },
-    relations: ['club', 'club.members']
+    relations: ['club']
   });
 
   if (!round) {
+    console.log(`[MemberNotes] Round not found: ${roundId}`);
     res.status(404).json({ error: 'Round not found' });
     return;
   }
 
-  // Check if member is part of the club
-  const isMemberOfClub = round.club.members.some(m => m.id === member.id);
-  if (!isMemberOfClub) {
+  console.log(`[MemberNotes] Found round: ${round.id} in club: ${round.clubId}`);
+
+  // Find the member for this user in the specific club
+  const memberRepository = AppDataSource.getRepository(Member);
+  const member = await memberRepository.findOne({
+    where: { 
+      email: userEmail,
+      clubId: round.clubId 
+    }
+  });
+
+  if (!member) {
+    console.log(`[MemberNotes] Member not found for email: ${userEmail} in club: ${round.clubId}`);
     res.status(403).json({ error: 'You are not a member of this club' });
     return;
   }
+
+  console.log(`[MemberNotes] Found member: ${member.id} (${member.email}) in club: ${member.clubId}`);
 
   // Find or create the note
   const noteRepository = AppDataSource.getRepository(MemberNote);
@@ -168,6 +172,57 @@ export const getAllMemberNotes = asyncHandler(async (req: AuthenticatedRequest, 
   }));
 
   res.json(response);
+});
+
+// Debug endpoint to help troubleshoot 403 errors
+export const debugMemberNoteAccess = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { roundId } = req.params;
+  const userEmail = req.user?.email;
+
+  console.log(`[MemberNotes Debug] Debug request for round ${roundId} by user ${userEmail}`);
+
+  if (!userEmail) {
+    res.status(401).json({ error: 'User not authenticated' });
+    return;
+  }
+
+  // Find the round first
+  const roundRepository = AppDataSource.getRepository(Round);
+  const round = await roundRepository.findOne({
+    where: { id: roundId },
+    relations: ['club']
+  });
+
+  if (!round) {
+    res.status(404).json({ error: 'Round not found' });
+    return;
+  }
+
+  // Find the member for this user in the specific club
+  const memberRepository = AppDataSource.getRepository(Member);
+  const member = await memberRepository.findOne({
+    where: { 
+      email: userEmail,
+      clubId: round.clubId 
+    }
+  });
+
+  const memberInClub = !!member;
+
+  res.json({
+    debug: true,
+    user: {
+      email: userEmail,
+      memberId: member?.id || null,
+      memberClubId: member?.clubId || null
+    },
+    round: {
+      id: round.id,
+      clubId: round.clubId
+    },
+    memberInClub: memberInClub,
+    accessGranted: memberInClub
+  });
 });
 
 export const deleteMemberNote = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {

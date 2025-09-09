@@ -9,7 +9,8 @@ import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useRoundCompletions, useUpdateCompletion, useClubMembers, useFinishRound } from '../../../../../hooks/useApi';
 import { Recommendation, Completion, Member } from '../../../../../context/AppContext';
 import { useAuth } from '../../../../../contexts/AuthContext';
-import { useRealtimeUpdates } from '../../../../../hooks/useRealtimeUpdates';
+import { useSocket } from '../../../../../contexts/SocketContext';
+import { useNotificationHandler } from '../../../../../hooks/useNotificationHandler';
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -36,8 +37,16 @@ export default function CompletionTracking() {
   const updateCompletion = useUpdateCompletion();
   const finishRound = useFinishRound();
   
-  // Enable real-time updates for this page
-  useRealtimeUpdates({ clubId, roundId });
+  // Connect to socket for real-time updates
+  const { isConnected, joinClubs } = useSocket();
+  
+  // Join the club for real-time updates
+  React.useEffect(() => {
+    if (isConnected && clubId) {
+      joinClubs([clubId]);
+      console.log('🔌 Joined club for completion tracking:', clubId);
+    }
+  }, [isConnected, clubId, joinClubs]);
 
   // Get current user's member info
   const currentUserMember = members?.find((member: Member) => member.email === user?.email);
@@ -54,8 +63,30 @@ export default function CompletionTracking() {
   
   // Get completion data for the round (only if there's a winning recommendation)
   const hasWinningRecommendation = !!round?.winningRecommendationId;
-  console.log('Round data:', { round, hasWinningRecommendation, roundId });
   const { completions, summary, isLoading: completionsLoading, mutate: mutateCompletions } = useRoundCompletions(roundId, hasWinningRecommendation);
+  console.log('Round data:', { round, hasWinningRecommendation, roundId });
+
+  // Register notification handler specifically for completion updates
+  useNotificationHandler({
+    component: 'CompletionTrackingPage',
+    notificationTypes: ['completion_updated'],
+    handler: (event) => {
+      console.log('🔔 Completion tracking page received completion update:', event);
+      console.log('🔔 Event data:', event.data);
+      console.log('🔔 Current roundId:', roundId);
+      console.log('🔔 Event roundId:', event.data?.roundId);
+      
+      // Only handle events for this specific round
+      if (event.data?.roundId === roundId) {
+        console.log('✅ Refreshing completion data for this round');
+        // Only refresh completion-related data, not everything
+        mutateCompletions();
+      } else {
+        console.log('❌ Event not for this round, ignoring');
+      }
+    },
+    priority: 10 // High priority for completion events
+  });
 
   // Check if current user can mark completion for a specific member
   const canMarkCompletionForMember = (member: Member) => {
@@ -257,25 +288,6 @@ export default function CompletionTracking() {
           </CardContent>
         </Card>
 
-        {/* Debug Info */}
-        <Card className="bg-yellow-100 dark:bg-yellow-900">
-          <CardHeader>
-            <h2 className="text-xl font-semibold text-yellow-800 dark:text-yellow-200">Debug Info</h2>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-yellow-800 dark:text-yellow-200">
-              <p>Round ID: {roundId}</p>
-              <p>Has Winning Recommendation: {hasWinningRecommendation ? 'Yes' : 'No'}</p>
-              <p>Round Winning ID: {round?.winningRecommendationId || 'None'}</p>
-              <p>Completions Loading: {completionsLoading ? 'Yes' : 'No'}</p>
-              <p>Completions Count: {completions?.length || 0}</p>
-              <p>Summary: {summary ? JSON.stringify(summary) : 'None'}</p>
-              <p>Completed Count: {completedCount}</p>
-              <p>Total Count: {totalCount}</p>
-              <p>Percentage: {completionPercentage}%</p>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Progress */}
         <Card>
