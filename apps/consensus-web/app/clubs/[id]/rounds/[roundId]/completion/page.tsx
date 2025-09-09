@@ -11,6 +11,8 @@ import { Recommendation, Completion, Member } from '../../../../../context/AppCo
 import { useAuth } from '../../../../../contexts/AuthContext';
 import { useSocket } from '../../../../../contexts/SocketContext';
 import { useNotificationHandler } from '../../../../../hooks/useNotificationHandler';
+import { CompletionProgress } from '../../../../../components/ui/CompletionProgress';
+import { useOptimisticCompletion } from '../../../../../hooks/useOptimisticCompletion';
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -36,6 +38,7 @@ export default function CompletionTracking() {
   const { members, isLoading: membersLoading, mutate: mutateMembers } = useClubMembers(clubId);
   const updateCompletion = useUpdateCompletion();
   const finishRound = useFinishRound();
+  const { optimisticUpdateCompletion } = useOptimisticCompletion();
   
   // Connect to socket for real-time updates
   const { isConnected, joinClubs } = useSocket();
@@ -112,12 +115,8 @@ export default function CompletionTracking() {
     setError(null);
 
     try {
-      await updateCompletion(roundId, memberId, recommendationId, !isCompleted);
-      // Refresh completion data to show updated status
-      console.log('Completion updated, refreshing data...');
-      // Force refresh with revalidate
-      await mutateCompletions(undefined, { revalidate: true });
-      console.log('Completion data refreshed');
+      // Use optimistic update for instant UI feedback
+      await optimisticUpdateCompletion(roundId, memberId, recommendationId, !isCompleted);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update completion status');
     } finally {

@@ -21,7 +21,7 @@ export interface OnlineUsersResponse {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export function useOnlineUsers(clubId: string) {
-  const { socket, isConnected } = useSocket();
+  const { isConnected } = useSocket();
   const { data, error, isLoading, mutate } = useSWR<OnlineUsersResponse>(
     clubId ? `/clubs/${clubId}/online-users` : null,
     async (url: string) => {
@@ -38,32 +38,8 @@ export function useOnlineUsers(clubId: string) {
     }
   );
 
-  // Listen for real-time online/offline events
-  useEffect(() => {
-    if (!socket || !isConnected || !clubId) return;
-
-    const handleUserOnline = (event: any) => {
-      if (event.clubId === clubId) {
-        // Refresh the online users list
-        mutate();
-      }
-    };
-
-    const handleUserOffline = (event: any) => {
-      if (event.clubId === clubId) {
-        // Refresh the online users list
-        mutate();
-      }
-    };
-
-    socket.on('user_online', handleUserOnline);
-    socket.on('user_offline', handleUserOffline);
-
-    return () => {
-      socket.off('user_online', handleUserOnline);
-      socket.off('user_offline', handleUserOffline);
-    };
-  }, [socket, isConnected, clubId, mutate]);
+  // Note: Real-time online/offline events are not yet implemented in SocketContext
+  // For now, we rely on SWR's automatic revalidation and polling
 
   return {
     onlineUsers: data?.data?.onlineUsers || [],

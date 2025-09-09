@@ -10,7 +10,6 @@ import { useRound, useRoundRecommendations, useRoundVotes, useUpdateRoundStatus,
 import { NotesSection } from '../../../../components/ui/NotesSection';
 import { Recommendation, Vote, Completion, Member } from '../../../../context/AppContext';
 import { useAuth } from '../../../../contexts/AuthContext';
-import { useRealtimeUpdates } from '../../../../hooks/useRealtimeUpdates';
 import { useNotificationHandler } from '../../../../hooks/useNotificationHandler';
 import { 
   ArrowLeft, 
@@ -30,23 +29,22 @@ export default function RoundDetail() {
   const roundId = params.roundId as string;
   const { user, hasRole } = useAuth();
   
-  // Enable real-time updates for this page
-  useRealtimeUpdates({ clubId, roundId });
+  // Real-time updates handled by useNotificationHandler below
 
   const { round, isLoading: roundLoading, error: roundError, mutate: mutateRound } = useRound(roundId);
   const { recommendations, isLoading: recommendationsLoading, mutate: mutateRecommendations } = useRoundRecommendations(roundId);
   const { votes, isLoading: votesLoading, mutate: mutateVotes } = useRoundVotes(roundId);
   const hasWinningRecommendation = !!round?.winningRecommendationId;
-  const { completions } = useRoundCompletions(roundId, hasWinningRecommendation);
+  const { completions, mutate: mutateCompletions } = useRoundCompletions(roundId, hasWinningRecommendation);
   const { members } = useClubMembers(clubId);
   
   const updateRoundStatus = useUpdateRoundStatus();
   const closeVoting = useCloseVoting();
 
-  // Register notification handler for voting events
+  // Register notification handler for voting and completion events
   useNotificationHandler({
     component: 'RoundDetailsPage',
-    notificationTypes: ['round_status_changed', 'notification_created'],
+    notificationTypes: ['round_status_changed', 'notification_created', 'completion_updated'],
     handler: (event) => {
       console.log('Round details page received notification:', event);
       
@@ -70,11 +68,17 @@ export default function RoundDetail() {
               mutateVotes();
             }
             break;
+          case 'completion_updated':
+            console.log('Completion updated, refreshing completion data');
+            // Refresh completion data to update the progress bar
+            mutateCompletions();
+            break;
         }
       }
     },
     priority: 10 // High priority for round-related events
   });
+
 
   // Check if current user is the recommender
   const isCurrentRecommender = user && round?.currentRecommender && 

@@ -13,7 +13,9 @@ import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useSubmitVote, useClubMembers, useRoundVotes, useClub } from '../../../../../hooks/useApi';
 import { Recommendation, Vote, Member } from '../../../../../context/AppContext';
 import { useAuth } from '../../../../../contexts/AuthContext';
-import { useRealtimeUpdates } from '../../../../../hooks/useRealtimeUpdates';
+import { VoteProgress } from '../../../../../components/ui/VoteProgress';
+import { useOptimisticVote } from '../../../../../hooks/useOptimisticVote';
+import { useNotificationHandler } from '../../../../../hooks/useNotificationHandler';
 import { 
   ArrowLeft, 
   Vote as VoteIcon, 
@@ -62,8 +64,29 @@ export default function Voting() {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [showAdminWarning, setShowAdminWarning] = useState(false);
   
-  // Enable real-time updates for this page
-  useRealtimeUpdates({ clubId, roundId });
+  // Use targeted notification handler instead of broad real-time updates
+  useNotificationHandler({
+    component: 'VotingPage',
+    notificationTypes: ['vote_cast', 'round_status_changed'],
+    handler: (event) => {
+      console.log('Voting page received notification:', event);
+      
+      // Only handle events for this specific round
+      if (event.data?.roundId === roundId) {
+        switch (event.type) {
+          case 'vote_cast':
+            console.log('Vote cast received, refreshing votes only');
+            mutateVotes(); // Only refresh votes, not everything
+            break;
+          case 'round_status_changed':
+            console.log('Round status changed, refreshing round data');
+            // Only refresh round data, not all club data
+            break;
+        }
+      }
+    },
+    priority: 10
+  });
 
   const { round, isLoading: roundLoading } = useRound(roundId);
   const { recommendations, isLoading: recommendationsLoading } = useRoundRecommendations(roundId);
@@ -71,6 +94,7 @@ export default function Voting() {
   const { votes, isLoading: votesLoading, mutate: mutateVotes } = useRoundVotes(roundId);
   const { club } = useClub(clubId);
   const submitVote = useSubmitVote();
+  const { optimisticVote } = useOptimisticVote();
 
   // Get current user's member info
   const currentUserMember = members?.find((member: Member) => member.email === user?.email);
@@ -208,9 +232,8 @@ export default function Voting() {
         return;
       }
 
-      await submitVote(roundId, selectedMember, validVotes);
-      // Refresh votes data to show updated voting status
-      await mutateVotes();
+      // Use optimistic update for instant UI feedback
+      await optimisticVote(roundId, selectedMember, validVotes);
       setSelectedMember(null); // Go back to member list
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit vote');
@@ -508,6 +531,23 @@ export default function Voting() {
                 );
               })}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Vote Progress */}
+        <Card>
+          <CardHeader>
+            <h2 className="text-xl font-semibold flex items-center">
+              <VoteIcon className="h-5 w-5 mr-2 text-primary" />
+              Voting Progress
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <VoteProgress 
+              roundId={roundId}
+              members={members || []}
+              votes={votes || []}
+            />
           </CardContent>
         </Card>
 

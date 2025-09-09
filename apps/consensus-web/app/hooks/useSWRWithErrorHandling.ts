@@ -17,7 +17,7 @@ export function useSWRWithErrorHandling<T = any>(
   const { context, showErrorToast = true, ...swrOptions } = options;
   const { handleHttpError } = useError();
 
-  const swr = useSWR(key, fetcher, {
+  const swr = useSWR(key, fetcher || null, {
     ...swrOptions,
     onError: (error) => {
       if (showErrorToast) {
@@ -26,7 +26,7 @@ export function useSWRWithErrorHandling<T = any>(
       
       // Call the original onError if provided
       if (swrOptions.onError) {
-        swrOptions.onError(error);
+        swrOptions.onError(error, key || '', swrOptions as any);
       }
     },
   });

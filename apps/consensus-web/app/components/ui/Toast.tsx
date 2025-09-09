@@ -57,9 +57,9 @@ const ToastComponent: React.FC<ToastProps> = ({ toast, onDismiss }) => {
       case 'warning':
         return 'warning' as const;
       case 'info':
-        return 'default' as const;
+        return 'info' as const;
       default:
-        return 'default' as const;
+        return 'info' as const;
     }
   };
 

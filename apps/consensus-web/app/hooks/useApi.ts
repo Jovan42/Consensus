@@ -308,7 +308,6 @@ export function useUpdateCompletion() {
   return async (roundId: string, memberId: string, recommendationId: string, isCompleted: boolean) => {
     const response = await api.post(`/rounds/${roundId}/completions`, {
       memberId,
-      recommendationId,
       isCompleted,
     });
     return response.data;

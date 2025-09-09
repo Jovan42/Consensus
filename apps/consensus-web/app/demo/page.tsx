@@ -146,7 +146,7 @@ export default function DemoPage() {
         <h3 className="text-lg font-medium text-foreground mb-3">Button Sizes</h3>
         <div className="flex flex-wrap items-center gap-3">
           <Button size="sm">Small</Button>
-          <Button size="default">Default</Button>
+          <Button>Default</Button>
           <Button size="lg">Large</Button>
         </div>
       </div>

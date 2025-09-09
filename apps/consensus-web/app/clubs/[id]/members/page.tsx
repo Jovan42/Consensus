@@ -12,7 +12,6 @@ import { Input } from '../../../components/ui/Input';
 import { Alert } from '../../../components/ui/Alert';
 import { useClub, useClubMembers, useAddMember, useRemoveMember, useUpdateMemberManagerStatus } from '../../../hooks/useApi';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useRealtimeUpdates } from '../../../hooks/useRealtimeUpdates';
 import { useNotificationHandler } from '../../../hooks/useNotificationHandler';
 import { OnlineStatus } from '../../../components/ui/OnlineStatus';
 import { Member } from '../../../context/AppContext';
@@ -47,8 +46,7 @@ export default function ClubMembers() {
   const [removingMember, setRemovingMember] = useState<string | null>(null);
   const [updatingManager, setUpdatingManager] = useState<string | null>(null);
   
-  // Enable real-time updates for this page
-  useRealtimeUpdates({ clubId });
+  // Real-time updates handled by useNotificationHandler below
 
   const { club, isLoading: clubLoading } = useClub(clubId);
   const { members, isLoading: membersLoading, mutate } = useClubMembers(clubId);
