@@ -8,6 +8,7 @@ import {
   deleteUser,
   getUserSettings,
   updateUserSettings,
+  getCurrentUser,
   getCurrentUserSettings,
   updateCurrentUserSettings,
   banUser,
@@ -16,15 +17,18 @@ import {
 
 const router = Router();
 
-// Apply authentication middleware to all routes
+// Public route for getting all users (for login page)
+router.get('/', getAllUsers);
+
+// Apply authentication middleware to all other routes
 router.use(authenticateUser);
 
-// Current user settings routes (by email from header) - must come before /:id routes
+// Current user routes (by email from header) - must come before /:id routes
+router.get('/current', getCurrentUser);
 router.get('/settings', getCurrentUserSettings);
 router.put('/settings', updateCurrentUserSettings);
 
 // User CRUD routes
-router.get('/', getAllUsers);
 router.get('/:id', getUserById);
 router.post('/', createUser);
 router.put('/:id', updateUser);

@@ -12,12 +12,29 @@ import userRouter from './userRoutes';
 import { startNewRound, getClubRounds } from '../controllers/roundController';
 import { addRecommendation, getRecommendationsByRound } from '../controllers/recommendationController';
 import { validateDto } from '../middleware/validation.middleware';
+import { authenticateUser } from '../middleware/auth.middleware';
 import { StartRoundDto } from '../dto/round.dto';
 import { AddRecommendationDto } from '../dto/recommendation.dto';
 
 const router = Router();
 
-// API routes - order matters! More specific routes first
+// Public routes (no authentication required)
+router.use('/users', userRouter); // User management routes (public for login page)
+
+// Health check route
+router.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    success: true,
+    message: 'Consensus API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Apply authentication middleware to all other routes
+router.use(authenticateUser);
+
+// Protected API routes - order matters! More specific routes first
 router.post('/clubs/:clubId/rounds', validateDto(StartRoundDto), startNewRound); // Nested route for starting rounds
 router.get('/clubs/:clubId/rounds', getClubRounds); // Nested route for getting club rounds
 router.post('/rounds/:roundId/recommendations', validateDto(AddRecommendationDto), addRecommendation); // Nested route for adding recommendations
@@ -31,16 +48,5 @@ router.use('/recommendations', recommendationsRouter);
 router.use('/member-notes', memberNoteRouter); // Member notes routes
 router.use('/notifications', notificationRouter); // Notification routes
 router.use('/clubs', onlineStatusRouter); // Online status routes (nested under clubs)
-router.use('/users', userRouter); // User management routes
-
-// Health check route
-router.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    success: true,
-    message: 'Consensus API is running',
-    timestamp: new Date().toISOString()
-  });
-});
 
 export default router;

@@ -445,10 +445,11 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       // Emit the event to all registered component handlers
       notificationEventManager.emitEvent(eventType, data);
       
-      // For notification_created events, we still need to fetch unread notifications
+      // For notification_created events, we need to fetch both unread count and notifications
       if (eventType === 'notification_created') {
-        console.log('🔔 Calling debouncedFetchUnreadCount for notification_created');
+        console.log('🔔 Calling debouncedFetchUnreadCount and fetchUnreadNotifications for notification_created');
         debouncedFetchUnreadCount();
+        fetchUnreadNotifications(); // This will update the notifications array
       }
     };
 

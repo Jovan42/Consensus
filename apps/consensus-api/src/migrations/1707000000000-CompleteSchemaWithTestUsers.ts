@@ -52,6 +52,13 @@ export class CompleteSchemaWithTestUsers1707000000000 implements MigrationInterf
         "notificationDuration" integer NOT NULL DEFAULT 5000,
         "emailNotifications" boolean NOT NULL DEFAULT true,
         "pushNotifications" boolean NOT NULL DEFAULT true,
+        "language" character varying NOT NULL DEFAULT 'en',
+        "itemsPerPage" integer NOT NULL DEFAULT 12,
+        "showProfilePicture" boolean NOT NULL DEFAULT true,
+        "showEmailInProfile" boolean NOT NULL DEFAULT true,
+        "autoJoinClubs" boolean NOT NULL DEFAULT false,
+        "showVoteProgress" boolean NOT NULL DEFAULT true,
+        "showCompletionProgress" boolean NOT NULL DEFAULT true,
         "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_user_settings" PRIMARY KEY ("id"),
@@ -79,6 +86,7 @@ export class CompleteSchemaWithTestUsers1707000000000 implements MigrationInterf
         "name" character varying NOT NULL,
         "email" character varying,
         "clubId" uuid NOT NULL,
+        "isClubManager" boolean NOT NULL DEFAULT false,
         "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_members" PRIMARY KEY ("id")
@@ -158,10 +166,12 @@ export class CompleteSchemaWithTestUsers1707000000000 implements MigrationInterf
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "userEmail" character varying NOT NULL,
         "type" character varying NOT NULL,
+        "status" character varying NOT NULL DEFAULT 'unread',
         "title" character varying NOT NULL,
         "message" text NOT NULL,
         "data" jsonb,
-        "isRead" boolean NOT NULL DEFAULT false,
+        "clubId" uuid NOT NULL,
+        "roundId" uuid,
         "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
         "updatedAt" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_notifications" PRIMARY KEY ("id")
@@ -241,6 +251,18 @@ export class CompleteSchemaWithTestUsers1707000000000 implements MigrationInterf
       FOREIGN KEY ("roundId") REFERENCES "rounds"("id") ON DELETE CASCADE
     `);
 
+    await queryRunner.query(`
+      ALTER TABLE "notifications" 
+      ADD CONSTRAINT "FK_notifications_club" 
+      FOREIGN KEY ("clubId") REFERENCES "clubs"("id") ON DELETE CASCADE
+    `);
+
+    await queryRunner.query(`
+      ALTER TABLE "notifications" 
+      ADD CONSTRAINT "FK_notifications_round" 
+      FOREIGN KEY ("roundId") REFERENCES "rounds"("id") ON DELETE CASCADE
+    `);
+
     // Create indexes for better performance
     await queryRunner.query(`CREATE INDEX "IDX_users_email" ON "users" ("email")`);
     await queryRunner.query(`CREATE INDEX "IDX_users_role" ON "users" ("role")`);
@@ -257,28 +279,47 @@ export class CompleteSchemaWithTestUsers1707000000000 implements MigrationInterf
     await queryRunner.query(`CREATE INDEX "IDX_member_notes_roundId" ON "member_notes" ("roundId")`);
     await queryRunner.query(`CREATE INDEX "IDX_notifications_userEmail" ON "notifications" ("userEmail")`);
     await queryRunner.query(`CREATE INDEX "IDX_notifications_type" ON "notifications" ("type")`);
-    await queryRunner.query(`CREATE INDEX "IDX_notifications_isRead" ON "notifications" ("isRead")`);
+    await queryRunner.query(`CREATE INDEX "IDX_notifications_status" ON "notifications" ("status")`);
+    await queryRunner.query(`CREATE INDEX "IDX_notifications_clubId" ON "notifications" ("clubId")`);
 
-    // Insert test users
+    // Insert demo login test users
     await queryRunner.query(`
       INSERT INTO "users" ("id", "email", "name", "picture", "role", "isActive", "banned", "emailVerified", "timezone", "locale", "createdAt", "updatedAt") VALUES
-      ('550e8400-e29b-41d4-a716-446655440001', 'admin@test.com', 'Admin User', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face', 'admin', true, false, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440002', 'manager@test.com', 'Manager User', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face', 'manager', true, false, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440003', 'user1@test.com', 'John Doe', 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face', 'user', true, false, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440004', 'user2@test.com', 'Jane Smith', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face', 'user', true, false, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440005', 'user3@test.com', 'Bob Johnson', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=32&h=32&fit=crop&crop=face', 'user', true, false, true, 'UTC', 'en', NOW(), NOW()),
-      ('550e8400-e29b-41d4-a716-446655440006', 'banned@test.com', 'Banned User', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face', 'user', true, true, true, 'UTC', 'en', NOW(), NOW())
+      -- Admin users (3 admins)
+      ('550e8400-e29b-41d4-a716-446655440000', 'alexander.thompson@consensus.dev', 'Alexander Thompson', 'https://via.placeholder.com/150', 'admin', true, false, true, 'UTC', 'en', NOW(), NOW()),
+      ('550e8400-e29b-41d4-a716-446655440001', 'maya.patel@consensus.dev', 'Maya Patel', 'https://via.placeholder.com/150', 'admin', true, false, true, 'UTC', 'en', NOW(), NOW()),
+      ('550e8400-e29b-41d4-a716-446655440002', 'james.rodriguez@consensus.dev', 'James Rodriguez', 'https://via.placeholder.com/150', 'admin', true, false, true, 'UTC', 'en', NOW(), NOW()),
+      
+      -- Regular members (6 members)
+      ('550e8400-e29b-41d4-a716-446655440003', 'sophia.chen@consensus.dev', 'Sophia Chen', 'https://via.placeholder.com/150', 'user', true, false, true, 'UTC', 'en', NOW(), NOW()),
+      ('550e8400-e29b-41d4-a716-446655440004', 'michael.johnson@consensus.dev', 'Michael Johnson', 'https://via.placeholder.com/150', 'user', true, false, true, 'UTC', 'en', NOW(), NOW()),
+      ('550e8400-e29b-41d4-a716-446655440005', 'emma.williams@consensus.dev', 'Emma Williams', 'https://via.placeholder.com/150', 'user', true, false, true, 'UTC', 'en', NOW(), NOW()),
+      ('550e8400-e29b-41d4-a716-446655440006', 'oliver.brown@consensus.dev', 'Oliver Brown', 'https://via.placeholder.com/150', 'user', true, false, true, 'UTC', 'en', NOW(), NOW()),
+      ('550e8400-e29b-41d4-a716-446655440007', 'ava.davis@consensus.dev', 'Ava Davis', 'https://via.placeholder.com/150', 'user', true, false, true, 'UTC', 'en', NOW(), NOW()),
+      ('550e8400-e29b-41d4-a716-446655440008', 'liam.miller@consensus.dev', 'Liam Miller', 'https://via.placeholder.com/150', 'user', true, false, true, 'UTC', 'en', NOW(), NOW()),
+      
+      -- Additional test user for ban functionality
+      ('550e8400-e29b-41d4-a716-446655440009', 'banned@test.com', 'Banned User', 'https://via.placeholder.com/150', 'user', true, true, true, 'UTC', 'en', NOW(), NOW())
     `);
 
-    // Insert user settings for test users
+    // Insert user settings for all test users
     await queryRunner.query(`
-      INSERT INTO "user_settings" ("id", "userId", "theme", "showOnlineStatus", "enableNotifications", "enableNotificationSound", "notificationSound", "notificationDuration", "emailNotifications", "pushNotifications", "createdAt", "updatedAt") VALUES
-      ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', 'system', true, true, true, 'default', 5000, true, true, NOW(), NOW()),
-      ('650e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440002', 'system', true, true, true, 'default', 5000, true, true, NOW(), NOW()),
-      ('650e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440003', 'system', true, true, true, 'default', 5000, true, true, NOW(), NOW()),
-      ('650e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440004', 'system', true, true, true, 'default', 5000, true, true, NOW(), NOW()),
-      ('650e8400-e29b-41d4-a716-446655440005', '550e8400-e29b-41d4-a716-446655440005', 'system', true, true, true, 'default', 5000, true, true, NOW(), NOW()),
-      ('650e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440006', 'system', true, true, true, 'default', 5000, true, true, NOW(), NOW())
+      INSERT INTO "user_settings" ("id", "userId", "theme", "showOnlineStatus", "enableNotifications", "enableNotificationSound", "notificationSound", "notificationDuration", "emailNotifications", "pushNotifications", "language", "itemsPerPage", "showProfilePicture", "showEmailInProfile", "autoJoinClubs", "showVoteProgress", "showCompletionProgress", "createdAt", "updatedAt") VALUES
+      -- Admin users settings
+      ('650e8400-e29b-41d4-a716-446655440000', '550e8400-e29b-41d4-a716-446655440000', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+      ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+      ('650e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440002', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+      
+      -- Member users settings
+      ('650e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440003', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+      ('650e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440004', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+      ('650e8400-e29b-41d4-a716-446655440005', '550e8400-e29b-41d4-a716-446655440005', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+      ('650e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440006', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+      ('650e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440007', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+      ('650e8400-e29b-41d4-a716-446655440008', '550e8400-e29b-41d4-a716-446655440008', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW()),
+      
+      -- Banned user settings
+      ('650e8400-e29b-41d4-a716-446655440009', '550e8400-e29b-41d4-a716-446655440009', 'system', true, true, true, 'default', 5000, true, true, 'en', 12, true, true, false, true, true, NOW(), NOW())
     `);
 
     // Update the banned user with ban details

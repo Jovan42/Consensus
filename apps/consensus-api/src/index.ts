@@ -61,9 +61,6 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   next(error);
 });
 
-// Authentication middleware
-app.use('/api', authenticateUser);
-
 // API routes
 app.use('/api', routes);
 

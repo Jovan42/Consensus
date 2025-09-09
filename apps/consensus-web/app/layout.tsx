@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import Navigation from "./components/layout/Navigation";
 import { AuthenticatedFetchScript } from "./components/AuthenticatedFetchScript";
 import { ThemeScript } from "./components/ThemeScript";
+import BannedUserRedirect from "./components/auth/BannedUserRedirect";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,8 +34,10 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
         <AuthenticatedFetchScript />
         <Providers>
-          <Navigation />
-          {children}
+          <BannedUserRedirect>
+            <Navigation />
+            {children}
+          </BannedUserRedirect>
         </Providers>
       </body>
     </html>

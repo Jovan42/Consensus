@@ -65,6 +65,15 @@ export const TEST_ACCOUNTS = {
     name: 'Liam Miller',
     picture: 'https://via.placeholder.com/150',
     role: 'member'
+  },
+  
+  // Banned user for testing
+  'banned@test.com': {
+    sub: 'banned-user',
+    email: 'banned@test.com',
+    name: 'Banned User',
+    picture: 'https://via.placeholder.com/150',
+    role: 'member'
   }
 };
 

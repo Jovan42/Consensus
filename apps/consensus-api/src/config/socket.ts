@@ -339,11 +339,19 @@ export class SocketManager {
     event: T, 
     data: SocketEvents[T]
   ) {
+    console.log(`SocketManager: Attempting to emit ${event} to user ${userId}`);
+    console.log('SocketManager: Available user sockets:', Array.from(this.userSockets.keys()));
+    console.log('SocketManager: User info map:', Array.from(this.userInfo.keys()));
+    
     const userSockets = this.userSockets.get(userId);
     if (userSockets) {
+      console.log(`SocketManager: Found ${userSockets.size} sockets for user ${userId}:`, Array.from(userSockets));
       userSockets.forEach(socketId => {
+        console.log(`SocketManager: Emitting ${event} to socket ${socketId}`);
         this.io.to(socketId).emit(event, data);
       });
+    } else {
+      console.log(`SocketManager: No sockets found for user ${userId}`);
     }
   }
 

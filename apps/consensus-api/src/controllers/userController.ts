@@ -3,21 +3,41 @@ import { AppDataSource } from '../config/database';
 import { User } from '../entities/User';
 import { UserSettings } from '../entities/UserSettings';
 import { NotificationService } from '../services/notificationService';
+import { NotificationType } from '../entities/Notification';
 
 const userRepository = AppDataSource.getRepository(User);
 const userSettingsRepository = AppDataSource.getRepository(UserSettings);
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await userRepository.find({
-      relations: ['settings'],
-      order: { createdAt: 'DESC' }
-    });
-
-    res.json({
-      success: true,
-      data: users
-    });
+    // Check if user is authenticated (for admin access to full data)
+    const isAuthenticated = req.headers['x-user-email'];
+    
+    if (isAuthenticated) {
+      // Authenticated request - return full user data with settings
+      const users = await userRepository.find({
+        relations: ['settings'],
+        order: { createdAt: 'DESC' }
+      });
+      
+      res.json({
+        success: true,
+        data: users,
+        count: users.length
+      });
+    } else {
+      // Public request - return only basic user info for login page
+      const users = await userRepository.find({
+        select: ['id', 'email', 'name', 'picture', 'role', 'banned', 'banReason', 'bannedAt', 'createdAt'],
+        order: { createdAt: 'DESC' }
+      });
+      
+      res.json({
+        success: true,
+        data: users,
+        count: users.length
+      });
+    }
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({
@@ -320,6 +340,43 @@ export const updateUserSettings = async (req: Request, res: Response) => {
   }
 };
 
+export const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    const userEmail = req.headers['x-user-email'] as string;
+    
+    if (!userEmail) {
+      return res.status(401).json({
+        success: false,
+        message: 'User email not provided in headers'
+      });
+    }
+
+    const user = await userRepository.findOne({
+      where: { email: userEmail },
+      select: ['id', 'email', 'name', 'picture', 'role', 'banned', 'banReason', 'bannedAt', 'emailVerified', 'timezone', 'locale', 'createdAt', 'updatedAt']
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    console.error('Error fetching current user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch current user',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};
+
 export const getCurrentUserSettings = async (req: Request, res: Response) => {
   try {
     const userEmail = req.headers['x-user-email'] as string;
@@ -428,18 +485,23 @@ export const banUser = async (req: Request, res: Response) => {
     await userRepository.save(user);
 
     // Send notification to banned user
-    await NotificationService.createNotification({
-      userEmail: user.email,
-      type: 'USER_BANNED' as any,
-      title: 'Account Banned',
-      message: `Your account has been banned. Reason: ${user.banReason}`,
-      data: {
-        reason: user.banReason,
-        bannedAt: user.bannedAt,
-        adminEmail: adminEmail
-      },
-      clubId: '', // Not applicable for user-level notifications
-    });
+    try {
+      await NotificationService.createAndEmitNotification(req, {
+        userEmail: user.email,
+        type: NotificationType.USER_BANNED,
+        title: 'Account Banned',
+        message: `Your account has been banned. Reason: ${user.banReason}`,
+        data: {
+          reason: user.banReason,
+          bannedAt: user.bannedAt,
+          adminEmail: adminEmail
+        },
+        clubId: '', // Not applicable for user-level notifications
+      });
+    } catch (notificationError) {
+      console.warn('Failed to create ban notification:', notificationError);
+      // Don't fail the ban operation if notification fails
+    }
 
     res.json({ 
       success: true, 
@@ -477,17 +539,22 @@ export const unbanUser = async (req: Request, res: Response) => {
     await userRepository.save(user);
 
     // Send notification to unbanned user
-    await NotificationService.createNotification({
-      userEmail: user.email,
-      type: 'USER_UNBANNED' as any,
-      title: 'Account Unbanned',
-      message: 'Your account has been unbanned and you can now access all features.',
-      data: {
-        unbannedAt: new Date(),
-        adminEmail: adminEmail
-      },
-      clubId: '', // Not applicable for user-level notifications
-    });
+    try {
+      await NotificationService.createAndEmitNotification(req, {
+        userEmail: user.email,
+        type: NotificationType.USER_UNBANNED,
+        title: 'Account Unbanned',
+        message: 'Your account has been unbanned and you can now access all features.',
+        data: {
+          unbannedAt: new Date(),
+          adminEmail: adminEmail
+        },
+        clubId: '', // Not applicable for user-level notifications
+      });
+    } catch (notificationError) {
+      console.warn('Failed to create unban notification:', notificationError);
+      // Don't fail the unban operation if notification fails
+    }
 
     res.json({ 
       success: true, 

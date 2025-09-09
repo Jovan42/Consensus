@@ -16,7 +16,7 @@ config();
 export const AppDataSource = new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
-  synchronize: false, // Never use synchronize in production, use migrations instead
+  synchronize: true, // Auto-create tables based on entities
   logging: process.env.NODE_ENV === 'development',
   entities: [Club, Member, Round, Recommendation, Vote, Completion, MemberNote, Notification, User, UserSettings],
   migrations: [process.env.NODE_ENV === 'production' ? 'dist/migrations/*.js' : 'src/migrations/*.ts'],
@@ -46,14 +46,8 @@ export const initializeDatabase = async () => {
     await Promise.race([connectionPromise, timeoutPromise]);
     console.log('✅ Database connection established');
     
-    // Skip migrations in production since database is already set up
-    if (process.env.NODE_ENV === 'production') {
-      console.log('ℹ️  Skipping migrations in production (database already configured)');
-    } else {
-      console.log('🔄 Running migrations...');
-      await AppDataSource.runMigrations();
-      console.log('✅ Migrations completed');
-    }
+    // Skip migrations since we're using synchronize: true
+    console.log('ℹ️  Using synchronize: true - tables will be auto-created from entities');
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     console.error('Error details:', error instanceof Error ? error.message : String(error));

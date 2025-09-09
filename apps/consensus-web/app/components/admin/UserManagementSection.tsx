@@ -27,7 +27,7 @@ export default function UserManagementSection() {
   const [banReason, setBanReason] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [banStatusFilter, setBanStatusFilter] = useState('all');
 
   const handleDeleteUser = async (user: User) => {
     try {
@@ -120,13 +120,13 @@ export default function UserManagementSection() {
       const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            user.email?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-      const matchesStatus = statusFilter === 'all' || 
-                           (statusFilter === 'active' && user.isActive) ||
-                           (statusFilter === 'inactive' && !user.isActive);
+      const matchesBanStatus = banStatusFilter === 'all' || 
+                              (banStatusFilter === 'banned' && user.banned) ||
+                              (banStatusFilter === 'not-banned' && !user.banned);
       
-      return matchesSearch && matchesRole && matchesStatus;
+      return matchesSearch && matchesRole && matchesBanStatus;
     });
-  }, [users, searchTerm, roleFilter, statusFilter]);
+  }, [users, searchTerm, roleFilter, banStatusFilter]);
 
   if (isLoading) {
     return (
@@ -188,13 +188,13 @@ export default function UserManagementSection() {
                   <option value="user">User</option>
                 </select>
                 <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  value={banStatusFilter}
+                  onChange={(e) => setBanStatusFilter(e.target.value)}
                   className="px-3 py-2 border rounded-md bg-background text-sm"
                 >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="all">All Users</option>
+                  <option value="not-banned">Not Banned</option>
+                  <option value="banned">Banned</option>
                 </select>
               </div>
             </div>
@@ -326,7 +326,7 @@ export default function UserManagementSection() {
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">No users found</h3>
               <p className="text-muted-foreground">
-                {searchTerm || roleFilter !== 'all' || statusFilter !== 'all'
+                {searchTerm || roleFilter !== 'all' || banStatusFilter !== 'all'
                   ? 'Try adjusting your search or filters'
                   : 'No users available'
                 }
@@ -384,7 +384,7 @@ export default function UserManagementSection() {
                   value={banReason}
                   onChange={(e) => setBanReason(e.target.value)}
                   placeholder="Enter reason for banning this user..."
-                  className="w-full p-3 border rounded-md resize-none"
+                  className="w-full p-3 border border-border rounded-md resize-none bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   rows={3}
                 />
               </div>

@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { getAllTestAccounts } from '@/lib/auth0';
+import { useDemoUsers } from '@/app/hooks/useDemoUsers';
+import { Badge } from '@/app/components/ui/Badge';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 
 const LoginForm: React.FC = () => {
   const { login, testLogin, isLoading } = useAuth();
@@ -10,7 +12,7 @@ const LoginForm: React.FC = () => {
   const [isTestLoginLoading, setIsTestLoginLoading] = useState(false);
   const [testLoginError, setTestLoginError] = useState('');
 
-  const testAccounts = getAllTestAccounts();
+  const { users, isLoading: usersLoading, error: usersError, mutate } = useDemoUsers();
 
   const handleTestLogin = async (email: string) => {
     setIsTestLoginLoading(true);
@@ -84,21 +86,56 @@ const LoginForm: React.FC = () => {
               Use these pre-configured test accounts for development
             </p>
             
-            <div className="space-y-2">
-              {testAccounts.map((account) => (
-                <button
-                  key={account.sub}
-                  onClick={() => handleTestLogin(account.email)}
-                  disabled={isTestLoginLoading}
-                  className="w-full flex justify-between items-center py-2 px-3 border border-warning-300 rounded-md text-sm font-medium text-warning-800 bg-warning-100 hover:bg-warning-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-warning-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span>{account.name}</span>
-                  <span className="text-xs bg-warning-200 px-2 py-1 rounded">
-                    {account.role}
-                  </span>
-                </button>
-              ))}
-            </div>
+            {usersLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <RefreshCw className="h-5 w-5 animate-spin text-warning-600 mr-2" />
+                <span className="text-warning-700">Loading users...</span>
+              </div>
+            ) : usersError ? (
+              <div className="flex items-center justify-center py-4">
+                <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                <div className="text-center">
+                  <p className="text-red-600 text-sm">Failed to load users</p>
+                  <button
+                    onClick={() => mutate()}
+                    className="text-xs text-warning-600 hover:text-warning-800 underline mt-1"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {users.map((user) => (
+                  <button
+                    key={user.id}
+                    onClick={() => handleTestLogin(user.email)}
+                    disabled={isTestLoginLoading}
+                    className={`w-full flex justify-between items-center py-2 px-3 border rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed ${
+                      user.banned
+                        ? 'border-red-300 text-red-600 bg-red-50 hover:bg-red-100 focus:ring-red-500'
+                        : 'border-warning-300 text-warning-800 bg-warning-100 hover:bg-warning-200 focus:ring-warning-500'
+                    } ${isTestLoginLoading ? 'opacity-50' : ''}`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span>{user.name}</span>
+                      {user.banned && (
+                        <span className="text-xs text-red-500">(Banned)</span>
+                      )}
+                    </div>
+                    <Badge 
+                      className={`text-xs ${
+                        user.role === 'admin' 
+                          ? 'bg-yellow-200 text-yellow-800' 
+                          : 'bg-blue-200 text-blue-800'
+                      }`}
+                    >
+                      {user.role}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Custom Test Email */}
             <div className="mt-4 pt-4 border-t border-warning-300">
@@ -134,7 +171,7 @@ const LoginForm: React.FC = () => {
 
         <div className="text-center">
           <p className="text-xs text-muted-foreground">
-            Test accounts: test1@consensus.dev, test2@consensus.dev, test3@consensus.dev, admin@consensus.dev
+            {usersLoading ? 'Loading users...' : `${users.length} test accounts available`}
           </p>
         </div>
       </div>

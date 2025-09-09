@@ -11,6 +11,9 @@ export interface User {
   picture?: string;
   role: 'admin' | 'member';
   isTestAccount?: boolean;
+  banned?: boolean;
+  banReason?: string;
+  bannedAt?: string;
 }
 
 export interface AuthContextType {

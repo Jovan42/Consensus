@@ -71,7 +71,29 @@ export class NotificationService {
   ): Promise<Notification> {
     const notification = await this.createNotification(data);
     
-    // Note: Real-time notification is handled by createAndEmitClubNotification
+    // Emit real-time notification to the specific user
+    const socketManager = getSocketManager(req);
+    
+    // Convert email to userId format that socket manager expects
+    const userId = `test-user-${data.userEmail}`;
+    
+    console.log('NotificationService: Creating and emitting notification:', {
+      userId,
+      userEmail: data.userEmail,
+      type: data.type,
+      title: data.title
+    });
+    
+    socketManager.emitToUser(userId, 'notification_created', {
+      type: data.type,
+      title: data.title,
+      message: data.message,
+      clubId: data.clubId,
+      roundId: data.roundId,
+      notificationCount: 1
+    });
+
+    console.log('NotificationService: Notification emitted successfully');
 
     return notification;
   }

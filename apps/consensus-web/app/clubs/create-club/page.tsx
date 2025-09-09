@@ -77,6 +77,7 @@ export default function CreateClub() {
   } = useForm<CreateClubForm>({
     resolver: zodResolver(createClubSchema),
     defaultValues: {
+      type: 'book', // Set a default club type
       minRecommendations: 2,
       maxRecommendations: 4,
       votingPoints: '[3,2,1]',

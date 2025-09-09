@@ -321,7 +321,7 @@ export default function DemoPage() {
           {/* Tabs */}
           <Card>
             <CardContent className="p-6">
-              <Tabs tabs={tabs} defaultTab="theme" />
+              <Tabs tabs={tabs} defaultTab="users" />
             </CardContent>
           </Card>
 

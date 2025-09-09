@@ -17,11 +17,14 @@ import {
   Save,
   X,
   TestTube,
-  Bell
+  Bell,
+  AlertTriangle,
+  FileText
 } from 'lucide-react';
 import Link from 'next/link';
 import { NotificationSettings } from '../components/NotificationSettings';
 import { useCurrentUserSettings } from '../hooks/useCurrentUserSettings';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import { useToast } from '../hooks/useToast';
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/Label';
@@ -29,6 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 export default function ProfilePage() {
   const { user, isTestAccount } = useAuth();
+  const { currentUser, isLoading: currentUserLoading, mutate: refreshCurrentUser } = useCurrentUser();
   const { settings, updateSettings, isLoading: settingsLoading } = useCurrentUserSettings();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -37,6 +41,10 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [showAppealModal, setShowAppealModal] = useState(false);
+  const [appealMessage, setAppealMessage] = useState('');
+
+  const isBanned = currentUser?.banned || false;
 
   const handleSave = async () => {
     if (!editedName.trim()) {
@@ -77,6 +85,15 @@ export default function ProfilePage() {
   };
 
   const handleSettingUpdate = async (key: string, value: any) => {
+    if (isBanned) {
+      toast({
+        type: 'error',
+        title: 'Action Restricted',
+        message: 'You cannot modify settings while banned'
+      });
+      return;
+    }
+
     try {
       await updateSettings({ [key]: value });
       toast({
@@ -90,6 +107,37 @@ export default function ProfilePage() {
         type: 'error',
         title: 'Update Failed',
         message: 'Failed to save your preference'
+      });
+    }
+  };
+
+  const handleAppealBan = async () => {
+    if (!appealMessage.trim()) {
+      toast({
+        type: 'error',
+        title: 'Appeal Required',
+        message: 'Please provide a reason for your appeal'
+      });
+      return;
+    }
+
+    try {
+      // In a real app, this would send the appeal to admins
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        type: 'success',
+        title: 'Appeal Submitted',
+        message: 'Your ban appeal has been submitted for review'
+      });
+      
+      setShowAppealModal(false);
+      setAppealMessage('');
+    } catch (error) {
+      toast({
+        type: 'error',
+        title: 'Appeal Failed',
+        message: 'Failed to submit your appeal. Please try again.'
       });
     }
   };
@@ -149,7 +197,7 @@ export default function ProfilePage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg sm:text-xl font-semibold text-foreground">Profile Information</h2>
-                  {!isEditing && (
+                  {!isEditing && !isBanned && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -166,12 +214,12 @@ export default function ProfilePage() {
                 <div className="flex items-center space-x-4">
                   <div>
                     <h3 className="text-lg font-medium text-foreground">
-                      {isEditing ? (
+                      {isEditing && !isBanned ? (
                         <input
                           type="text"
                           value={editedName}
                           onChange={(e) => setEditedName(e.target.value)}
-                          className="border border-border rounded-md px-3 py-2 text-lg font-medium"
+                          className="border border-border rounded-md px-3 py-2 text-lg font-medium bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                           placeholder="Enter your name"
                         />
                       ) : (
@@ -179,16 +227,38 @@ export default function ProfilePage() {
                       )}
                     </h3>
                     <p className="text-sm text-muted-foreground">{user.email}</p>
-                    {isTestAccount && (
-                      <div className="mt-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {isTestAccount && (
                         <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-warning-100 text-warning-800">
                           <TestTube className="h-3 w-3" />
                           <span className="hidden sm:inline">Test Account</span>
                         </span>
-                      </div>
-                    )}
+                      )}
+                      {isBanned && (
+                        <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          <AlertTriangle className="h-3 w-3" />
+                          <span>Banned</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {/* Ban Information */}
+                {isBanned && currentUser && (
+                  <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
+                    <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    <div className="text-red-800 dark:text-red-200">
+                      <p className="font-medium">Your account has been banned</p>
+                      <div className="mt-2 space-y-1 text-sm">
+                        <p><strong>Reason:</strong> {currentUser.banReason || 'No reason provided'}</p>
+                        {currentUser.bannedAt && (
+                          <p><strong>Banned on:</strong> {new Date(currentUser.bannedAt).toLocaleDateString()}</p>
+                        )}
+                      </div>
+                    </div>
+                  </Alert>
+                )}
 
                 {/* Account Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -279,128 +349,130 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* User Settings */}
-            <Card>
-              <CardHeader>
-                <h3 className="text-base sm:text-lg font-semibold text-foreground">User Settings</h3>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {settingsLoading ? (
-                  <div className="flex items-center justify-center p-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  </div>
-                ) : settings ? (
-                  <>
-                    {/* Theme Setting */}
-                    <div className="space-y-2">
-                      <Label htmlFor="theme">Theme</Label>
-                      <Select
-                        value={settings.theme}
-                        onValueChange={(value) => handleSettingUpdate('theme', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="light">Light</SelectItem>
-                          <SelectItem value="dark">Dark</SelectItem>
-                          <SelectItem value="system">System</SelectItem>
-                        </SelectContent>
-                      </Select>
+            {/* User Settings - Hidden for banned users */}
+            {!isBanned && (
+              <Card>
+                <CardHeader>
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">User Settings</h3>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {settingsLoading ? (
+                    <div className="flex items-center justify-center p-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                     </div>
-
-                    {/* Notification Settings */}
-                    <div className="space-y-3">
-                      <Label>Notifications</Label>
+                  ) : settings ? (
+                    <>
+                      {/* Theme Setting */}
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="enableNotifications" className="text-sm">Enable Notifications</Label>
-                          <Switch
-                            id="enableNotifications"
-                            checked={settings.enableNotifications}
-                            onCheckedChange={(checked) => handleSettingUpdate('enableNotifications', checked)}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="enableNotificationSound" className="text-sm">Notification Sound</Label>
-                          <Switch
-                            id="enableNotificationSound"
-                            checked={settings.enableNotificationSound}
-                            onCheckedChange={(checked) => handleSettingUpdate('enableNotificationSound', checked)}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="emailNotifications" className="text-sm">Email Notifications</Label>
-                          <Switch
-                            id="emailNotifications"
-                            checked={settings.emailNotifications}
-                            onCheckedChange={(checked) => handleSettingUpdate('emailNotifications', checked)}
-                          />
+                        <Label htmlFor="theme">Theme</Label>
+                        <Select
+                          value={settings.theme}
+                          onValueChange={(value) => handleSettingUpdate('theme', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="light">Light</SelectItem>
+                            <SelectItem value="dark">Dark</SelectItem>
+                            <SelectItem value="system">System</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Notification Settings */}
+                      <div className="space-y-3">
+                        <Label>Notifications</Label>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="enableNotifications" className="text-sm">Enable Notifications</Label>
+                            <Switch
+                              id="enableNotifications"
+                              checked={settings.enableNotifications}
+                              onCheckedChange={(checked) => handleSettingUpdate('enableNotifications', checked)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="enableNotificationSound" className="text-sm">Notification Sound</Label>
+                            <Switch
+                              id="enableNotificationSound"
+                              checked={settings.enableNotificationSound}
+                              onCheckedChange={(checked) => handleSettingUpdate('enableNotificationSound', checked)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="emailNotifications" className="text-sm">Email Notifications</Label>
+                            <Switch
+                              id="emailNotifications"
+                              checked={settings.emailNotifications}
+                              onCheckedChange={(checked) => handleSettingUpdate('emailNotifications', checked)}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Privacy Settings */}
-                    <div className="space-y-3">
-                      <Label>Privacy</Label>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="showOnlineStatus" className="text-sm">Show Online Status</Label>
-                          <Switch
-                            id="showOnlineStatus"
-                            checked={settings.showOnlineStatus}
-                            onCheckedChange={(checked) => handleSettingUpdate('showOnlineStatus', checked)}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="showProfilePicture" className="text-sm">Show Profile Picture</Label>
-                          <Switch
-                            id="showProfilePicture"
-                            checked={settings.showProfilePicture}
-                            onCheckedChange={(checked) => handleSettingUpdate('showProfilePicture', checked)}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="showEmailInProfile" className="text-sm">Show Email in Profile</Label>
-                          <Switch
-                            id="showEmailInProfile"
-                            checked={settings.showEmailInProfile}
-                            onCheckedChange={(checked) => handleSettingUpdate('showEmailInProfile', checked)}
-                          />
+                      {/* Privacy Settings */}
+                      <div className="space-y-3">
+                        <Label>Privacy</Label>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="showOnlineStatus" className="text-sm">Show Online Status</Label>
+                            <Switch
+                              id="showOnlineStatus"
+                              checked={settings.showOnlineStatus}
+                              onCheckedChange={(checked) => handleSettingUpdate('showOnlineStatus', checked)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="showProfilePicture" className="text-sm">Show Profile Picture</Label>
+                            <Switch
+                              id="showProfilePicture"
+                              checked={settings.showProfilePicture}
+                              onCheckedChange={(checked) => handleSettingUpdate('showProfilePicture', checked)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="showEmailInProfile" className="text-sm">Show Email in Profile</Label>
+                            <Switch
+                              id="showEmailInProfile"
+                              checked={settings.showEmailInProfile}
+                              onCheckedChange={(checked) => handleSettingUpdate('showEmailInProfile', checked)}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Display Settings */}
-                    <div className="space-y-3">
-                      <Label>Display</Label>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="showVoteProgress" className="text-sm">Show Vote Progress</Label>
-                          <Switch
-                            id="showVoteProgress"
-                            checked={settings.showVoteProgress}
-                            onCheckedChange={(checked) => handleSettingUpdate('showVoteProgress', checked)}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="showCompletionProgress" className="text-sm">Show Completion Progress</Label>
-                          <Switch
-                            id="showCompletionProgress"
-                            checked={settings.showCompletionProgress}
-                            onCheckedChange={(checked) => handleSettingUpdate('showCompletionProgress', checked)}
-                          />
+                      {/* Display Settings */}
+                      <div className="space-y-3">
+                        <Label>Display</Label>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="showVoteProgress" className="text-sm">Show Vote Progress</Label>
+                            <Switch
+                              id="showVoteProgress"
+                              checked={settings.showVoteProgress}
+                              onCheckedChange={(checked) => handleSettingUpdate('showVoteProgress', checked)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="showCompletionProgress" className="text-sm">Show Completion Progress</Label>
+                            <Switch
+                              id="showCompletionProgress"
+                              checked={settings.showCompletionProgress}
+                              onCheckedChange={(checked) => handleSettingUpdate('showCompletionProgress', checked)}
+                            />
+                          </div>
                         </div>
                       </div>
+                    </>
+                  ) : (
+                    <div className="text-center p-4">
+                      <p className="text-muted-foreground text-sm">Failed to load settings</p>
                     </div>
-                  </>
-                ) : (
-                  <div className="text-center p-4">
-                    <p className="text-muted-foreground text-sm">Failed to load settings</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Account Actions */}
@@ -410,47 +482,78 @@ export default function ProfilePage() {
                 <h3 className="text-base sm:text-lg font-semibold text-foreground">Account Actions</h3>
               </CardHeader>
               <CardContent className="space-y-3 sm:space-y-4">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  size="sm"
-                  onClick={() => {
-                    // In a real app, this would open a change password modal
-                    alert('Change password functionality would be implemented here');
-                  }}
-                  title="Change Password"
-                >
-                  <Shield className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Change Password</span>
-                </Button>
+                {isBanned ? (
+                  // Banned user actions
+                  <>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      size="sm"
+                      onClick={() => setShowAppealModal(true)}
+                      title="Appeal Ban"
+                    >
+                      <FileText className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Appeal Ban</span>
+                    </Button>
+                    
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                      <div className="flex items-start space-x-2">
+                        <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5" />
+                        <div className="text-sm">
+                          <p className="text-red-800 font-medium">Account Restricted</p>
+                          <p className="text-red-700">
+                            Most actions are disabled while your account is banned.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  // Normal user actions
+                  <>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      size="sm"
+                      onClick={() => {
+                        // In a real app, this would open a change password modal
+                        alert('Change password functionality would be implemented here');
+                      }}
+                      title="Change Password"
+                    >
+                      <Shield className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Change Password</span>
+                    </Button>
 
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  size="sm"
-                  onClick={() => setShowNotificationSettings(true)}
-                  title="Notification Settings"
-                >
-                  <Bell className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Notification Settings</span>
-                </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      size="sm"
+                      onClick={() => setShowNotificationSettings(true)}
+                      title="Notification Settings"
+                    >
+                      <Bell className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Notification Settings</span>
+                    </Button>
 
-                <div className="pt-3 sm:pt-4 border-t border-border">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-destructive hover:text-destructive/80 hover:bg-destructive/10"
-                    size="sm"
-                    onClick={() => {
-                      if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                        alert('Account deletion would be implemented here');
-                      }
-                    }}
-                    title="Delete Account"
-                  >
-                    <X className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Delete Account</span>
-                  </Button>
-                </div>
+                    <div className="pt-3 sm:pt-4 border-t border-border">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-destructive hover:text-destructive/80 hover:bg-destructive/10"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                            alert('Account deletion would be implemented here');
+                          }
+                        }}
+                        title="Delete Account"
+                      >
+                        <X className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Delete Account</span>
+                      </Button>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -493,6 +596,61 @@ export default function ProfilePage() {
       {/* Notification Settings Modal */}
       {showNotificationSettings && (
         <NotificationSettings onClose={() => setShowNotificationSettings(false)} />
+      )}
+
+      {/* Appeal Ban Modal */}
+      {showAppealModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <FileText className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold text-foreground">Appeal Ban</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Please provide a reason why you believe your ban should be lifted. 
+                Your appeal will be reviewed by an administrator.
+              </p>
+              
+              <div className="space-y-2">
+                <Label htmlFor="appeal-message">Appeal Message</Label>
+                <textarea
+                  id="appeal-message"
+                  value={appealMessage}
+                  onChange={(e) => setAppealMessage(e.target.value)}
+                  placeholder="Explain why you believe your ban should be lifted..."
+                  className="w-full min-h-[100px] px-3 py-2 border border-border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground placeholder:text-muted-foreground"
+                  maxLength={500}
+                />
+                <p className="text-xs text-muted-foreground text-right">
+                  {appealMessage.length}/500 characters
+                </p>
+              </div>
+
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleAppealBan}
+                  disabled={!appealMessage.trim()}
+                  className="flex-1"
+                >
+                  Submit Appeal
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowAppealModal(false);
+                    setAppealMessage('');
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </Layout>
   );

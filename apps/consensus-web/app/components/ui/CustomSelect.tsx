@@ -18,7 +18,10 @@ interface CustomSelectProps {
   ref?: React.Ref<HTMLSelectElement>;
 }
 
-export const CustomSelect: React.FC<CustomSelectProps> = ({
+export const CustomSelect: React.FC<CustomSelectProps> = React.forwardRef<
+  HTMLSelectElement,
+  CustomSelectProps
+>(({
   label,
   options,
   error,
@@ -29,9 +32,22 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   name,
   onChange,
   onBlur,
-  ref,
   ...props
-}) => {
+}, ref) => {
+  const handleValueChange = (newValue: string) => {
+    if (onValueChange) {
+      onValueChange(newValue);
+    }
+    if (onChange) {
+      // Create a synthetic event for react-hook-form compatibility
+      const syntheticEvent = {
+        target: { value: newValue, name: name || '' },
+        currentTarget: { value: newValue, name: name || '' }
+      } as React.ChangeEvent<HTMLSelectElement>;
+      onChange(syntheticEvent);
+    }
+  };
+
   return (
     <div className="space-y-2">
       {label && (
@@ -41,7 +57,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
       )}
       <Select
         value={value}
-        onValueChange={onValueChange}
+        onValueChange={handleValueChange}
         disabled={disabled}
         defaultValue={defaultValue}
       >
@@ -61,6 +77,6 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
       )}
     </div>
   );
-};
+});
 
 export default CustomSelect;
