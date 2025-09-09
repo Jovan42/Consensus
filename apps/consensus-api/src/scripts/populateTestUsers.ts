@@ -213,7 +213,7 @@ const testUsers = [
   }
 ];
 
-async function populateTestUsers() {
+export async function populateTestUsers() {
   try {
     await AppDataSource.initialize();
     console.log('✅ Database connection established');
