@@ -64,3 +64,11 @@ export function Alert({
     </div>
   );
 }
+
+export function AlertDescription({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn('text-sm', className)} {...props}>
+      {children}
+    </div>
+  );
+}

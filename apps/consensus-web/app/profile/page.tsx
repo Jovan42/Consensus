@@ -21,9 +21,16 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { NotificationSettings } from '../components/NotificationSettings';
+import { useCurrentUserSettings } from '../hooks/useCurrentUserSettings';
+import { useToast } from '../hooks/useToast';
+import { Switch } from '../components/ui/switch';
+import { Label } from '../components/ui/Label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 export default function ProfilePage() {
   const { user, isTestAccount } = useAuth();
+  const { settings, updateSettings, isLoading: settingsLoading } = useCurrentUserSettings();
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(user?.name || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -67,6 +74,24 @@ export default function ProfilePage() {
     setIsEditing(false);
     setError(null);
     setSuccess(null);
+  };
+
+  const handleSettingUpdate = async (key: string, value: any) => {
+    try {
+      await updateSettings({ [key]: value });
+      toast({
+        type: 'success',
+        title: 'Setting Updated',
+        message: 'Your preference has been saved'
+      });
+    } catch (error) {
+      console.error('Failed to update setting:', error);
+      toast({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Failed to save your preference'
+      });
+    }
   };
 
   if (!user) {
@@ -118,8 +143,8 @@ export default function ProfilePage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Information */}
-          <div className="lg:col-span-2">
+          {/* Profile Information and User Settings */}
+          <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -249,6 +274,129 @@ export default function ProfilePage() {
                       <X className="h-4 w-4 sm:mr-2" />
                       <span className="hidden sm:inline">Cancel</span>
                     </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* User Settings */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">User Settings</h3>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {settingsLoading ? (
+                  <div className="flex items-center justify-center p-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  </div>
+                ) : settings ? (
+                  <>
+                    {/* Theme Setting */}
+                    <div className="space-y-2">
+                      <Label htmlFor="theme">Theme</Label>
+                      <Select
+                        value={settings.theme}
+                        onValueChange={(value) => handleSettingUpdate('theme', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="light">Light</SelectItem>
+                          <SelectItem value="dark">Dark</SelectItem>
+                          <SelectItem value="system">System</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Notification Settings */}
+                    <div className="space-y-3">
+                      <Label>Notifications</Label>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="enableNotifications" className="text-sm">Enable Notifications</Label>
+                          <Switch
+                            id="enableNotifications"
+                            checked={settings.enableNotifications}
+                            onCheckedChange={(checked) => handleSettingUpdate('enableNotifications', checked)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="enableNotificationSound" className="text-sm">Notification Sound</Label>
+                          <Switch
+                            id="enableNotificationSound"
+                            checked={settings.enableNotificationSound}
+                            onCheckedChange={(checked) => handleSettingUpdate('enableNotificationSound', checked)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="emailNotifications" className="text-sm">Email Notifications</Label>
+                          <Switch
+                            id="emailNotifications"
+                            checked={settings.emailNotifications}
+                            onCheckedChange={(checked) => handleSettingUpdate('emailNotifications', checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Privacy Settings */}
+                    <div className="space-y-3">
+                      <Label>Privacy</Label>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="showOnlineStatus" className="text-sm">Show Online Status</Label>
+                          <Switch
+                            id="showOnlineStatus"
+                            checked={settings.showOnlineStatus}
+                            onCheckedChange={(checked) => handleSettingUpdate('showOnlineStatus', checked)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="showProfilePicture" className="text-sm">Show Profile Picture</Label>
+                          <Switch
+                            id="showProfilePicture"
+                            checked={settings.showProfilePicture}
+                            onCheckedChange={(checked) => handleSettingUpdate('showProfilePicture', checked)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="showEmailInProfile" className="text-sm">Show Email in Profile</Label>
+                          <Switch
+                            id="showEmailInProfile"
+                            checked={settings.showEmailInProfile}
+                            onCheckedChange={(checked) => handleSettingUpdate('showEmailInProfile', checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Display Settings */}
+                    <div className="space-y-3">
+                      <Label>Display</Label>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="showVoteProgress" className="text-sm">Show Vote Progress</Label>
+                          <Switch
+                            id="showVoteProgress"
+                            checked={settings.showVoteProgress}
+                            onCheckedChange={(checked) => handleSettingUpdate('showVoteProgress', checked)}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="showCompletionProgress" className="text-sm">Show Completion Progress</Label>
+                          <Switch
+                            id="showCompletionProgress"
+                            checked={settings.showCompletionProgress}
+                            onCheckedChange={(checked) => handleSettingUpdate('showCompletionProgress', checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center p-4">
+                    <p className="text-muted-foreground text-sm">Failed to load settings</p>
                   </div>
                 )}
               </CardContent>

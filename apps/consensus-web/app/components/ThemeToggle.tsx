@@ -2,16 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/app/contexts/ThemeContext';
+import { useCurrentUserSettings } from '@/app/hooks/useCurrentUserSettings';
+import { useToast } from '@/app/hooks/useToast';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { Button } from './ui/Button';
 
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { settings, updateSettings } = useCurrentUserSettings();
+  const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Sync theme from user settings when settings change
+  useEffect(() => {
+    if (settings?.theme) {
+      setTheme(settings.theme);
+    }
+  }, [settings?.theme, setTheme]);
 
   if (!mounted) {
     return (
@@ -22,6 +33,29 @@ export function ThemeToggle() {
       </div>
     );
   }
+
+  const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
+    try {
+      // Update local theme immediately
+      setTheme(newTheme);
+      
+      // Save to database
+      await updateSettings({ theme: newTheme });
+      
+      toast({
+        type: 'success',
+        title: 'Theme Updated',
+        message: `Theme changed to ${newTheme}`
+      });
+    } catch (error) {
+      console.error('Failed to update theme:', error);
+      toast({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Failed to save theme preference'
+      });
+    }
+  };
 
   const themes = [
     { value: 'light' as const, label: 'Light', icon: Sun },
@@ -36,7 +70,7 @@ export function ThemeToggle() {
           key={value}
           variant={theme === value ? 'primary' : 'ghost'}
           size="sm"
-          onClick={() => setTheme(value)}
+          onClick={() => handleThemeChange(value)}
           className="h-8 w-8 p-0"
           title={`Switch to ${label} theme`}
         >
@@ -49,14 +83,43 @@ export function ThemeToggle() {
 
 export function SimpleThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
+  const { settings, updateSettings } = useCurrentUserSettings();
+  const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === 'light' ? 'dark' : 'light');
+  // Sync theme from user settings when settings change
+  useEffect(() => {
+    if (settings?.theme && settings.theme !== 'system') {
+      setTheme(settings.theme);
+    }
+  }, [settings?.theme, setTheme]);
+
+  const toggleTheme = async () => {
+    const newTheme = resolvedTheme === 'light' ? 'dark' : 'light';
+    try {
+      // Update local theme immediately
+      setTheme(newTheme);
+      
+      // Save to database
+      await updateSettings({ theme: newTheme });
+      
+      toast({
+        type: 'success',
+        title: 'Theme Updated',
+        message: `Theme changed to ${newTheme}`
+      });
+    } catch (error) {
+      console.error('Failed to update theme:', error);
+      toast({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Failed to save theme preference'
+      });
+    }
   };
 
   if (!mounted) {

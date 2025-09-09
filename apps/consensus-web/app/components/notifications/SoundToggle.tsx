@@ -7,6 +7,8 @@ import {
   setNotificationSoundEnabled, 
   playNotificationSound 
 } from '../../utils/notificationSound';
+import { useCurrentUserSettings } from '../../hooks/useCurrentUserSettings';
+import { useToast } from '../../hooks/useToast';
 
 interface SoundToggleProps {
   className?: string;
@@ -19,27 +21,54 @@ export const SoundToggle: React.FC<SoundToggleProps> = ({
 }) => {
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { settings, updateSettings } = useCurrentUserSettings();
+  const { toast } = useToast();
 
-  // Load current settings
+  // Load current settings from user settings
   useEffect(() => {
-    setSoundEnabled(isNotificationSoundEnabled());
-  }, []);
+    if (settings?.enableNotificationSound !== undefined) {
+      setSoundEnabled(settings.enableNotificationSound);
+      setNotificationSoundEnabled(settings.enableNotificationSound);
+    } else {
+      // Fallback to local storage if settings not loaded yet
+      setSoundEnabled(isNotificationSoundEnabled());
+    }
+  }, [settings?.enableNotificationSound]);
 
   const handleToggle = async () => {
     setIsLoading(true);
     
     try {
       const newValue = !soundEnabled;
+      
+      // Update local state immediately
       setNotificationSoundEnabled(newValue);
       setSoundEnabled(newValue);
+
+      // Save to database
+      await updateSettings({ 
+        enableNotificationSound: newValue,
+        notificationSound: newValue ? 'default' : 'none'
+      });
 
       // Test the sound if enabling
       if (newValue) {
         console.log('🔊 Testing notification sound...');
         await playNotificationSound();
       }
+
+      toast({
+        type: 'success',
+        title: 'Notification Sound Updated',
+        message: `Notification sound ${newValue ? 'enabled' : 'disabled'}`
+      });
     } catch (error) {
       console.warn('Could not toggle notification sound:', error);
+      toast({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Failed to save notification sound preference'
+      });
     } finally {
       setIsLoading(false);
     }

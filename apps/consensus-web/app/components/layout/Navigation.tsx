@@ -48,6 +48,14 @@ const Navigation: React.FC = () => {
               {hasRole('admin') && (
                 <>
                   <Link
+                    href="/users"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Users</span>
+                  </Link>
+                  
+                  <Link
                     href="/demo"
                     className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                   >
@@ -83,6 +91,26 @@ const Navigation: React.FC = () => {
               >
                 <Users className="w-5 h-5" />
               </Link>
+              
+              {hasRole('admin') && (
+                <>
+                  <Link
+                    href="/users"
+                    className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                    title="Users"
+                  >
+                    <Users className="w-5 h-5" />
+                  </Link>
+                  
+                  <Link
+                    href="/demo"
+                    className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                    title="Demo"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Link>
+                </>
+              )}
             </div>
           </div>
           

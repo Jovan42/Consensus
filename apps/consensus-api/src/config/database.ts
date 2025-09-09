@@ -8,6 +8,8 @@ import { Vote } from '../entities/Vote';
 import { Completion } from '../entities/Completion';
 import { MemberNote } from '../entities/MemberNote';
 import { Notification } from '../entities/Notification';
+import { User } from '../entities/User';
+import { UserSettings } from '../entities/UserSettings';
 
 config();
 
@@ -16,8 +18,8 @@ export const AppDataSource = new DataSource({
   url: process.env.DATABASE_URL,
   synchronize: process.env.NODE_ENV === 'development', // Only in development
   logging: process.env.NODE_ENV === 'development',
-  entities: [Club, Member, Round, Recommendation, Vote, Completion, MemberNote, Notification],
-  migrations: [],
+  entities: [Club, Member, Round, Recommendation, Vote, Completion, MemberNote, Notification, User, UserSettings],
+  migrations: ['src/migrations/*.ts'],
   subscribers: [],
 });
 

@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { Layout } from '../../../../../components/layout/Layout';
 import { Card, CardContent, CardHeader } from '../../../../../components/ui/Card';
 import { Button } from '../../../../../components/ui/Button';
-import { Select } from '../../../../../components/ui/Select';
+import { CustomSelect } from '../../../../../components/ui/CustomSelect';
 import { Alert } from '../../../../../components/ui/Alert';
 import { useRound, useRoundRecommendations, useSubmitVote, useClubMembers, useRoundVotes, useClub } from '../../../../../hooks/useApi';
 import { Recommendation, Vote, Member } from '../../../../../context/AppContext';
@@ -411,7 +411,7 @@ export default function Voting() {
 
                         <div className="flex items-center space-x-3">
                           <Star className="h-5 w-5 text-warning" />
-                          <Select
+                          <CustomSelect
                             label="Points"
                             options={votingOptions}
                             error={errors.votes?.[index]?.points?.message}

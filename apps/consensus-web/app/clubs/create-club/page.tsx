@@ -9,7 +9,7 @@ import { Layout } from '../../components/layout/Layout';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { Select } from '../../components/ui/Select';
+import { CustomSelect } from '../../components/ui/CustomSelect';
 import { Alert } from '../../components/ui/Alert';
 import { useCreateClub } from '../../hooks/useApi';
 import { ArrowLeft, Save } from 'lucide-react';
@@ -161,7 +161,7 @@ export default function CreateClub() {
                   {...register('name')}
                 />
 
-                <Select
+                <CustomSelect
                   label="Club Type"
                   options={clubTypeOptions}
                   error={errors.type?.message}
@@ -193,21 +193,21 @@ export default function CreateClub() {
                   />
                 </div>
 
-                <Select
+                <CustomSelect
                   label="Voting Points System"
                   options={votingPointsOptions}
                   error={errors.votingPoints?.message}
                   {...register('votingPoints')}
                 />
 
-                <Select
+                <CustomSelect
                   label="Turn Order"
                   options={turnOrderOptions}
                   error={errors.turnOrder?.message}
                   {...register('turnOrder')}
                 />
 
-                <Select
+                <CustomSelect
                   label="Tie-Breaking Method"
                   options={tieBreakingOptions}
                   error={errors.tieBreakingMethod?.message}
