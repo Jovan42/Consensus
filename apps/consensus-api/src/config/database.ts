@@ -38,8 +38,10 @@ export const initializeDatabase = async () => {
     await AppDataSource.initialize();
     console.log('✅ Database connection established');
     
-    // Run migrations in production
+    // Skip migrations in production since database is already set up
     if (process.env.NODE_ENV === 'production') {
+      console.log('ℹ️  Skipping migrations in production (database already configured)');
+    } else {
       console.log('🔄 Running migrations...');
       await AppDataSource.runMigrations();
       console.log('✅ Migrations completed');
