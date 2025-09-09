@@ -10,6 +10,7 @@ import { MemberNote } from '../entities/MemberNote';
 import { Notification } from '../entities/Notification';
 import { User } from '../entities/User';
 import { UserSettings } from '../entities/UserSettings';
+import { Appeal } from '../entities/Appeal';
 
 config();
 
@@ -18,7 +19,7 @@ export const AppDataSource = new DataSource({
   url: process.env.DATABASE_URL,
   synchronize: true, // Auto-create tables based on entities
   logging: process.env.NODE_ENV === 'development',
-  entities: [Club, Member, Round, Recommendation, Vote, Completion, MemberNote, Notification, User, UserSettings],
+  entities: [Club, Member, Round, Recommendation, Vote, Completion, MemberNote, Notification, User, UserSettings, Appeal],
   migrations: [process.env.NODE_ENV === 'production' ? 'dist/migrations/*.js' : 'src/migrations/*.ts'],
   subscribers: [],
 });

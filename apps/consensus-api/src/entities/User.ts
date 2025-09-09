@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany } from 'typeorm';
 import { UserSettings } from './UserSettings';
+import { Appeal } from './Appeal';
 
 @Entity('users')
 export class User {
@@ -51,4 +52,7 @@ export class User {
   // Relations
   @OneToOne(() => UserSettings, userSettings => userSettings.user, { cascade: true })
   settings: UserSettings;
+
+  @OneToMany(() => Appeal, appeal => appeal.user, { cascade: true })
+  appeals: Appeal[];
 }

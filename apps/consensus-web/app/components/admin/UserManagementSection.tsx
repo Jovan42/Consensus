@@ -7,11 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Badge } from '../ui/Badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/Avatar';
 import { Input } from '../ui/Input';
-import { Trash2, Settings, User as UserIcon, Mail, Calendar, Globe, Shield, Users, Search, Filter, Ban, Unlock } from 'lucide-react';
+import { Trash2, Settings, User as UserIcon, Mail, Calendar, Globe, Shield, Users, Search, Filter, Ban, Unlock, FileText, AlertCircle } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import { useError } from '../../contexts/ErrorContext';
 import UserSettingsModal from '../UserSettingsModal';
 import DeleteUserModal from '../DeleteUserModal';
+import { AppealManagementModal } from './AppealManagementModal';
+import { Appeal } from '../../hooks/useAppeals';
 
 export default function UserManagementSection() {
   const { users, isLoading, error, mutate } = useUsers();
@@ -28,6 +30,8 @@ export default function UserManagementSection() {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [banStatusFilter, setBanStatusFilter] = useState('all');
+  const [showAppealModal, setShowAppealModal] = useState(false);
+  const [selectedAppeal, setSelectedAppeal] = useState<Appeal | null>(null);
 
   const handleDeleteUser = async (user: User) => {
     try {
@@ -84,6 +88,18 @@ export default function UserManagementSection() {
     } catch (error) {
       handleHttpError(error, 'User Management');
     }
+  };
+
+  const handleViewAppeal = (user: User) => {
+    const appeal = user.appeals?.[0];
+    if (appeal) {
+      setSelectedAppeal(appeal);
+      setShowAppealModal(true);
+    }
+  };
+
+  const handleAppealStatusUpdate = () => {
+    mutate(); // Refresh users to get updated appeal status
   };
 
   const openBanModal = (user: User) => {
@@ -292,15 +308,36 @@ export default function UserManagementSection() {
                       
                       <div className="flex items-center space-x-2">
                         {user.banned ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUnbanUser(user)}
-                            className="flex-1 text-green-600 hover:text-green-700"
-                          >
-                            <Unlock className="h-4 w-4 mr-1" />
-                            Unban
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUnbanUser(user)}
+                              className="flex-1 text-green-600 hover:text-green-700"
+                            >
+                              <Unlock className="h-4 w-4 mr-1" />
+                              Unban
+                            </Button>
+                            {user.appeals && user.appeals.length > 0 && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewAppeal(user)}
+                                className={`flex-1 ${
+                                  user.appeals[0]?.isRead 
+                                    ? 'text-gray-600 hover:text-gray-700' 
+                                    : 'text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100'
+                                }`}
+                                title={user.appeals[0]?.isRead ? 'View Appeal (Read)' : 'View Appeal (Unread)'}
+                              >
+                                <FileText className="h-4 w-4 mr-1" />
+                                Appeal
+                                {!user.appeals[0]?.isRead && (
+                                  <AlertCircle className="h-3 w-3 ml-1 text-orange-600" />
+                                )}
+                              </Button>
+                            )}
+                          </>
                         ) : (
                           <Button
                             variant="outline"
@@ -412,6 +449,17 @@ export default function UserManagementSection() {
           </div>
         </div>
       )}
+
+      {/* Appeal Management Modal */}
+      <AppealManagementModal
+        isOpen={showAppealModal}
+        onClose={() => {
+          setShowAppealModal(false);
+          setSelectedAppeal(null);
+        }}
+        appeal={selectedAppeal}
+        onStatusUpdate={handleAppealStatusUpdate}
+      />
     </Card>
   );
 }

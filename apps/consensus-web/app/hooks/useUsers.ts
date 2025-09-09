@@ -1,5 +1,6 @@
 import useSWR from 'swr';
 import { authenticatedFetch } from '../utils/authenticatedFetch';
+import { Appeal } from './useAppeals';
 
 export interface User {
   id: string;
@@ -18,6 +19,7 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   settings?: UserSettings;
+  appeals?: Appeal[];
 }
 
 export interface UserSettings {

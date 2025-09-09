@@ -4,9 +4,11 @@ import { User } from '../entities/User';
 import { UserSettings } from '../entities/UserSettings';
 import { NotificationService } from '../services/notificationService';
 import { NotificationType } from '../entities/Notification';
+import { Appeal } from '../entities/Appeal';
 
 const userRepository = AppDataSource.getRepository(User);
 const userSettingsRepository = AppDataSource.getRepository(UserSettings);
+const appealRepository = AppDataSource.getRepository(Appeal);
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -14,16 +16,47 @@ export const getAllUsers = async (req: Request, res: Response) => {
     const isAuthenticated = req.headers['x-user-email'];
     
     if (isAuthenticated) {
-      // Authenticated request - return full user data with settings
+      // Authenticated request - return full user data with settings and appeals
       const users = await userRepository.find({
-        relations: ['settings'],
+        relations: ['settings', 'appeals'],
         order: { createdAt: 'DESC' }
+      });
+
+      // Sort users by priority:
+      // 1. Admins first
+      // 2. Regular users
+      // 3. Banned users with unread appeals
+      // 4. Banned users with read appeals
+      const sortedUsers = users.sort((a, b) => {
+        // Admins first
+        if (a.role === 'admin' && b.role !== 'admin') return -1;
+        if (b.role === 'admin' && a.role !== 'admin') return 1;
+        
+        // If both are admins or both are regular users, sort by creation date
+        if (a.role === b.role) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        
+        // Regular users before banned users
+        if (!a.banned && b.banned) return -1;
+        if (a.banned && !b.banned) return 1;
+        
+        // If both are banned, sort by appeal status
+        if (a.banned && b.banned) {
+          const aHasUnreadAppeal = a.appeals && a.appeals.length > 0 && !a.appeals[0].isRead;
+          const bHasUnreadAppeal = b.appeals && b.appeals.length > 0 && !b.appeals[0].isRead;
+          
+          if (aHasUnreadAppeal && !bHasUnreadAppeal) return -1;
+          if (!aHasUnreadAppeal && bHasUnreadAppeal) return 1;
+        }
+        
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
       
       res.json({
         success: true,
-        data: users,
-        count: users.length
+        data: sortedUsers,
+        count: sortedUsers.length
       });
     } else {
       // Public request - return only basic user info for login page
@@ -537,6 +570,14 @@ export const unbanUser = async (req: Request, res: Response) => {
     user.banReason = null;
     user.bannedAt = null;
     await userRepository.save(user);
+
+    // Delete any existing appeal
+    const existingAppeal = await appealRepository.findOne({
+      where: { userId: user.id }
+    });
+    if (existingAppeal) {
+      await appealRepository.remove(existingAppeal);
+    }
 
     // Send notification to unbanned user
     try {

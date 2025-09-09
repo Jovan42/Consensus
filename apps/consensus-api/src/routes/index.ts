@@ -9,6 +9,7 @@ import memberNoteRouter from './memberNoteRoutes';
 import notificationRouter from './notificationRoutes';
 import onlineStatusRouter from './onlineStatus';
 import userRouter from './userRoutes';
+import appealRouter from './appealRoutes';
 import { startNewRound, getClubRounds } from '../controllers/roundController';
 import { addRecommendation, getRecommendationsByRound } from '../controllers/recommendationController';
 import { validateDto } from '../middleware/validation.middleware';
@@ -20,6 +21,7 @@ const router = Router();
 
 // Public routes (no authentication required)
 router.use('/users', userRouter); // User management routes (public for login page)
+router.use('/appeals', appealRouter); // Appeal routes (public for banned users)
 
 // Health check route
 router.get('/health', (req, res) => {

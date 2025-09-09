@@ -26,6 +26,9 @@ import { NotificationSettings } from '../components/NotificationSettings';
 import { useCurrentUserSettings } from '../hooks/useCurrentUserSettings';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { useToast } from '../hooks/useToast';
+import { useMyAppeal } from '../hooks/useAppeals';
+import { AppealModal } from '../components/AppealModal';
+import { AppealDisplay } from '../components/AppealDisplay';
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/Label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -34,6 +37,7 @@ export default function ProfilePage() {
   const { user, isTestAccount } = useAuth();
   const { currentUser, isLoading: currentUserLoading, mutate: refreshCurrentUser } = useCurrentUser();
   const { settings, updateSettings, isLoading: settingsLoading } = useCurrentUserSettings();
+  const { appeal, mutate: refreshAppeal } = useMyAppeal();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(user?.name || '');
@@ -42,7 +46,6 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [showAppealModal, setShowAppealModal] = useState(false);
-  const [appealMessage, setAppealMessage] = useState('');
 
   const isBanned = currentUser?.banned || false;
 
@@ -111,35 +114,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAppealBan = async () => {
-    if (!appealMessage.trim()) {
-      toast({
-        type: 'error',
-        title: 'Appeal Required',
-        message: 'Please provide a reason for your appeal'
-      });
-      return;
-    }
-
-    try {
-      // In a real app, this would send the appeal to admins
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        type: 'success',
-        title: 'Appeal Submitted',
-        message: 'Your ban appeal has been submitted for review'
-      });
-      
-      setShowAppealModal(false);
-      setAppealMessage('');
-    } catch (error) {
-      toast({
-        type: 'error',
-        title: 'Appeal Failed',
-        message: 'Failed to submit your appeal. Please try again.'
-      });
-    }
+  const handleAppealSuccess = () => {
+    refreshAppeal();
+    setSuccess('Appeal submitted successfully');
   };
 
   if (!user) {
@@ -258,6 +235,11 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </Alert>
+                )}
+
+                {/* Appeal Display */}
+                {isBanned && appeal && (
+                  <AppealDisplay appeal={appeal} />
                 )}
 
                 {/* Account Details */}
@@ -485,16 +467,30 @@ export default function ProfilePage() {
                 {isBanned ? (
                   // Banned user actions
                   <>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      size="sm"
-                      onClick={() => setShowAppealModal(true)}
-                      title="Appeal Ban"
-                    >
-                      <FileText className="h-4 w-4 sm:mr-2" />
-                      <span className="hidden sm:inline">Appeal Ban</span>
-                    </Button>
+                    {!appeal ? (
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        size="sm"
+                        onClick={() => setShowAppealModal(true)}
+                        title="Appeal Ban"
+                      >
+                        <FileText className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Appeal Ban</span>
+                      </Button>
+                    ) : (
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <div className="flex items-start space-x-2">
+                          <FileText className="h-4 w-4 text-blue-600 mt-0.5" />
+                          <div className="text-sm">
+                            <p className="text-blue-800 font-medium">Appeal Submitted</p>
+                            <p className="text-blue-700">
+                              You have already submitted an appeal. Please wait for admin review.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                       <div className="flex items-start space-x-2">
@@ -598,60 +594,12 @@ export default function ProfilePage() {
         <NotificationSettings onClose={() => setShowNotificationSettings(false)} />
       )}
 
-      {/* Appeal Ban Modal */}
-      {showAppealModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <FileText className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold text-foreground">Appeal Ban</h3>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Please provide a reason why you believe your ban should be lifted. 
-                Your appeal will be reviewed by an administrator.
-              </p>
-              
-              <div className="space-y-2">
-                <Label htmlFor="appeal-message">Appeal Message</Label>
-                <textarea
-                  id="appeal-message"
-                  value={appealMessage}
-                  onChange={(e) => setAppealMessage(e.target.value)}
-                  placeholder="Explain why you believe your ban should be lifted..."
-                  className="w-full min-h-[100px] px-3 py-2 border border-border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground placeholder:text-muted-foreground"
-                  maxLength={500}
-                />
-                <p className="text-xs text-muted-foreground text-right">
-                  {appealMessage.length}/500 characters
-                </p>
-              </div>
-
-              <div className="flex space-x-2">
-                <Button
-                  onClick={handleAppealBan}
-                  disabled={!appealMessage.trim()}
-                  className="flex-1"
-                >
-                  Submit Appeal
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowAppealModal(false);
-                    setAppealMessage('');
-                  }}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Appeal Modal */}
+      <AppealModal
+        isOpen={showAppealModal}
+        onClose={() => setShowAppealModal(false)}
+        onSuccess={handleAppealSuccess}
+      />
     </Layout>
   );
 }
