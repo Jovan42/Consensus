@@ -3,6 +3,7 @@
 import useSWR from 'swr';
 import { Club, Member, Round, Recommendation, Vote, Completion, MemberNote } from '../context/AppContext';
 import { authenticatedFetch } from '../utils/authenticatedFetch';
+import { useError } from '../contexts/ErrorContext';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -316,6 +317,8 @@ export function useUpdateCompletion() {
 
 // Member Notes API functions
 export function useMemberNote(roundId: string) {
+  const { handleHttpError } = useError();
+  
   const { data, error, isLoading, mutate } = useSWR(
     roundId ? `/member-notes/round/${roundId}` : null,
     async (url: string) => {
@@ -333,14 +336,17 @@ export function useMemberNote(roundId: string) {
           try {
             return await api.get(url);
           } catch (retryError: any) {
-            // If still 403 after retry, treat as permission denied
+            // If still 403 after retry, show error toast
             if (retryError.message?.includes('403')) {
+              handleHttpError(retryError, 'Member Notes');
               throw new Error('Access denied: You are not a member of this club');
             }
+            handleHttpError(retryError, 'Member Notes');
             throw retryError;
           }
         }
-        // Re-throw other errors
+        // Show error toast for other errors
+        handleHttpError(error, 'Member Notes');
         throw error;
       }
     }

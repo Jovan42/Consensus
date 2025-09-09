@@ -6,10 +6,27 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { ErrorProvider } from './contexts/ErrorContext';
 import { authenticatedFetch } from './utils/authenticatedFetch';
 
-const fetcher = (url: string) => {
-  return authenticatedFetch(url).then((res) => res.json());
+const fetcher = async (url: string) => {
+  const response = await authenticatedFetch(url);
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const error = {
+      response: {
+        status: response.status,
+        statusText: response.statusText,
+        data: errorData
+      }
+    };
+    
+    // We'll handle this error in the component level using useError
+    throw error;
+  }
+  
+  return response.json();
 };
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -26,15 +43,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }}
     >
       <ThemeProvider>
-        <AuthProvider>
-          <SocketProvider>
-            <NotificationProvider>
-              <AppProvider>
-                {children}
-              </AppProvider>
-            </NotificationProvider>
-          </SocketProvider>
-        </AuthProvider>
+        <ErrorProvider>
+          <AuthProvider>
+            <SocketProvider>
+              <NotificationProvider>
+                <AppProvider>
+                  {children}
+                </AppProvider>
+              </NotificationProvider>
+            </SocketProvider>
+          </AuthProvider>
+        </ErrorProvider>
       </ThemeProvider>
     </SWRConfig>
   );

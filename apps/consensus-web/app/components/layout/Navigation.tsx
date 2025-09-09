@@ -48,11 +48,11 @@ const Navigation: React.FC = () => {
               {hasRole('admin') && (
                 <>
                   <Link
-                    href="/theme-demo"
+                    href="/demo"
                     className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <Settings className="w-4 h-4" />
-                    <span>Theme Demo</span>
+                    <span>Demo</span>
                   </Link>
                   
                   <Link

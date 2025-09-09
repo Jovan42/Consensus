@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from '../../lib/utils';
-import { AlertCircle, CheckCircle, Info, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, X, AlertTriangle } from 'lucide-react';
 
 interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'success' | 'error' | 'warning' | 'info';
@@ -29,7 +29,7 @@ export function Alert({
   const icons = {
     success: CheckCircle,
     error: AlertCircle,
-    warning: AlertCircle,
+    warning: AlertTriangle,
     info: Info,
   };
 
