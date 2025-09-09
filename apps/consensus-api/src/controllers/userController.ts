@@ -405,3 +405,101 @@ export const updateCurrentUserSettings = async (req: Request, res: Response) => 
     });
   }
 };
+
+export const banUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const adminEmail = req.headers['x-user-email'] as string;
+
+    const user = await userRepository.findOne({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.banned) {
+      return res.status(400).json({ success: false, message: 'User is already banned' });
+    }
+
+    // Update user with ban information
+    user.banned = true;
+    user.banReason = reason || 'No reason provided';
+    user.bannedAt = new Date();
+    await userRepository.save(user);
+
+    // Send notification to banned user
+    await NotificationService.createNotification({
+      userEmail: user.email,
+      type: 'USER_BANNED' as any,
+      title: 'Account Banned',
+      message: `Your account has been banned. Reason: ${user.banReason}`,
+      data: {
+        reason: user.banReason,
+        bannedAt: user.bannedAt,
+        adminEmail: adminEmail
+      },
+      clubId: '', // Not applicable for user-level notifications
+    });
+
+    res.json({ 
+      success: true, 
+      data: user, 
+      message: `User ${user.email} has been banned successfully` 
+    });
+  } catch (error) {
+    console.error('Error banning user:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to ban user', 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+};
+
+export const unbanUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const adminEmail = req.headers['x-user-email'] as string;
+
+    const user = await userRepository.findOne({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (!user.banned) {
+      return res.status(400).json({ success: false, message: 'User is not banned' });
+    }
+
+    // Update user to remove ban
+    user.banned = false;
+    user.banReason = null;
+    user.bannedAt = null;
+    await userRepository.save(user);
+
+    // Send notification to unbanned user
+    await NotificationService.createNotification({
+      userEmail: user.email,
+      type: 'USER_UNBANNED' as any,
+      title: 'Account Unbanned',
+      message: 'Your account has been unbanned and you can now access all features.',
+      data: {
+        unbannedAt: new Date(),
+        adminEmail: adminEmail
+      },
+      clubId: '', // Not applicable for user-level notifications
+    });
+
+    res.json({ 
+      success: true, 
+      data: user, 
+      message: `User ${user.email} has been unbanned successfully` 
+    });
+  } catch (error) {
+    console.error('Error unbanning user:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to unban user', 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+};

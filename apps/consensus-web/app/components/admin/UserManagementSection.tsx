@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useUsers, deleteUser, User } from '../../hooks/useUsers';
+import { useUsers, deleteUser, banUser, unbanUser, User } from '../../hooks/useUsers';
 import { Button } from '../ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/Avatar';
 import { Input } from '../ui/Input';
-import { Trash2, Settings, User as UserIcon, Mail, Calendar, Globe, Shield, Users, Search, Filter } from 'lucide-react';
+import { Trash2, Settings, User as UserIcon, Mail, Calendar, Globe, Shield, Users, Search, Filter, Ban, Unlock } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import { useError } from '../../contexts/ErrorContext';
 import UserSettingsModal from '../UserSettingsModal';
@@ -22,6 +22,9 @@ export default function UserManagementSection() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [userToBan, setUserToBan] = useState<User | null>(null);
+  const [banReason, setBanReason] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -52,6 +55,42 @@ export default function UserManagementSection() {
     setShowDeleteModal(true);
   };
 
+  const handleBanUser = async (user: User) => {
+    try {
+      await banUser(user.id, banReason);
+      toast({
+        type: 'success',
+        title: 'User Banned',
+        message: `User ${user.email} has been banned successfully.`
+      });
+      mutate(); // Refresh the users list
+      setShowBanModal(false);
+      setUserToBan(null);
+      setBanReason('');
+    } catch (error) {
+      handleHttpError(error, 'User Management');
+    }
+  };
+
+  const handleUnbanUser = async (user: User) => {
+    try {
+      await unbanUser(user.id);
+      toast({
+        type: 'success',
+        title: 'User Unbanned',
+        message: `User ${user.email} has been unbanned successfully.`
+      });
+      mutate(); // Refresh the users list
+    } catch (error) {
+      handleHttpError(error, 'User Management');
+    }
+  };
+
+  const openBanModal = (user: User) => {
+    setUserToBan(user);
+    setShowBanModal(true);
+  };
+
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin':
@@ -67,6 +106,12 @@ export default function UserManagementSection() {
     return isActive 
       ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
       : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+  };
+
+  const getBanStatusColor = (banned: boolean) => {
+    return banned 
+      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+      : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
   };
 
   // Filter users based on search term and filters
@@ -183,14 +228,29 @@ export default function UserManagementSection() {
 
                     {/* User Info */}
                     <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 flex-wrap">
                         <Badge className={getRoleColor(user.role)}>
                           {user.role}
                         </Badge>
                         <Badge className={getStatusColor(user.isActive)}>
                           {user.isActive ? 'Active' : 'Inactive'}
                         </Badge>
+                        <Badge className={getBanStatusColor(user.banned)}>
+                          {user.banned ? 'Banned' : 'Not Banned'}
+                        </Badge>
                       </div>
+                      
+                      {user.banned && user.banReason && (
+                        <div className="text-sm text-red-600 dark:text-red-400">
+                          <strong>Ban Reason:</strong> {user.banReason}
+                        </div>
+                      )}
+                      
+                      {user.banned && user.bannedAt && (
+                        <div className="text-sm text-muted-foreground">
+                          <strong>Banned:</strong> {new Date(user.bannedAt).toLocaleDateString()}
+                        </div>
+                      )}
                       
                       {user.lastLoginAt && (
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
@@ -208,25 +268,51 @@ export default function UserManagementSection() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center space-x-2 pt-2 border-t">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openSettingsModal(user)}
-                        className="flex-1"
-                      >
-                        <Settings className="h-4 w-4 mr-1" />
-                        Settings
-                      </Button>
+                    <div className="space-y-2 pt-2 border-t">
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openSettingsModal(user)}
+                          className="flex-1"
+                        >
+                          <Settings className="h-4 w-4 mr-1" />
+                          Settings
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openDeleteModal(user)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                       
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openDeleteModal(user)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        {user.banned ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleUnbanUser(user)}
+                            className="flex-1 text-green-600 hover:text-green-700"
+                          >
+                            <Unlock className="h-4 w-4 mr-1" />
+                            Unban
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openBanModal(user)}
+                            className="flex-1 text-red-600 hover:text-red-700"
+                          >
+                            <Ban className="h-4 w-4 mr-1" />
+                            Ban
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -277,6 +363,54 @@ export default function UserManagementSection() {
           }}
           onConfirm={() => userToDelete && handleDeleteUser(userToDelete)}
         />
+      )}
+
+      {/* Ban Modal */}
+      {userToBan && showBanModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Ban User</h3>
+            <p className="text-muted-foreground mb-4">
+              Are you sure you want to ban <strong>{userToBan.name}</strong> ({userToBan.email})?
+            </p>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="banReason" className="block text-sm font-medium mb-2">
+                  Ban Reason (optional)
+                </label>
+                <textarea
+                  id="banReason"
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  placeholder="Enter reason for banning this user..."
+                  className="w-full p-3 border rounded-md resize-none"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="flex space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowBanModal(false);
+                    setUserToBan(null);
+                    setBanReason('');
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleBanUser(userToBan)}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Ban User
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </Card>
   );

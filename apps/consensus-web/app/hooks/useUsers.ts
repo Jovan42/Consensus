@@ -8,6 +8,9 @@ export interface User {
   picture?: string;
   role: string;
   isActive: boolean;
+  banned: boolean;
+  banReason?: string;
+  bannedAt?: string;
   lastLoginAt?: string;
   emailVerified: boolean;
   timezone?: string;
@@ -174,6 +177,39 @@ export async function updateUserSettings(userId: string, settingsData: Partial<U
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || 'Failed to update user settings');
+  }
+
+  return response.json();
+}
+
+export async function banUser(userId: string, reason?: string) {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users/${userId}/ban`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ reason }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to ban user');
+  }
+
+  return response.json();
+}
+
+export async function unbanUser(userId: string) {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users/${userId}/unban`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to unban user');
   }
 
   return response.json();

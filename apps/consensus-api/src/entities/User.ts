@@ -21,6 +21,15 @@ export class User {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  banned: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  banReason: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  bannedAt: Date | null;
+
   @Column({ type: 'timestamp', nullable: true })
   lastLoginAt: Date;
 

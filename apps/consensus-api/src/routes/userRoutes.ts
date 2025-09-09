@@ -9,7 +9,9 @@ import {
   getUserSettings,
   updateUserSettings,
   getCurrentUserSettings,
-  updateCurrentUserSettings
+  updateCurrentUserSettings,
+  banUser,
+  unbanUser
 } from '../controllers/userController';
 
 const router = Router();
@@ -27,6 +29,10 @@ router.get('/:id', getUserById);
 router.post('/', createUser);
 router.put('/:id', updateUser);
 router.delete('/:id', deleteUser);
+
+// User ban/unban routes
+router.post('/:id/ban', banUser);
+router.post('/:id/unban', unbanUser);
 
 // User settings routes
 router.get('/:userId/settings', getUserSettings);

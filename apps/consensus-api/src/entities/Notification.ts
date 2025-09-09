@@ -12,7 +12,9 @@ export enum NotificationType {
   MEMBER_ADDED = 'member_added',
   MEMBER_REMOVED = 'member_removed',
   MEMBER_ROLE_CHANGED = 'member_role_changed',
-  CLUB_UPDATED = 'club_updated'
+  CLUB_UPDATED = 'club_updated',
+  USER_BANNED = 'user_banned',
+  USER_UNBANNED = 'user_unbanned'
 }
 
 export enum NotificationStatus {
