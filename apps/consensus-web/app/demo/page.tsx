@@ -11,6 +11,7 @@ import ErrorHandlingExample from '@/app/components/examples/ErrorHandlingExample
 import { NotificationHandlerExample } from '@/app/components/examples/NotificationHandlerExample';
 import SocketConnectionDemo from '@/app/components/examples/SocketConnectionDemo';
 import FormValidationDemo from '@/app/components/examples/FormValidationDemo';
+import { OnlineStatus } from '@/app/components/ui/OnlineStatus';
 import { Tabs } from '@/app/components/ui/Tabs';
 import Link from 'next/link';
 import { 
@@ -256,7 +257,23 @@ export default function DemoPage() {
       id: 'socket',
       label: 'Socket Connection',
       icon: <Wifi className="h-4 w-4" />,
-      content: <SocketConnectionDemo />
+      content: (
+        <div className="space-y-6">
+          <SocketConnectionDemo />
+          
+          {/* Online Status Demo */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-foreground">Online Status Demo</h3>
+            <p className="text-sm text-muted-foreground">
+              This shows online members for a test club. In a real club, you'd see actual online members.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <OnlineStatus clubId="demo-club" showList={true} />
+              <OnlineStatus clubId="demo-club" compact showCount={true} />
+            </div>
+          </div>
+        </div>
+      )
     },
     {
       id: 'forms',

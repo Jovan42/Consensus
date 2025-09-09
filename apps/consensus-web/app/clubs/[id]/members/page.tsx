@@ -14,6 +14,7 @@ import { useClub, useClubMembers, useAddMember, useRemoveMember, useUpdateMember
 import { useAuth } from '../../../contexts/AuthContext';
 import { useRealtimeUpdates } from '../../../hooks/useRealtimeUpdates';
 import { useNotificationHandler } from '../../../hooks/useNotificationHandler';
+import { OnlineStatus } from '../../../components/ui/OnlineStatus';
 import { Member } from '../../../context/AppContext';
 import { getTestAccount } from '../../../../lib/auth0';
 import { 
@@ -241,6 +242,9 @@ export default function ClubMembers() {
             </Button>
           )}
         </div>
+
+        {/* Online Status */}
+        <OnlineStatus clubId={clubId} showList={true} />
 
         {/* Error Alert */}
         {error && (

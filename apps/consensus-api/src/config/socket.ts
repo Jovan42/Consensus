@@ -117,12 +117,30 @@ export interface SocketEvents {
     roundId?: string;
     notificationCount: number;
   };
+  
+  // Online status events
+  user_online: {
+    clubId: string;
+    userId: string;
+    userEmail: string;
+    userName: string;
+    timestamp: string;
+  };
+  
+  user_offline: {
+    clubId: string;
+    userId: string;
+    userEmail: string;
+    userName: string;
+    timestamp: string;
+  };
 }
 
 export class SocketManager {
   private io: SocketIOServer;
   private userSockets: Map<string, Set<string>> = new Map(); // userId -> Set of socketIds
   private clubMembers: Map<string, Set<string>> = new Map(); // clubId -> Set of userIds
+  private userInfo: Map<string, { email: string; name: string; role: string }> = new Map(); // userId -> user info
 
   constructor(server: HTTPServer) {
     console.log('Initializing SocketManager...');
@@ -212,9 +230,17 @@ export class SocketManager {
         this.userSockets.set(userId, new Set());
       }
       this.userSockets.get(userId)!.add(socket.id);
+      
+      // Store user info
+      this.userInfo.set(userId, {
+        email: userEmail,
+        name: this.getUserNameFromEmail(userEmail),
+        role: userRole
+      });
 
       // Join user to their clubs
       socket.on('join_clubs', (clubIds: string[]) => {
+        console.log(`User ${userEmail} (${userId}) joining clubs:`, clubIds);
         clubIds.forEach(clubId => {
           socket.join(`club:${clubId}`);
           
@@ -222,7 +248,24 @@ export class SocketManager {
           if (!this.clubMembers.has(clubId)) {
             this.clubMembers.set(clubId, new Set());
           }
+          
+          const wasAlreadyInClub = this.clubMembers.get(clubId)!.has(userId);
           this.clubMembers.get(clubId)!.add(userId);
+          
+          console.log(`Club ${clubId} now has members:`, Array.from(this.clubMembers.get(clubId)!));
+          
+          // Emit user_online event if this is a new connection to the club
+          if (!wasAlreadyInClub) {
+            const userName = this.getUserNameFromEmail(userEmail);
+            this.io.to(`club:${clubId}`).emit('user_online', {
+              clubId,
+              userId,
+              userEmail,
+              userName,
+              timestamp: new Date().toISOString()
+            });
+            console.log(`Emitted user_online event for ${userEmail} in club ${clubId}`);
+          }
         });
         
         console.log(`User ${userEmail} joined clubs: ${clubIds.join(', ')}`);
@@ -233,6 +276,16 @@ export class SocketManager {
         clubIds.forEach(clubId => {
           socket.leave(`club:${clubId}`);
           this.clubMembers.get(clubId)?.delete(userId);
+          
+          // Emit user_offline event
+          const userName = this.getUserNameFromEmail(userEmail);
+          this.io.to(`club:${clubId}`).emit('user_offline', {
+            clubId,
+            userId,
+            userEmail,
+            userName,
+            timestamp: new Date().toISOString()
+          });
         });
       });
 
@@ -243,12 +296,29 @@ export class SocketManager {
         // Remove socket from user's connections
         this.userSockets.get(userId)?.delete(socket.id);
         
-        // If no more sockets for this user, remove from club memberships
+        // If no more sockets for this user, remove from club memberships and emit offline events
         if (this.userSockets.get(userId)?.size === 0) {
           this.userSockets.delete(userId);
+          const userInfo = this.userInfo.get(userId);
+          const userName = userInfo?.name || this.getUserNameFromEmail(userEmail);
+          
           this.clubMembers.forEach((members, clubId) => {
-            members.delete(userId);
+            if (members.has(userId)) {
+              members.delete(userId);
+              
+              // Emit user_offline event
+              this.io.to(`club:${clubId}`).emit('user_offline', {
+                clubId,
+                userId,
+                userEmail,
+                userName,
+                timestamp: new Date().toISOString()
+              });
+            }
           });
+          
+          // Clean up user info
+          this.userInfo.delete(userId);
         }
       });
     });
@@ -304,6 +374,82 @@ export class SocketManager {
   // Get total connected users
   public getTotalConnectedUsers(): number {
     return this.userSockets.size;
+  }
+
+  // Get online users for a specific club
+  public getClubOnlineUsers(clubId: string): Array<{ userId: string; userEmail: string; userName: string }> {
+    const onlineUsers: Array<{ userId: string; userEmail: string; userName: string }> = [];
+    const clubMembers = this.clubMembers.get(clubId);
+    
+    console.log(`Getting online users for club ${clubId}`);
+    console.log(`Club members:`, clubMembers ? Array.from(clubMembers) : 'No members');
+    console.log(`All user sockets:`, Array.from(this.userSockets.keys()));
+    console.log(`All user info:`, Array.from(this.userInfo.entries()));
+    
+    if (clubMembers) {
+      clubMembers.forEach(userId => {
+        // Check if user has active sockets
+        if (this.userSockets.has(userId) && this.userSockets.get(userId)!.size > 0) {
+          // Get user info from stored data
+          const userInfo = this.userInfo.get(userId);
+          if (userInfo) {
+            onlineUsers.push({ 
+              userId, 
+              userEmail: userInfo.email, 
+              userName: userInfo.name 
+            });
+          }
+        }
+      });
+    }
+    
+    console.log(`Returning online users:`, onlineUsers);
+    return onlineUsers;
+  }
+
+  // Get all online users across all clubs
+  public getAllOnlineUsers(): Array<{ userId: string; userEmail: string; userName: string; clubs: string[] }> {
+    const onlineUsers: Array<{ userId: string; userEmail: string; userName: string; clubs: string[] }> = [];
+    
+    this.userSockets.forEach((sockets, userId) => {
+      if (sockets.size > 0) {
+        const userInfo = this.userInfo.get(userId);
+        if (userInfo) {
+          const clubs: string[] = [];
+          
+          // Find which clubs this user is in
+          this.clubMembers.forEach((members, clubId) => {
+            if (members.has(userId)) {
+              clubs.push(clubId);
+            }
+          });
+          
+          onlineUsers.push({ 
+            userId, 
+            userEmail: userInfo.email, 
+            userName: userInfo.name, 
+            clubs 
+          });
+        }
+      }
+    });
+    
+    return onlineUsers;
+  }
+
+  private getUserEmailFromId(userId: string): string {
+    // Extract email from userId (assuming format: test-user-email@example.com)
+    if (userId.startsWith('test-user-')) {
+      return userId.replace('test-user-', '');
+    }
+    // For other formats, return a default
+    return 'user@example.com';
+  }
+
+  private getUserNameFromEmail(email: string): string {
+    // Extract name from email (simple implementation)
+    const name = email.split('@')[0];
+    return name.charAt(0).toUpperCase() + name.slice(1);
   }
 }
 

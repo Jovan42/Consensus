@@ -11,6 +11,7 @@ import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import { useNotificationHandler } from '../../hooks/useNotificationHandler';
+import { OnlineStatus } from '../../components/ui/OnlineStatus';
 import { Member } from '../../context/AppContext';
 import { 
   ArrowLeft, 
@@ -204,7 +205,7 @@ export default function ClubDetail() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -242,6 +243,24 @@ export default function ClubDetail() {
                   <p className="text-2xl font-bold text-foreground">
                     {roundsLoading ? '...' : completedRounds.length}
                   </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Online Status Card */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="relative">
+                  <Users className="h-8 w-8 text-green-500" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">Online Now</p>
+                  <div className="text-2xl font-bold text-foreground">
+                    <OnlineStatus clubId={clubId} compact showCount={true} />
+                  </div>
                 </div>
               </div>
             </CardContent>
