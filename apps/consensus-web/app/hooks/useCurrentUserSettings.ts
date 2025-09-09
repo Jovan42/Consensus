@@ -33,7 +33,7 @@ export function useCurrentUserSettings() {
   const { user } = useAuth();
   
   const { data, error, isLoading, mutate } = useSWR<UserSettingsResponse>(
-    user ? `http://localhost:3001/api/users/settings` : null,
+    user ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users/settings` : null,
     async (url: string) => {
       const response = await authenticatedFetch(url);
       if (!response.ok) {
@@ -46,7 +46,7 @@ export function useCurrentUserSettings() {
   const updateSettings = async (settingsData: Partial<UserSettings>) => {
     if (!user) throw new Error('User not authenticated');
     
-    const response = await authenticatedFetch(`http://localhost:3001/api/users/settings`, {
+    const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users/settings`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

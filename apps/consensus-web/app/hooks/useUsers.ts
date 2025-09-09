@@ -56,7 +56,7 @@ export interface UserSettingsResponse {
 
 export function useUsers() {
   const { data, error, isLoading, mutate } = useSWR<UsersResponse>(
-    'http://localhost:3001/api/users',
+    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users`,
     async (url: string) => {
       const response = await authenticatedFetch(url);
       if (!response.ok) {
@@ -77,7 +77,7 @@ export function useUsers() {
 
 export function useUser(userId: string) {
   const { data, error, isLoading, mutate } = useSWR<UserResponse>(
-    userId ? `http://localhost:3001/api/users/${userId}` : null,
+    userId ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users/${userId}` : null,
     async (url: string) => {
       const response = await authenticatedFetch(url);
       if (!response.ok) {
@@ -97,7 +97,7 @@ export function useUser(userId: string) {
 
 export function useUserSettings(userId: string) {
   const { data, error, isLoading, mutate } = useSWR<UserSettingsResponse>(
-    userId ? `http://localhost:3001/api/users/${userId}/settings` : null,
+    userId ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users/${userId}/settings` : null,
     async (url: string) => {
       const response = await authenticatedFetch(url);
       if (!response.ok) {
@@ -116,7 +116,7 @@ export function useUserSettings(userId: string) {
 }
 
 export async function createUser(userData: Partial<User>) {
-  const response = await authenticatedFetch('http://localhost:3001/api/users', {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ export async function createUser(userData: Partial<User>) {
 }
 
 export async function updateUser(userId: string, userData: Partial<User>) {
-  const response = await authenticatedFetch(`http://localhost:3001/api/users/${userId}`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users/${userId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ export async function updateUser(userId: string, userData: Partial<User>) {
 }
 
 export async function deleteUser(userId: string) {
-  const response = await authenticatedFetch(`http://localhost:3001/api/users/${userId}`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users/${userId}`, {
     method: 'DELETE',
   });
 
@@ -163,7 +163,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function updateUserSettings(userId: string, settingsData: Partial<UserSettings>) {
-  const response = await authenticatedFetch(`http://localhost:3001/api/users/${userId}/settings`, {
+  const response = await authenticatedFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/users/${userId}/settings`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
