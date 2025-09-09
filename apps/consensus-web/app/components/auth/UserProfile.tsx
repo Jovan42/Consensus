@@ -7,7 +7,7 @@ import { User, LogOut, Settings, Shield, Crown, TestTube } from 'lucide-react';
 import { getRoleColors } from '@/lib/color-utils';
 
 const UserProfile: React.FC = () => {
-  const { user, logout, isTestAccount } = useAuth();
+  const { user, logout, isTestAccount, hasRole } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -112,6 +112,19 @@ const UserProfile: React.FC = () => {
               <Settings className="w-4 h-4" />
               <span>Profile Settings</span>
             </button>
+            
+            {hasRole('admin') && (
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  router.push('/admin');
+                }}
+                className="w-full flex items-center space-x-2 px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md transition-colors"
+              >
+                <Shield className="w-4 h-4" />
+                <span>Admin Panel</span>
+              </button>
+            )}
             
             <button
               onClick={() => {

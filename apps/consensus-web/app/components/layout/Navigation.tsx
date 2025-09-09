@@ -48,14 +48,6 @@ const Navigation: React.FC = () => {
               {hasRole('admin') && (
                 <>
                   <Link
-                    href="/users"
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <Users className="w-4 h-4" />
-                    <span>Users</span>
-                  </Link>
-                  
-                  <Link
                     href="/demo"
                     className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                   >

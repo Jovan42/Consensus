@@ -91,9 +91,9 @@ export default function UserManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">User Management</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Admin Panel</h2>
           <p className="text-muted-foreground">
-            Manage users and their settings
+            Manage users and system settings
           </p>
         </div>
         <Badge variant="outline" className="text-sm">
