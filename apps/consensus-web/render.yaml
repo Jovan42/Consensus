@@ -9,4 +9,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        value: https://consensus-hbbc.onrender.com/api
+        value: https://consensus-ua48.onrender.com/api
